@@ -16,7 +16,30 @@ python3 scripts/00_check_environment.py     # offline environment report
 python3 -m pytest -q                         # offline test suite
 ```
 
-No network, no GPU, no paid API are required for any of the above.
+No network (after install), no GPU, no paid API are required for any of the above.
+
+### If `pip install` says "externally managed environment" (PEP 668)
+
+Modern Ubuntu marks the **system** Python as externally managed, so installing
+into it is blocked — always use a virtualenv. If `python3 -m venv .venv` itself
+fails with *"ensurepip is not available"*, the host is missing `python3.12-venv`.
+Two fixes:
+
+```bash
+# Recommended — no sudo, fast, reproducible (uv bundles its own bootstrap):
+pip install --user --break-system-packages uv     # one-time, installs to ~/.local/bin
+uv venv .venv
+uv pip install -e '.[dev]'
+source .venv/bin/activate
+
+# Or the standard one-time-sudo route:
+sudo apt-get install -y python3.12-venv
+python3.12 -m venv .venv && source .venv/bin/activate
+pip install -e '.[dev]'
+```
+
+Docker is **not** needed for this CPU-only, offline-by-default project; a venv is
+lighter and matches the lowest-friction design.
 
 ## Longer explanation
 
@@ -65,7 +88,10 @@ pip install -e '.[llm]'      # opt-in real LLM adapter (M10); never required
 Each milestone runs as a single `claude -p` invocation under
 `.claude/settings.json` (no push, no network fetch, no secret reads), commits
 locally, and the runner stops on any failure, dirty tree, or missing commit.
-Per-milestone logs are written under `logs/` (gitignored).
+Per-milestone logs are written under `logs/` (gitignored). The runner
+auto-activates `./.venv` if present (so its pytest gate and the milestone agents
+use project deps, not the externally-managed system Python); activate it yourself
+too if you run the pipeline scripts manually.
 
 ## Limitations
 

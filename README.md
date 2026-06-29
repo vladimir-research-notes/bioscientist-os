@@ -52,6 +52,12 @@ drug-efficacy advice. See [`docs/SAFETY.md`](docs/SAFETY.md).
 python3.12 -m venv .venv && source .venv/bin/activate
 pip install -e '.[dev]'
 
+# If pip reports "externally managed environment" (PEP 668) or venv creation
+# fails ("ensurepip is not available"), use the no-sudo uv path instead:
+#   pip install --user --break-system-packages uv
+#   uv venv .venv && uv pip install -e '.[dev]' && source .venv/bin/activate
+# See docs/REPRODUCIBILITY.md. Docker is not required for this CPU-only project.
+
 # Environment report (no network, no paid API):
 python3 scripts/00_check_environment.py
 

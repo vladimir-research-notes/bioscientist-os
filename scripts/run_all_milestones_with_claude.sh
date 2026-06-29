@@ -29,6 +29,19 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 cd "$REPO_ROOT"
 
+# Auto-activate a local virtualenv if one exists and none is active. The system
+# Python on modern Ubuntu is "externally managed" (PEP 668), so installing into
+# it is blocked; the project is meant to run from a venv. Activating here means
+# both this script's pytest gate AND the per-milestone `claude -p` subprocesses
+# (which inherit our environment) use the project's deps. Create one first with:
+#   uv venv .venv && uv pip install -e '.[dev]'        # no sudo, recommended
+#   # or: sudo apt-get install -y python3.12-venv && python3.12 -m venv .venv
+if [ -z "${VIRTUAL_ENV:-}" ] && [ -x ".venv/bin/python" ]; then
+  # shellcheck disable=SC1091
+  source ".venv/bin/activate"
+  echo "Activated .venv ($(python3 --version 2>&1))"
+fi
+
 START="${1:-0}"
 END="${2:-12}"
 
