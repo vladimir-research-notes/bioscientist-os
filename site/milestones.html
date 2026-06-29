@@ -48,7 +48,7 @@
       <table class="grid milestones">
         <tr><th>#</th><th>Milestone</th><th>Status</th></tr>
         <tr><td>0</td><td>Package skeleton and runnable contract</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>1</td><td>Data schemas and small fixtures</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>1</td><td>Data schemas and small fixtures</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>2</td><td>Ingestion and local storage</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>3</td><td>Search and topic grouping</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>4</td><td>Entity and claim extraction baseline</td><td><span class="badge badge-planned">Planned</span></td></tr>
@@ -63,6 +63,28 @@
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 1 &mdash; delivered</h2>
+
+      <p>The data model exists as typed <code>pydantic</code> v2 schemas with
+      provenance as a first-class field. Delivered: nine core schemas
+      (<code>Paper, Author, BiomedicalEntity, Claim, EvidenceItem, DatabaseRecord,
+      EvidenceTable, ResearchQuestion, WorkbenchRun</code>) plus a shared
+      <code>Provenance</code> submodel and four controlled vocabularies
+      (<code>DataSource, EpistemicLevel, EntityType, SupportLabel</code>) in
+      <code>src/bioscientist_os/schemas.py</code>; a thin fixture loader
+      (<code>src/bioscientist_os/fixtures.py</code>) that parses and validates the
+      committed corpus and stamps <code>data_source = fixture</code>; and small,
+      clearly-labeled fixtures on the cellular-senescence / longevity / autophagy
+      theme &mdash; <strong>18</strong> papers (synthetic), <strong>10</strong>
+      UniProt-style protein records (modeled on real accessions), <strong>9</strong>
+      Open Targets-style association records (synthetic scores), and
+      <strong>3</strong> research questions.</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 50 passed
+      (offline); <code>ruff check</code> clean on the new files. The loader does
+      parse + validate only &mdash; database ingestion and normalization are
+      Milestone&nbsp;2, so no <code>.db</code> file is produced yet.</p>
     </section>
     <section>
       <h2>Milestone 0 &mdash; delivered</h2>
@@ -87,8 +109,9 @@
       <ul class="files">
         <li><code>docs/PLAN.md</code></li>
         <li><code>docs/milestones/</code></li>
-        <li><code>src/bioscientist_os/cli.py</code></li>
-        <li><code>src/bioscientist_os/__init__.py</code></li>
+        <li><code>src/bioscientist_os/schemas.py</code></li>
+        <li><code>src/bioscientist_os/fixtures.py</code></li>
+        <li><code>data/fixtures/</code></li>
         <li><code>scripts/run_all_milestones_with_claude.sh</code></li>
       </ul>
   </main>

@@ -1,0 +1,161 @@
+[
+  {
+    "record_id": "P05231",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "P05231",
+      "protein_name": "Interleukin-6",
+      "gene": "IL6",
+      "organism": "Homo sapiens",
+      "function": "Pro-inflammatory cytokine; a commonly reported component of the senescence-associated secretory phenotype (SASP).",
+      "keywords": ["SASP", "inflammation", "cytokine"],
+      "xrefs": {"HGNC_symbol": "IL6"}
+    }
+  },
+  {
+    "record_id": "P42771",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "P42771",
+      "protein_name": "Cyclin-dependent kinase inhibitor 2A",
+      "gene": "CDKN2A",
+      "common_name": "p16INK4a",
+      "organism": "Homo sapiens",
+      "function": "Cyclin-dependent kinase inhibitor; widely used marker of cellular senescence.",
+      "keywords": ["senescence", "cell-cycle arrest", "tumor suppressor"],
+      "xrefs": {"HGNC_symbol": "CDKN2A"}
+    }
+  },
+  {
+    "record_id": "P04637",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "P04637",
+      "protein_name": "Cellular tumor antigen p53",
+      "gene": "TP53",
+      "common_name": "p53",
+      "organism": "Homo sapiens",
+      "function": "Tumor-suppressor transcription factor; can induce cell-cycle arrest and senescence in response to cellular stress.",
+      "keywords": ["senescence", "DNA damage", "tumor suppressor"],
+      "xrefs": {"HGNC_symbol": "TP53"}
+    }
+  },
+  {
+    "record_id": "P38936",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "P38936",
+      "protein_name": "Cyclin-dependent kinase inhibitor 1",
+      "gene": "CDKN1A",
+      "common_name": "p21",
+      "organism": "Homo sapiens",
+      "function": "Cyclin-dependent kinase inhibitor downstream of p53; mediates cell-cycle arrest.",
+      "keywords": ["senescence", "cell-cycle arrest", "p53 target"],
+      "xrefs": {"HGNC_symbol": "CDKN1A"}
+    }
+  },
+  {
+    "record_id": "P42345",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "P42345",
+      "protein_name": "Serine/threonine-protein kinase mTOR",
+      "gene": "MTOR",
+      "common_name": "mTOR",
+      "organism": "Homo sapiens",
+      "function": "Serine/threonine kinase; central regulator of cell growth and a negative regulator of autophagy.",
+      "keywords": ["autophagy", "longevity", "rapamycin", "nutrient signaling"],
+      "xrefs": {"HGNC_symbol": "MTOR"}
+    }
+  },
+  {
+    "record_id": "Q96EB6",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "Q96EB6",
+      "protein_name": "NAD-dependent protein deacetylase sirtuin-1",
+      "gene": "SIRT1",
+      "common_name": "SIRT1",
+      "organism": "Homo sapiens",
+      "function": "NAD+-dependent deacetylase implicated in metabolic regulation and longevity-associated pathways.",
+      "keywords": ["longevity", "metabolism", "deacetylase"],
+      "xrefs": {"HGNC_symbol": "SIRT1"}
+    }
+  },
+  {
+    "record_id": "Q9GZQ8",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "Q9GZQ8",
+      "protein_name": "Microtubule-associated proteins 1A/1B light chain 3B",
+      "gene": "MAP1LC3B",
+      "common_name": "LC3B",
+      "organism": "Homo sapiens",
+      "function": "Ubiquitin-like protein conjugated to autophagosomal membranes; a standard marker of autophagy.",
+      "keywords": ["autophagy", "autophagosome", "marker"],
+      "xrefs": {"HGNC_symbol": "MAP1LC3B"}
+    }
+  },
+  {
+    "record_id": "O95352",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "O95352",
+      "protein_name": "Ubiquitin-like modifier-activating enzyme ATG7",
+      "gene": "ATG7",
+      "common_name": "ATG7",
+      "organism": "Homo sapiens",
+      "function": "E1-like activating enzyme required for autophagosome formation.",
+      "keywords": ["autophagy", "autophagosome", "ubiquitin-like"],
+      "xrefs": {"HGNC_symbol": "ATG7"}
+    }
+  },
+  {
+    "record_id": "O43524",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "O43524",
+      "protein_name": "Forkhead box protein O3",
+      "gene": "FOXO3",
+      "common_name": "FOXO3",
+      "organism": "Homo sapiens",
+      "function": "Forkhead transcription factor associated with stress resistance and reported human longevity.",
+      "keywords": ["longevity", "stress resistance", "transcription factor"],
+      "xrefs": {"HGNC_symbol": "FOXO3"}
+    }
+  },
+  {
+    "record_id": "P20700",
+    "source": "UniProt",
+    "record_type": "protein",
+    "synthetic": false,
+    "fields": {
+      "accession": "P20700",
+      "protein_name": "Lamin-B1",
+      "gene": "LMNB1",
+      "common_name": "Lamin B1",
+      "organism": "Homo sapiens",
+      "function": "Nuclear lamina protein; its loss is a reported feature of senescent cells.",
+      "keywords": ["senescence", "nuclear lamina", "marker"],
+      "xrefs": {"HGNC_symbol": "LMNB1"}
+    }
+  }
+]

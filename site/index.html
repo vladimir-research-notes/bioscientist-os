@@ -69,16 +69,17 @@
       <h2>Status</h2>
 
       <p>The project contract (plan, docs, website, permission policy, and an
-      autonomous milestone runner) exists, and <strong>Milestone 0</strong> has landed:
-      the repository is an importable package with a runnable <code>biosci</code> CLI.
-      Functional code (schemas, ingestion, search, extraction, evidence tables) lands
-      milestone by milestone. See the <a href="milestones.html">Milestones</a> page for
-      live status and <a href="results.html">Results</a> for measured numbers (currently
-      pending).</p>
+      autonomous milestone runner) exists, and <strong>Milestones 0&ndash;1</strong>
+      have landed: the repository is an importable package with a runnable
+      <code>biosci</code> CLI, and the typed data model (pydantic schemas with
+      provenance) plus small, clearly-labeled fixtures now exist. Ingestion, search,
+      extraction, and evidence tables land milestone by milestone. See the
+      <a href="milestones.html">Milestones</a> page for live status and
+      <a href="results.html">Results</a> for measured numbers.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Milestone 0 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>). Subpackages are skeletons; functional code begins at Milestone 1.</td></tr>
-        <tr><th>Tests / results</th><td>20 offline tests pass (contract + package-import + CLI smoke). Functional results pending (see Results).</td></tr>
+        <tr><th>Implementation</th><td>Milestones 0&ndash;1 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>); 9 typed schemas + provenance model in <code>schemas.py</code>; a fixture loader and labeled fixtures (18 papers, 10 proteins, 9 associations, 3 questions). Pipeline subpackages remain skeletons until M2+.</td></tr>
+        <tr><th>Tests / results</th><td>50 offline tests pass (contract + package-import + CLI smoke + schema/fixture). Pipeline results pending (see Results).</td></tr>
         <tr><th>Open questions</th><td>Whether transparent baselines alone make claims auditable enough to be useful.</td></tr>
       </table>
     <section>

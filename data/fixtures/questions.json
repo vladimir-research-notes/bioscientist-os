@@ -1,0 +1,17 @@
+[
+  {
+    "question_id": "rq-senescence-inflammation",
+    "text": "What evidence links cellular senescence to chronic inflammation?",
+    "entities_of_interest": ["IL6", "CDKN2A", "SASP", "senescence", "inflammation"]
+  },
+  {
+    "question_id": "rq-autophagy-senescence",
+    "text": "Does autophagy promote or restrain cellular senescence?",
+    "entities_of_interest": ["ATG7", "MAP1LC3B", "MTOR", "autophagy", "senescence"]
+  },
+  {
+    "question_id": "rq-longevity-pathways",
+    "text": "Which molecular pathways are associated with longevity in this corpus?",
+    "entities_of_interest": ["FOXO3", "SIRT1", "MTOR", "rapamycin", "caloric restriction"]
+  }
+]

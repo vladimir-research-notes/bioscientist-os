@@ -30,32 +30,44 @@
   <main class="content">
     <div class="page-head">
       <h1>Data model</h1>
-      <span class="badge badge-planned">Planned</span>
+      <span class="badge badge-done">Implemented (M1)</span>
     </div>
-    <p class="subtitle">Typed pydantic schemas with explicit provenance and epistemic typing.</p>
+    <p class="subtitle">Typed pydantic v2 schemas with explicit provenance and epistemic typing.</p>
     <section>
       <h2>Brief</h2>
 
       <p>Core schemas: <code>Paper</code>, <code>Author</code>,
       <code>BiomedicalEntity</code>, <code>Claim</code>, <code>EvidenceItem</code>,
       <code>DatabaseRecord</code>, <code>EvidenceTable</code>,
-      <code>ResearchQuestion</code>, <code>WorkbenchRun</code>. Each derived object
-      points back at its source.</p>
+      <code>ResearchQuestion</code>, <code>WorkbenchRun</code> &mdash; plus a shared
+      <code>Provenance</code> submodel and four controlled vocabularies
+      (<code>DataSource</code>, <code>EpistemicLevel</code>, <code>EntityType</code>,
+      <code>SupportLabel</code>). Implemented in Milestone&nbsp;1.</p>
+
+      <p>Objects split into two families. <strong>Observed-metadata</strong> objects
+      (<code>Paper</code>, <code>DatabaseRecord</code>) <em>are</em> the source and
+      carry <code>data_source</code> + <code>synthetic</code> directly.
+      <strong>Derived</strong> objects (<code>BiomedicalEntity</code>,
+      <code>Claim</code>, <code>EvidenceItem</code>) carry a required
+      <code>Provenance</code> block pointing back at a paper, snippet, and method &mdash;
+      enforced by the type system, not by convention.</p>
     </section>
     <section>
       <h2>Provenance and epistemic typing</h2>
 
       <ul>
-        <li><code>data_source</code> &isin; {fixture, cache, live} on every externally sourced object.</li>
+        <li><code>data_source</code> &isin; {fixture, cache, live} on every externally sourced object; the loader <em>stamps</em> <code>fixture</code> on load.</li>
         <li><code>synthetic: bool</code> marks fabricated fixture records.</li>
-        <li><code>extraction_method</code> names the exact rule/model that produced a claim/entity.</li>
+        <li><code>extraction_method</code> (on <code>Provenance</code>) names the exact rule/model that produced a claim/entity.</li>
+        <li><code>EpistemicLevel</code> &isin; {observed&nbsp;metadata, extracted&nbsp;claim, inferred&nbsp;relation, unsupported&nbsp;hypothesis} &mdash; asserted at import to match the CLI's four levels.</li>
         <li><code>support_conflict_unknown</code> is a heuristic <em>textual</em> signal, not a biological verdict.</li>
+        <li>Every model uses <code>extra="forbid"</code>; <code>confidence</code> &isin; [0,1]; <code>char_span</code> must be non-negative and ordered.</li>
       </ul>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Planned for Milestone 1.</td></tr>
-        <tr><th>Tests / results</th><td>Round-trip and validation tests added with the schemas.</td></tr>
-        <tr><th>Open questions</th><td>Coarse entity typing (gene/protein/disease/process) &mdash; is that granularity enough?</td></tr>
+        <tr><th>Implementation</th><td><strong>Done (Milestone&nbsp;1).</strong> 9 schemas + <code>Provenance</code> + 4 enums in <code>schemas.py</code>; a thin fixture loader in <code>fixtures.py</code> (parse + validate only; no storage).</td></tr>
+        <tr><th>Tests / results</th><td><code>python3 -m pytest -q</code> &rarr; <strong>50 passed</strong> (offline). 30 new: schema JSON round-trips, enforced validation rules, and fixture loading/labeling.</td></tr>
+        <tr><th>Open questions</th><td>Coarse entity typing &mdash; is that granularity enough? Should <code>db_xrefs</code> be a typed model rather than a free-form mapping?</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>
@@ -64,6 +76,9 @@
       <ul class="files">
         <li><code>docs/DATA_MODEL.md</code></li>
         <li><code>src/bioscientist_os/schemas.py</code></li>
+        <li><code>src/bioscientist_os/fixtures.py</code></li>
+        <li><code>data/fixtures/</code> (papers, uniprot, opentargets, questions)</li>
+        <li><code>tests/test_schemas.py</code>, <code>tests/test_fixtures.py</code></li>
       </ul>
   </main>
   <footer class="site-footer">

@@ -1,0 +1,137 @@
+[
+  {
+    "record_id": "OTAF-0001",
+    "source": "OpenTargets",
+    "record_type": "association",
+    "synthetic": true,
+    "fields": {
+      "target_gene": "CDKN2A",
+      "target_symbol": "p16INK4a",
+      "disease_id": "SYN-DIS-0001",
+      "disease_label": "age-related tissue dysfunction",
+      "association_score": 0.58,
+      "datatypes": ["fixture", "literature"],
+      "note": "Synthetic association score for illustration; not an Open Targets value."
+    }
+  },
+  {
+    "record_id": "OTAF-0002",
+    "source": "OpenTargets",
+    "record_type": "association",
+    "synthetic": true,
+    "fields": {
+      "target_gene": "IL6",
+      "target_symbol": "IL-6",
+      "disease_id": "SYN-DIS-0002",
+      "disease_label": "chronic low-grade inflammation (inflammaging)",
+      "association_score": 0.64,
+      "datatypes": ["fixture", "literature"],
+      "note": "Synthetic association score for illustration; not an Open Targets value."
+    }
+  },
+  {
+    "record_id": "OTAF-0003",
+    "source": "OpenTargets",
+    "record_type": "association",
+    "synthetic": true,
+    "fields": {
+      "target_gene": "TP53",
+      "target_symbol": "p53",
+      "disease_id": "SYN-DIS-0003",
+      "disease_label": "cellular senescence phenotype",
+      "association_score": 0.55,
+      "datatypes": ["fixture", "literature"],
+      "note": "Synthetic association score for illustration; not an Open Targets value."
+    }
+  },
+  {
+    "record_id": "OTAF-0004",
+    "source": "OpenTargets",
+    "record_type": "association",
+    "synthetic": true,
+    "fields": {
+      "target_gene": "CDKN1A",
+      "target_symbol": "p21",
+      "disease_id": "SYN-DIS-0003",
+      "disease_label": "cellular senescence phenotype",
+      "association_score": 0.50,
+      "datatypes": ["fixture", "literature"],
+      "note": "Synthetic association score for illustration; not an Open Targets value."
+    }
+  },
+  {
+    "record_id": "OTAF-0005",
+    "source": "OpenTargets",
+    "record_type": "association",
+    "synthetic": true,
+    "fields": {
+      "target_gene": "MTOR",
+      "target_symbol": "mTOR",
+      "disease_id": "SYN-DIS-0004",
+      "disease_label": "age-related metabolic decline",
+      "association_score": 0.47,
+      "datatypes": ["fixture", "literature"],
+      "note": "Synthetic association score for illustration; not an Open Targets value."
+    }
+  },
+  {
+    "record_id": "OTAF-0006",
+    "source": "OpenTargets",
+    "record_type": "association",
+    "synthetic": true,
+    "fields": {
+      "target_gene": "FOXO3",
+      "target_symbol": "FOXO3",
+      "disease_id": "SYN-DIS-0005",
+      "disease_label": "exceptional human longevity",
+      "association_score": 0.60,
+      "datatypes": ["fixture", "literature"],
+      "note": "Synthetic association score for illustration; not an Open Targets value."
+    }
+  },
+  {
+    "record_id": "OTAF-0007",
+    "source": "OpenTargets",
+    "record_type": "association",
+    "synthetic": true,
+    "fields": {
+      "target_gene": "ATG7",
+      "target_symbol": "ATG7",
+      "disease_id": "SYN-DIS-0006",
+      "disease_label": "impaired autophagy in aging",
+      "association_score": 0.42,
+      "datatypes": ["fixture", "literature"],
+      "note": "Synthetic association score for illustration; not an Open Targets value."
+    }
+  },
+  {
+    "record_id": "OTAF-0008",
+    "source": "OpenTargets",
+    "record_type": "association",
+    "synthetic": true,
+    "fields": {
+      "target_gene": "LMNB1",
+      "target_symbol": "Lamin B1",
+      "disease_id": "SYN-DIS-0003",
+      "disease_label": "cellular senescence phenotype",
+      "association_score": 0.40,
+      "datatypes": ["fixture", "literature"],
+      "note": "Synthetic association score for illustration; not an Open Targets value."
+    }
+  },
+  {
+    "record_id": "OTAF-0009",
+    "source": "OpenTargets",
+    "record_type": "association",
+    "synthetic": true,
+    "fields": {
+      "target_gene": "SIRT1",
+      "target_symbol": "SIRT1",
+      "disease_id": "SYN-DIS-0002",
+      "disease_label": "chronic low-grade inflammation (inflammaging)",
+      "association_score": 0.38,
+      "datatypes": ["fixture", "literature"],
+      "note": "Synthetic association score for illustration; not an Open Targets value."
+    }
+  }
+]

@@ -16,13 +16,32 @@ The only measured results so far concern the build itself, not the pipeline:
 
 | Milestone | Status | Offline test suite |
 |-----------|--------|--------------------|
-| 0 — package skeleton and runnable CLI | Done | `python3 -m pytest -q` → **20 passed** |
+| 0 — package skeleton and runnable CLI | Done | (subsumed) |
+| 1 — data schemas and small fixtures | Done | `python3 -m pytest -q` → **50 passed** |
 
-These 20 tests are the repository-contract checks (8), package-import checks
-(7 — version/pyproject sync, the four epistemic levels, subpackage layout, the
-offline env-check), and CLI smoke checks (5 — `--help`, `version`, `info`,
-`env-check` text + JSON). No ingestion, search, extraction, evidence, or
-evaluation numbers exist yet; those land in Milestones 2–8.
+The 50 tests are the Milestone-0 contract/import/CLI-smoke checks (20) plus
+Milestone-1 schema and fixture checks (30): schema JSON round-trips, the
+enforced provenance/epistemic/validation rules, and fixture loading
+(counts, `synthetic` labeling, `data_source` stamping, and loud failure on
+malformed input). No ingestion, search, extraction, evidence, or evaluation
+*pipeline* numbers exist yet; those land in Milestones 2–8.
+
+### Fixtures (Milestone 1)
+
+The committed corpus loads and validates via
+`python3 -c "from bioscientist_os.fixtures import load_all; print(load_all().summary())"`:
+
+| Fixture set | Count | `synthetic` | Notes |
+|-------------|-------|-------------|-------|
+| papers (`data/fixtures/papers/papers.json`) | 18 | `true` (all) | fabricated abstracts; test-prefix DOIs (`10.0000/`) |
+| proteins (`data/fixtures/uniprot/proteins.json`) | 10 | `false` (all) | modeled on real UniProt accessions; condensed function text |
+| associations (`data/fixtures/opentargets/associations.json`) | 9 | `true` (all) | real gene symbols, **fabricated** scores, synthetic disease ids |
+| research questions (`data/fixtures/questions.json`) | 3 | n/a | seeds for evidence tables / memos |
+
+These counts describe the fixture set, not pipeline performance. Theme:
+cellular senescence / longevity / autophagy. Papers 006 and 007 deliberately
+disagree on whether autophagy promotes or restrains senescence, to give later
+support/conflict logic real material.
 
 ## Result tables (populated by milestones)
 

@@ -2,10 +2,14 @@
 
 ## TL;DR
 
-Typed `pydantic` schemas with explicit provenance. The core entities are
+Typed `pydantic` v2 schemas with explicit provenance. The core entities are
 `Paper`, `Author`, `BiomedicalEntity`, `Claim`, `EvidenceItem`,
 `DatabaseRecord`, `EvidenceTable`, `ResearchQuestion`, and `WorkbenchRun`. They
-are implemented in Milestone 1 (`src/bioscientist_os/schemas.py`).
+are implemented in Milestone 1 (`src/bioscientist_os/schemas.py`), alongside a
+shared `Provenance` submodel, four controlled vocabularies (`DataSource`,
+`EpistemicLevel`, `EntityType`, `SupportLabel`), and a thin fixture loader
+(`src/bioscientist_os/fixtures.py`) that parses the committed corpus into these
+types. **Status: implemented.**
 
 ## Short explanation
 
@@ -26,33 +30,63 @@ back at its source.
 
 ## Longer explanation
 
+### Two object families
+
+- **Observed-metadata objects** — `Paper` and `DatabaseRecord` — *are* the
+  source. They carry `data_source` and `synthetic` directly and have no
+  `Provenance` block (there is nothing upstream to point at).
+- **Derived objects** — `BiomedicalEntity`, `Claim`, `EvidenceItem` — carry a
+  required `Provenance` submodel that points back at a paper, a snippet (with an
+  optional `char_span`), the `extraction_method`, the `data_source`, and an
+  `epistemic_level`. By project policy a derived object without provenance is
+  incomplete; here that policy is enforced by the type system (the field is
+  required), not left to convention.
+
 ### Provenance and epistemic typing
 
 - `data_source` ∈ {`fixture`, `cache`, `live`} appears on every externally
   sourced object so a reader can tell whether data is committed, cached, or freshly
-  fetched.
+  fetched. The fixture loader **stamps** it (`fixture`) on load rather than reading
+  it from the file.
 - `synthetic: bool` marks fabricated fixture records so they are never mistaken
   for real curated data.
-- `Claim.extraction_method` and `BiomedicalEntity.extraction_method` name the
-  exact rule/model that produced the object (e.g. `rule:svo`, `dict:entity`).
-- `EvidenceItem.support_conflict_unknown` is a heuristic *textual* signal, not a
+- `extraction_method` (on `Provenance`) names the exact rule/model that produced
+  the object (e.g. `rule:svo`, `dict:entity`, `fixture:load`).
+- `EpistemicLevel` ∈ {`observed_metadata`, `extracted_claim`, `inferred_relation`,
+  `unsupported_hypothesis`} is the same four-level vocabulary the CLI prints; the
+  enum is asserted at import time to match `bioscientist_os.EPISTEMIC_LEVELS`.
+- `SupportLabel` (`support` / `conflict` / `unknown`, default `unknown`) on
+  `EvidenceItem.support_conflict_unknown` is a heuristic *textual* signal, not a
   biological verdict (see `docs/SAFETY.md`).
 
-### Validation
+### Validation enforced at construction
 
-All schemas validate on construction. Fixture loading (M2) rejects malformed
-records with readable errors. Round-trip (serialize → parse) tests guard schema
-stability.
+- `extra="forbid"` on every model: an unexpected key (e.g. a typo'd field in a
+  fixture) is rejected, not silently dropped.
+- `confidence` is constrained to `[0, 1]`; `year` to a sane range.
+- `Provenance.char_span` must be non-negative and ordered (`start <= end`).
+- A `Claim`'s `provenance.paper_id`, when set, must equal its `paper_id`.
+- `EvidenceTable.provenance_coverage` reports the fraction of rows whose
+  provenance names both a paper and a source snippet (used by the M8 evaluation).
+- Round-trip (`model_dump_json` → `model_validate_json`) tests guard stability;
+  the fixture loader rejects malformed records with file-and-index errors.
 
 ## Exact commands
 
 ```bash
-# After Milestone 1:
+# Inspect a schema:
 python3 -c "from bioscientist_os.schemas import Paper; print(Paper.model_json_schema())"
+
+# Load and summarize the committed fixtures (no database; that is Milestone 2):
+python3 -c "from bioscientist_os.fixtures import load_all; print(load_all().summary())"
+# -> {'papers': 18, 'proteins': 10, 'associations': 9, 'questions': 3}
 ```
 
 ## Limitations
 
 - The schema set is intentionally minimal; it is not a full biomedical ontology.
-- Entity typing is coarse (gene/protein/disease/process) and dictionary-driven.
+- Entity typing is coarse (`gene`/`protein`/`disease`/`process`/`pathway`/
+  `cell_type`/`chemical`/`other`) and will be dictionary-driven (M4).
 - `db_xrefs` are only as complete as the fixtures/connectors provide.
+- The loader does parsing/validation only; normalization, deduplication, and
+  storage are Milestone 2.
