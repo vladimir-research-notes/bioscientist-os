@@ -1,0 +1,26 @@
+# Pinned-by-range runtime + dev dependencies for bioscientist-os.
+#
+# The authoritative dependency declaration lives in pyproject.toml. This file
+# mirrors it for users who prefer `pip install -r requirements.txt`. Optional
+# extras (viz / duckdb / llm) are listed but commented out; install them only if
+# you need figures, the DuckDB backend, or the opt-in real LLM adapter.
+#
+# Recommended setup (CPU-only, no GPU, no paid API required):
+#   python3.12 -m venv .venv && source .venv/bin/activate
+#   pip install -e '.[dev]'
+#
+# Core
+pydantic>=2.6
+typer>=0.12
+pandas>=2.1
+networkx>=3.2
+
+# Dev tooling
+pytest>=7.0
+ruff>=0.4
+mypy>=1.8
+
+# Optional extras (uncomment as needed)
+# matplotlib>=3.8     # figures (Milestone 7); `pip install -e '.[viz]'`
+# duckdb>=0.10        # optional storage backend; `pip install -e '.[duckdb]'`
+# anthropic>=0.40     # opt-in real LLM adapter (Milestone 10); never required

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Database connectors — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html" class="active">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Database connectors</h1>
+      <span class="badge badge-planned">Planned</span>
+    </div>
+    <p class="subtitle">Offline-first adapters with a provenance field on every record.</p>
+    <section>
+      <h2>Brief</h2>
+
+      <p>A base connector interface with a required fixture-backed connector, a local
+      cache, retry/error handling, and a <code>data_source</code> provenance field
+      (fixture / cache / live). Live API connectors (PubMed, Europe PMC, OpenAlex,
+      UniProt, Open Targets, PDB/AlphaFold) are optional, off by default, and never a
+      test dependency.</p>
+    </section>
+    <section>
+      <h2>Targeted sources</h2>
+
+      <table class="grid">
+        <tr><th>Source</th><th>Models</th><th>Status</th></tr>
+        <tr><td>PubMed / NCBI</td><td>paper metadata</td><td>fixture (live optional)</td></tr>
+        <tr><td>Europe PMC / OpenAlex</td><td>paper metadata</td><td>optional</td></tr>
+        <tr><td>UniProt</td><td>protein records</td><td>fixture (live optional)</td></tr>
+        <tr><td>Open Targets</td><td>disease/gene/protein links</td><td>fixture</td></tr>
+        <tr><td>PDB / AlphaFold</td><td>structure links</td><td>optional, link-only</td></tr>
+      </table>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Planned for Milestone 6 (fixture + cache required; live optional).</td></tr>
+        <tr><th>Tests / results</th><td>Connector tests use only fixtures/cache; live mode is never tested in CI.</td></tr>
+        <tr><th>Open questions</th><td>Where licensing is uncertain, fixtures are synthetic and labeled.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>docs/DATABASES.md</code></li>
+        <li><code>src/bioscientist_os/databases/</code></li>
+        <li><code>data/fixtures/uniprot/</code></li>
+        <li><code>data/fixtures/opentargets/</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

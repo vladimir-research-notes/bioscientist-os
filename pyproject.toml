@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bioscientist-os"
+version = "0.0.0"
+description = "CPU-first, evidence-centered research workbench for biomedical literature: ingest papers, extract structured claims, link to biological databases, and build inspectable evidence tables with explicit provenance."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "bioscientist-os contributors" }]
+keywords = [
+  "biomedical",
+  "literature",
+  "evidence",
+  "provenance",
+  "claims",
+  "knowledge-graph",
+  "reproducibility",
+  "research-assistant",
+]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+# Core dependencies are intentionally modest and CPU-only. Storage uses the
+# stdlib `sqlite3` by default; everything here installs cleanly on an
+# m5.2xlarge-class CPU instance and requires no GPU and no paid API.
+dependencies = [
+  "pydantic>=2.6",
+  "typer>=0.12",
+  "pandas>=2.1",
+  "networkx>=3.2",
+]
+
+[project.optional-dependencies]
+# Visualization figures (Milestone 7). Kept optional so the core test path stays
+# light; figure-generating tests are skipped when matplotlib is absent.
+viz = ["matplotlib>=3.8"]
+# Optional DuckDB storage backend (sqlite is the default and needs no extra).
+duckdb = ["duckdb>=0.10"]
+# Optional, opt-in real LLM client for the Milestone 10 adapter. Never required
+# for tests or CI; the mock adapter covers the default path.
+llm = ["anthropic>=0.40"]
+# Developer tooling.
+dev = [
+  "pytest>=7.0",
+  "ruff>=0.4",
+  "mypy>=1.8",
+]
+
+[project.urls]
+Documentation = "https://github.com/Schakirov/bioscientist-os"
+Source = "https://github.com/Schakirov/bioscientist-os"
+
+[project.scripts]
+biosci = "bioscientist_os.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+# mypy is advisory in this project: it should help, not block. CI does not gate
+# on it (see docs/REPRODUCIBILITY.md).
+warn_unused_ignores = false

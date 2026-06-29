@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Results — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html" class="active">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Results</h1>
+      <span class="badge badge-scaffold">Scaffold</span>
+    </div>
+    <p class="subtitle">Measured numbers, with denominators. Currently pending &mdash; populated as milestones land.</p>
+    <section>
+      <h2>Brief</h2>
+
+      <p>This page mirrors <code>docs/RESULTS.md</code>. It is intentionally near-empty
+      in the scaffold: there are no functional results to report yet. Empty means
+      <em>not yet measured</em>, not zero. Do not cite any number until the
+      corresponding milestone has landed.</p>
+    </section>
+    <section>
+      <h2>Pending tables</h2>
+
+      <table class="grid">
+        <tr><th>Result</th><th>Status</th></tr>
+        <tr><td>papers / proteins / links ingested</td><td>pending (M2)</td></tr>
+        <tr><td>search recall@k</td><td>pending (M3)</td></tr>
+        <tr><td>entity precision / recall (95% CI)</td><td>pending (M4, M8)</td></tr>
+        <tr><td>evidence rows + provenance coverage</td><td>pending (M5, M8)</td></tr>
+        <tr><td>figures</td><td>pending (M7)</td></tr>
+      </table>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Scaffold; numbers appear here as each milestone produces them.</td></tr>
+        <tr><th>Tests / results</th><td>Offline test suite runs; functional metrics pending.</td></tr>
+        <tr><th>Open questions</th><td>All results are on a tiny, partly-synthetic corpus &mdash; illustrative only.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>docs/RESULTS.md</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

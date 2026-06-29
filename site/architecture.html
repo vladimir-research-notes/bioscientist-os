@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Architecture — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html" class="active">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Architecture</h1>
+      <span class="badge badge-scaffold">Scaffold</span>
+    </div>
+    <p class="subtitle">One Python package, narrow testable subpackages, SQLite storage, a static site. No services, no GPU.</p>
+    <section>
+      <h2>Brief</h2>
+
+      <p>A single package <code>src/bioscientist_os/</code> exposes a <code>biosci</code>
+      CLI that wires subcommands to small subpackages. Each subpackage is independently
+      importable and unit-tested. Storage is SQLite by default (stdlib, deterministic
+      file output); DuckDB is an optional backend.</p>
+    </section>
+    <section>
+      <h2>Pipeline</h2>
+
+      <pre>data/fixtures/ &rarr; ingest/ &rarr; storage/ (sqlite) &larr; databases/ (connectors)
+                          &darr;
+                       search/  evidence/ (entities, claims, evidence tables)
+                          &darr;
+                  visualization/   evals/
+                          &darr;
+                 site/ + results/figures + research memo</pre>
+    </section>
+    <section>
+      <h2>Subpackages</h2>
+
+      <table class="grid">
+        <tr><th>Subpackage</th><th>Responsibility</th><th>Milestone</th></tr>
+        <tr><td><code>schemas.py</code></td><td>pydantic models + provenance fields</td><td>M1</td></tr>
+        <tr><td><code>ingest/</code></td><td>fixture loaders, normalization</td><td>M2</td></tr>
+        <tr><td><code>storage/</code></td><td>sqlite / duckdb persistence</td><td>M2</td></tr>
+        <tr><td><code>search/</code></td><td>lexical + TF-IDF search, topics</td><td>M3</td></tr>
+        <tr><td><code>evidence/</code></td><td>entity + claim extraction, tables</td><td>M4&ndash;M5</td></tr>
+        <tr><td><code>databases/</code></td><td>connector interface + adapters</td><td>M6</td></tr>
+        <tr><td><code>visualization/</code></td><td>timeline, clusters, matrix, graph</td><td>M7</td></tr>
+        <tr><td><code>evals/</code></td><td>gold-label evaluation harness</td><td>M8</td></tr>
+      </table>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Layout fixed in the plan; subpackages created at Milestone 0+.</td></tr>
+        <tr><th>Tests / results</th><td>Determinism and import tests added as subpackages land.</td></tr>
+        <tr><th>Open questions</th><td>Whether sqlite-only is sufficient or DuckDB is needed for analysis tables.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>docs/ARCHITECTURE.md</code></li>
+        <li><code>src/bioscientist_os/cli.py</code></li>
+        <li><code>pyproject.toml</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

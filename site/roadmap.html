@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roadmap — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html" class="active">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Roadmap</h1>
+      <span class="badge badge-scaffold">Scaffold</span>
+    </div>
+    <p class="subtitle">From a provenance-first prototype toward a possibly publishable methodology.</p>
+    <section>
+      <h2>Near term (the 13 milestones)</h2>
+
+      <p>Schemas &rarr; ingestion &rarr; search &rarr; extraction &rarr; evidence tables
+      &rarr; connectors &rarr; visualizations &rarr; evaluation &rarr; memo &rarr;
+      optional LLM adapter &rarr; polish &rarr; cleanup. See
+      <a href="milestones.html">Milestones</a>.</p>
+    </section>
+    <section>
+      <h2>Later (research directions)</h2>
+
+      <ul>
+        <li>Larger, properly-licensed corpora and richer gold labels.</li>
+        <li>Stronger entity linking (ontology grounding) while preserving auditability.</li>
+        <li>Comparing transparent baselines vs. an LLM adapter on provenance fidelity.</li>
+        <li>A study of which provenance fields actually change scientists' trust/decisions.</li>
+      </ul>
+      <p>These are honest <em>directions</em>. The current repo is a platform/prototype
+      unless and until a novel empirical result is demonstrated &mdash; see
+      <code>docs/PAPER_PATH.md</code> (added at Milestone 12).</p>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Roadmap reflects the plan; updated as milestones complete.</td></tr>
+        <tr><th>Tests / results</th><td>No publishable empirical claim yet &mdash; platform/prototype stage.</td></tr>
+        <tr><th>Open questions</th><td>Which methodological question yields a genuinely novel result.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>docs/PLAN.md</code></li>
+        <li><code>docs/ROADMAP.md</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

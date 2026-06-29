@@ -1,0 +1,70 @@
+# Local Claude Code overrides (never commit personal/local settings)
+.claude/settings.local.json
+
+# Python virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python caches and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+
+# Build / packaging artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Coverage / test artifacts
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Node (the website is committed as plain static HTML under site/)
+node_modules/
+
+# Secrets and credentials (never commit)
+.env
+.env.*
+*.key
+*.pem
+
+# Model weights / large generated artifacts (never commit)
+*.bin
+*.pt
+*.onnx
+*.gguf
+*.safetensors
+*.h5
+*.ckpt
+
+# Local API / network caches written by database connectors (never commit)
+data/cache/
+*.cache.json
+
+# Milestone runner writes per-milestone run/cost logs under logs/ (local only)
+*.log
+/logs/
+
+# Generated workbench artifacts are reproducible from fixtures, so they are not
+# committed. The directory skeleton and READMEs are kept via the negations below.
+/results/**
+!/results/
+!/results/raw/
+!/results/processed/
+!/results/figures/
+!/results/**/.gitkeep
+!/results/README.md
+
+# OS / editor cruft
+.DS_Store
+*.swp
+*~

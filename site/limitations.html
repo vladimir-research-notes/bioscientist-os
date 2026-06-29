@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Limitations — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html" class="active">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Limitations</h1>
+      <span class="badge badge-scaffold">Scaffold</span>
+    </div>
+    <p class="subtitle">A prototype optimized for auditability and provenance, not coverage or sophistication.</p>
+    <section>
+      <h2>Brief</h2>
+
+      <p>The corpus is tiny and partly synthetic; extraction is deliberately simple and
+      transparent (low recall); support/conflict signals describe <em>text</em>, not
+      biology. Read every result with the denominators in
+      <a href="results.html">Results</a>.</p>
+    </section>
+    <section>
+      <h2>Possible misleading artifacts</h2>
+
+      <ul>
+        <li>Clean-looking evidence tables can imply more certainty than warranted &mdash;
+        read the <code>confidence</code>, <code>extraction_method</code>, and
+        <code>support_conflict_unknown</code> columns.</li>
+        <li>Synthetic fixtures look like real papers; they are marked <code>synthetic: true</code>.</li>
+        <li>A high point estimate at small N is not a strong result.</li>
+        <li>Visualizations summarize a tiny corpus and are not field maps.</li>
+      </ul>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Honest-limitations doc maintained alongside every results-producing milestone.</td></tr>
+        <tr><th>Tests / results</th><td>Limitations are stated, not hidden behind averages.</td></tr>
+        <tr><th>Open questions</th><td>Where rule-based baselines fail, and which failures an LLM would fix vs. obscure.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>docs/LIMITATIONS.md</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

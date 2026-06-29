@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Overview — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html" class="active">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Overview</h1>
+      <span class="badge badge-scaffold">Scaffold</span>
+    </div>
+    <p class="subtitle">An evidence-centered research workbench that makes provenance inspectable, not opaque.</p>
+    <section>
+      <h2>What it is</h2>
+
+      <p><strong>bioscientist-os</strong> ingests small biomedical paper corpora,
+      normalizes them, searches and clusters them, extracts <em>structured claims</em>
+      from abstracts using transparent (non-LLM) baselines, links those claims to
+      biological entities and database records, and assembles <strong>evidence
+      tables</strong> in which every cell carries explicit provenance.</p>
+      <p>The key artifact is not a summary. It is an auditable chain:</p>
+      <pre>paper &rarr; extracted claim &rarr; biological entities &rarr; database links &rarr; support / conflict / uncertainty &rarr; visual report</pre>
+    </section>
+    <section>
+      <h2>The methodological question</h2>
+
+      <blockquote>How can a biomedical research assistant make evidence provenance
+      explicit enough that scientists can inspect claims, supporting papers, database
+      links, conflicts, and uncertainty &mdash; rather than receiving opaque summaries?</blockquote>
+      <p>Every output separates four epistemic levels and never collapses them:
+      <strong>observed metadata</strong>, <strong>extracted claim</strong>,
+      <strong>inferred relation</strong>, and <strong>unsupported hypothesis</strong>.</p>
+    </section>
+    <section>
+      <h2>Constraints</h2>
+
+      <ul>
+        <li>CPU-only by default (target: AWS <code>m5.2xlarge</code>-class); no GPU.</li>
+        <li>No paid APIs in the default path; connectors are fixture/cache-backed.</li>
+        <li>Tests run fully offline from small committed fixtures.</li>
+        <li>No large datasets, model weights, secrets, or caches are committed.</li>
+        <li>Any LLM integration is optional, off by default, mock-backed, cost-guarded.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Status</h2>
+
+      <p>This is an early scaffold. The project contract (plan, docs, website,
+      permission policy, and an autonomous milestone runner) exists; functional code
+      lands milestone by milestone. See the <a href="milestones.html">Milestones</a>
+      page for live status and <a href="results.html">Results</a> for measured numbers
+      (currently pending).</p>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Scaffold + project contract committed; package code begins at Milestone 0.</td></tr>
+        <tr><th>Tests / results</th><td>Offline test suite runs; functional results pending (see Results).</td></tr>
+        <tr><th>Open questions</th><td>Whether transparent baselines alone make claims auditable enough to be useful.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>README.md</code></li>
+        <li><code>docs/PLAN.md</code></li>
+        <li><code>CLAUDE.md</code></li>
+        <li><code>src/bioscientist_os/</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

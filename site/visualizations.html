@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Visualizations — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html" class="active">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Visualizations</h1>
+      <span class="badge badge-planned">Planned</span>
+    </div>
+    <p class="subtitle">Figures that summarize the corpus and the evidence, regenerable from fixtures.</p>
+    <section>
+      <h2>Brief</h2>
+
+      <p>Generated figures: a literature timeline, a topic-cluster summary, a
+      claim/evidence matrix, an entity/database-link graph, and a support-vs-conflict
+      table. Saved under <code>results/figures/</code> (gitignored, regenerable).</p>
+      <pre>python3 scripts/05_generate_visualizations.py</pre>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Planned for Milestone 7 (matplotlib is an optional extra).</td></tr>
+        <tr><th>Tests / results</th><td>Figure tests are skipped when matplotlib is not installed; core path stays light.</td></tr>
+        <tr><th>Open questions</th><td>Figures summarize a tiny corpus &mdash; descriptive, not field maps.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>src/bioscientist_os/visualization/</code></li>
+        <li><code>scripts/05_generate_visualizations.py</code></li>
+        <li><code>results/figures/</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

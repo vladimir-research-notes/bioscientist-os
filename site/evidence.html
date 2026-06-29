@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Evidence tables — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="evidence.html" class="active">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Evidence tables</h1>
+      <span class="badge badge-planned">Planned</span>
+    </div>
+    <p class="subtitle">The core artifact: claims linked to papers, entities, and databases, with visible provenance.</p>
+    <section>
+      <h2>Brief</h2>
+
+      <p>An evidence table is built for a research question. Each row links a claim to
+      its paper, source snippet, entities, database links, a support/conflict/unknown
+      signal, the extraction method, and a confidence value.</p>
+      <pre>biosci evidence \
+  --question "What evidence links cellular senescence to chronic inflammation?" \
+  --db results/raw/bioscientist.db --out results/processed/evidence_table.csv</pre>
+    </section>
+    <section>
+      <h2>Columns</h2>
+
+      <p><code>claim_id</code>, <code>claim_text</code>, <code>entity_names</code>,
+      <code>paper_id</code>, <code>source_snippet</code>,
+      <code>support_conflict_unknown</code>, <code>extraction_method</code>,
+      <code>confidence</code>, <code>database_links</code>, <code>notes</code>.</p>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Entity/claim extraction at Milestone 4; table builder at Milestone 5.</td></tr>
+        <tr><th>Tests / results</th><td>Provenance-coverage and column-completeness tests added with the builder.</td></tr>
+        <tr><th>Open questions</th><td>How to represent conflict when two claims disagree only in degree, not direction.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>src/bioscientist_os/evidence/</code></li>
+        <li><code>scripts/03_extract_claims.py</code></li>
+        <li><code>scripts/04_build_evidence_table.py</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>
