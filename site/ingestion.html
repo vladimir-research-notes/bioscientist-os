@@ -30,31 +30,56 @@
   <main class="content">
     <div class="page-head">
       <h1>Ingestion</h1>
-      <span class="badge badge-planned">Planned</span>
+      <span class="badge badge-done">Done (M2)</span>
     </div>
-    <p class="subtitle">Load small fixtures into a deterministic local database.</p>
+    <p class="subtitle">Load small fixtures into a deterministic local SQLite database.</p>
     <section>
       <h2>Brief</h2>
 
-      <p>Fixture ingestion normalizes papers, authors, journals, dates, abstracts,
-      keywords, URLs, and database IDs, then writes them to SQLite. Re-ingest is
-      idempotent; database creation is deterministic.</p>
+      <p>Fixture ingestion loads the committed corpus through the typed schemas
+      (validating every record) and writes one row per object into SQLite, keeping
+      each record's <code>data_source</code> and <code>synthetic</code> provenance as
+      first-class columns. Re-ingest is <strong>idempotent</strong> (UPSERT by stable
+      id &mdash; no duplicate rows), and the database is <strong>content-deterministic</strong>:
+      a SHA-256 <em>content digest</em> over all rows is identical across separate
+      builds from the same fixtures.</p>
       <pre>biosci ingest data/fixtures --db results/raw/bioscientist.db
 biosci stats   --db results/raw/bioscientist.db</pre>
+      <p>Ingested rows are <em>observed metadata</em> only &mdash; directly read from a
+      source record. No claims, relations, or hypotheses are produced at ingestion
+      time (those are later milestones).</p>
+    </section>
+    <section>
+      <h2>Deeper</h2>
+
+      <p>Three tables hold the corpus: <code>papers</code> (one row per
+      <code>Paper</code>, with authors/keywords/external-ids stored as canonical
+      sorted-key JSON so a row round-trips back into the exact pydantic model),
+      <code>database_records</code> (UniProt-style proteins and Open Targets-style
+      associations, keyed by <code>(source, record_id)</code>), and
+      <code>research_questions</code>. A small <code>ingest_meta</code> table records
+      the schema and package version. No timestamps or run ids are written, which is
+      what makes the content digest stable; the digest itself sorts rows by primary
+      key, so it is independent of insertion order and on-disk page layout. (Raw file
+      bytes can still vary across libsqlite versions; the digest is the robust
+      determinism guarantee.) Validation runs <em>before</em> any file is created, so a
+      malformed corpus aborts with no partial database.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Planned for Milestone 2.</td></tr>
-        <tr><th>Tests / results</th><td>Count checks, duplicate handling, and reproducible-DB tests added then.</td></tr>
-        <tr><th>Open questions</th><td>Whether to dedupe by DOI/PMID, title hash, or both.</td></tr>
+        <tr><th>Implementation</th><td>Done (M2): <code>SQLiteStore</code> in <code>storage/sqlite_store.py</code> and the <code>ingest_fixtures()</code> pipeline in <code>ingest/pipeline.py</code>, wired to <code>biosci ingest</code> / <code>biosci stats</code>.</td></tr>
+        <tr><th>Tests / results</th><td>17 new tests (67 total, offline): count checks (18 papers / 10 proteins / 9 associations / 3 questions), idempotent re-ingest, two-build determinism, exact round-trip, and schema-validation-on-ingest. <code>biosci stats</code> reports the same digest on every build.</td></tr>
+        <tr><th>Open questions</th><td>Dedupe is currently by stable local id only; deduping near-duplicate papers by DOI/PMID or title hash is deferred. DuckDB remains an unused optional backend.</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>
 
     </section>
       <ul class="files">
-        <li><code>src/bioscientist_os/ingest/</code></li>
-        <li><code>src/bioscientist_os/storage/</code></li>
+        <li><code>src/bioscientist_os/ingest/pipeline.py</code></li>
+        <li><code>src/bioscientist_os/storage/sqlite_store.py</code></li>
+        <li><code>src/bioscientist_os/cli.py</code> (<code>ingest</code>, <code>stats</code>)</li>
         <li><code>scripts/01_ingest_fixtures.py</code></li>
+        <li><code>tests/test_storage.py</code>, <code>tests/test_ingest.py</code></li>
         <li><code>data/fixtures/</code></li>
       </ul>
   </main>

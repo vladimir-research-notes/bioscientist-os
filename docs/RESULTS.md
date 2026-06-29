@@ -17,14 +17,18 @@ The only measured results so far concern the build itself, not the pipeline:
 | Milestone | Status | Offline test suite |
 |-----------|--------|--------------------|
 | 0 — package skeleton and runnable CLI | Done | (subsumed) |
-| 1 — data schemas and small fixtures | Done | `python3 -m pytest -q` → **50 passed** |
+| 1 — data schemas and small fixtures | Done | (subsumed) |
+| 2 — ingestion and local storage | Done | `python3 -m pytest -q` → **67 passed** |
 
-The 50 tests are the Milestone-0 contract/import/CLI-smoke checks (20) plus
-Milestone-1 schema and fixture checks (30): schema JSON round-trips, the
-enforced provenance/epistemic/validation rules, and fixture loading
-(counts, `synthetic` labeling, `data_source` stamping, and loud failure on
-malformed input). No ingestion, search, extraction, evidence, or evaluation
-*pipeline* numbers exist yet; those land in Milestones 2–8.
+The 67 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
+Milestone-1 schema and fixture checks (30), and the Milestone-2 storage and
+ingestion checks (17): schema JSON round-trips, the enforced
+provenance/epistemic/validation rules, fixture loading (counts, `synthetic`
+labeling, `data_source` stamping, loud failure on malformed input), and now
+ingestion into SQLite (count checks, idempotent re-ingest, two-build
+determinism, exact round-trip, and schema-validation-on-ingest). No search,
+extraction, evidence, or evaluation *pipeline* numbers exist yet; those land in
+Milestones 3–8.
 
 ### Fixtures (Milestone 1)
 
@@ -47,12 +51,29 @@ support/conflict logic real material.
 
 ### Ingestion (Milestone 2)
 
+Produced by `python3 scripts/01_ingest_fixtures.py` (or
+`biosci ingest data/fixtures --db results/raw/bioscientist.db`), then inspected
+with `biosci stats --db results/raw/bioscientist.db`. The database is gitignored
+and reproducible from the committed fixtures.
+
 | Quantity | Value |
 |----------|-------|
-| paper fixtures ingested | _pending_ |
-| uniprot fixtures ingested | _pending_ |
-| opentargets link fixtures ingested | _pending_ |
-| duplicate-collapse behavior verified | _pending_ |
+| paper fixtures ingested (`papers`) | 18 |
+| uniprot fixtures ingested (`database_records`, source `UniProt`) | 10 |
+| opentargets link fixtures ingested (`database_records`, source `OpenTargets`) | 9 |
+| research questions ingested | 3 |
+| total rows | 40 |
+| first ingest writes | 40 inserted, 0 updated |
+| idempotent re-ingest writes | 0 inserted, 40 updated (no new rows) |
+| two-build content digest (sha256) | identical (`f040627…5123da94`) |
+
+Idempotency is verified by re-ingesting into the same database (counts and
+content digest unchanged); deterministic creation is verified by ingesting into
+two fresh databases and comparing their content digests. The digest is a SHA-256
+over the canonical, primary-key-sorted serialization of every data row, so it is
+independent of insertion order and on-disk layout. Every ingested row is
+*observed metadata* with `data_source = fixture`; no claims or relations are
+produced at ingestion.
 
 ### Search (Milestone 3)
 

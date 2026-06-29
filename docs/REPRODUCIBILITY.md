@@ -47,8 +47,14 @@ lighter and matches the lowest-friction design.
 
 Ingestion and indexing are deterministic given the committed fixtures, so the
 generated SQLite database and downstream artifacts are reproducible. Where any
-ordering could vary, the code sorts explicitly. The evaluation harness (M8) emits
-the same numbers on every run from the same inputs.
+ordering could vary, the code sorts explicitly. Concretely (M2): ingestion writes
+no timestamps or run ids, structured sub-fields are stored as canonical
+sorted-key JSON, and `SQLiteStore.content_digest()` hashes every row in
+primary-key order — so `biosci stats` reports the **same SHA-256 content digest**
+on every build from the same fixtures, and re-ingesting is an idempotent UPSERT
+that never creates duplicate rows. (Raw `.db` bytes can still differ across
+libsqlite versions; the content digest is the robust, logical guarantee.) The
+evaluation harness (M8) emits the same numbers on every run from the same inputs.
 
 ### End-to-end run (assembled across milestones)
 

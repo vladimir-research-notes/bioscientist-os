@@ -69,17 +69,18 @@
       <h2>Status</h2>
 
       <p>The project contract (plan, docs, website, permission policy, and an
-      autonomous milestone runner) exists, and <strong>Milestones 0&ndash;1</strong>
+      autonomous milestone runner) exists, and <strong>Milestones 0&ndash;2</strong>
       have landed: the repository is an importable package with a runnable
-      <code>biosci</code> CLI, and the typed data model (pydantic schemas with
-      provenance) plus small, clearly-labeled fixtures now exist. Ingestion, search,
+      <code>biosci</code> CLI, the typed data model (pydantic schemas with
+      provenance) plus small, clearly-labeled fixtures exist, and those fixtures now
+      <strong>ingest into a deterministic local SQLite database</strong>. Search,
       extraction, and evidence tables land milestone by milestone. See the
       <a href="milestones.html">Milestones</a> page for live status and
       <a href="results.html">Results</a> for measured numbers.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Milestones 0&ndash;1 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>); 9 typed schemas + provenance model in <code>schemas.py</code>; a fixture loader and labeled fixtures (18 papers, 10 proteins, 9 associations, 3 questions). Pipeline subpackages remain skeletons until M2+.</td></tr>
-        <tr><th>Tests / results</th><td>50 offline tests pass (contract + package-import + CLI smoke + schema/fixture). Pipeline results pending (see Results).</td></tr>
+        <tr><th>Implementation</th><td>Milestones 0&ndash;2 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>); 9 typed schemas + provenance model in <code>schemas.py</code>; a fixture loader and labeled fixtures (18 papers, 10 proteins, 9 associations, 3 questions); idempotent, content-deterministic SQLite ingestion via <code>storage/</code>. The remaining pipeline subpackages are skeletons until M3+.</td></tr>
+        <tr><th>Tests / results</th><td>67 offline tests pass (contract + package-import + CLI smoke + schema/fixture + storage/ingestion). Search/extraction/evidence results pending (see Results).</td></tr>
         <tr><th>Open questions</th><td>Whether transparent baselines alone make claims auditable enough to be useful.</td></tr>
       </table>
     <section>

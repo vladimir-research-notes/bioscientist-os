@@ -49,7 +49,7 @@
         <tr><th>#</th><th>Milestone</th><th>Status</th></tr>
         <tr><td>0</td><td>Package skeleton and runnable contract</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>1</td><td>Data schemas and small fixtures</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>2</td><td>Ingestion and local storage</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>2</td><td>Ingestion and local storage</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>3</td><td>Search and topic grouping</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>4</td><td>Entity and claim extraction baseline</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>5</td><td>Evidence table builder</td><td><span class="badge badge-planned">Planned</span></td></tr>
@@ -63,6 +63,29 @@
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 2 &mdash; delivered</h2>
+
+      <p>The fixture corpus now ingests into a local SQLite database through a
+      dedicated storage layer. Delivered: <code>SQLiteStore</code>
+      (<code>src/bioscientist_os/storage/sqlite_store.py</code>) &mdash; a stdlib
+      <code>sqlite3</code> backend with idempotent UPSERT writes, exact round-trip back
+      into the typed schemas, and a content-deterministic SHA-256 digest; the
+      <code>ingest_fixtures()</code> pipeline
+      (<code>src/bioscientist_os/ingest/pipeline.py</code>) that validates every record
+      before touching disk and reports what it wrote; the <code>biosci ingest</code> and
+      <code>biosci stats</code> CLI commands; and a thin
+      <code>scripts/01_ingest_fixtures.py</code> wrapper. Ingesting
+      <code>data/fixtures/</code> yields <strong>18</strong> papers, <strong>10</strong>
+      UniProt-style protein records, <strong>9</strong> Open Targets-style associations,
+      and <strong>3</strong> research questions (40 rows). Re-ingest is idempotent (0
+      inserted, 40 updated) and two separate builds produce the identical digest.</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 67 passed
+      (offline); <code>ruff check</code> clean on the new files. Ingested rows are
+      <em>observed metadata</em> only (<code>data_source=fixture</code>); no claims or
+      relations are produced yet. The generated <code>.db</code> lives under
+      <code>results/</code> (gitignored, reproducible from fixtures).</p>
     </section>
     <section>
       <h2>Milestone 1 &mdash; delivered</h2>
@@ -111,6 +134,8 @@
         <li><code>docs/milestones/</code></li>
         <li><code>src/bioscientist_os/schemas.py</code></li>
         <li><code>src/bioscientist_os/fixtures.py</code></li>
+        <li><code>src/bioscientist_os/ingest/pipeline.py</code></li>
+        <li><code>src/bioscientist_os/storage/sqlite_store.py</code></li>
         <li><code>data/fixtures/</code></li>
         <li><code>scripts/run_all_milestones_with_claude.sh</code></li>
       </ul>

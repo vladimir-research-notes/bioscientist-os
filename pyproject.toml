@@ -77,6 +77,11 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.ruff.lint.flake8-bugbear]
+# Typer's idiom puts `typer.Option(...)`/`typer.Argument(...)` in parameter
+# defaults; that is intentional and safe, so it is not a B008 violation here.
+extend-immutable-calls = ["typer.Option", "typer.Argument"]
+
 [tool.mypy]
 python_version = "3.12"
 ignore_missing_imports = true

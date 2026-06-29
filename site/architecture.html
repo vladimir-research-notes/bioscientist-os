@@ -59,8 +59,8 @@
         <tr><th>Subpackage</th><th>Responsibility</th><th>Milestone</th></tr>
         <tr><td><code>schemas.py</code></td><td>pydantic models + provenance fields <strong>(done, M1)</strong></td><td>M1</td></tr>
         <tr><td><code>fixtures.py</code></td><td>parse + validate committed fixtures <strong>(done, M1)</strong></td><td>M1</td></tr>
-        <tr><td><code>ingest/</code></td><td>fixture loaders, normalization, storage</td><td>M2</td></tr>
-        <tr><td><code>storage/</code></td><td>sqlite / duckdb persistence</td><td>M2</td></tr>
+        <tr><td><code>ingest/</code></td><td>fixture ingestion pipeline <strong>(done, M2)</strong></td><td>M2</td></tr>
+        <tr><td><code>storage/</code></td><td>sqlite persistence <strong>(done, M2)</strong>; duckdb optional/unused</td><td>M2</td></tr>
         <tr><td><code>search/</code></td><td>lexical + TF-IDF search, topics</td><td>M3</td></tr>
         <tr><td><code>evidence/</code></td><td>entity + claim extraction, tables</td><td>M4&ndash;M5</td></tr>
         <tr><td><code>databases/</code></td><td>connector interface + adapters</td><td>M6</td></tr>
@@ -69,9 +69,9 @@
       </table>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Milestones 0&ndash;1 done: the <code>biosci</code> CLI runs (<code>version</code>, <code>info</code>, <code>env-check</code>), the typed schemas + fixture loader exist, and all seven pipeline subpackages remain importable skeletons. Functional behavior lands per milestone.</td></tr>
-        <tr><th>Tests / results</th><td>50 offline tests pass: repository-contract, package-import, CLI smoke, and schema/fixture round-trip + validation tests.</td></tr>
-        <tr><th>Open questions</th><td>Whether sqlite-only is sufficient or DuckDB is needed for analysis tables.</td></tr>
+        <tr><th>Implementation</th><td>Milestones 0&ndash;2 done: the <code>biosci</code> CLI runs (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>), the typed schemas + fixture loader exist, and ingestion writes the fixtures into a deterministic SQLite database via <code>storage/</code>. The remaining five pipeline subpackages are importable skeletons; functional behavior lands per milestone.</td></tr>
+        <tr><th>Tests / results</th><td>67 offline tests pass: repository-contract, package-import, CLI smoke, schema/fixture round-trip + validation, and the M2 storage/ingestion tests (counts, idempotency, determinism, round-trip).</td></tr>
+        <tr><th>Open questions</th><td>SQLite is sufficient so far; DuckDB stays an unused optional backend until an analysis workload needs it.</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>
