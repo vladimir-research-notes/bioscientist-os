@@ -14,9 +14,11 @@ The key artifact is not a summary. It is an auditable chain:
 paper -> extracted claim -> biological entities -> database links -> support / conflict / uncertainty -> visual report
 ```
 
-> **Status:** early scaffold. This commit establishes the project contract
-> (plan, docs, website, permission policy, and an autonomous milestone runner).
-> Functional code is built milestone by milestone — see
+> **Status:** early-stage. The project contract (plan, docs, website, permission
+> policy, autonomous milestone runner) is in place and **Milestone 0** has landed:
+> the repository is an importable package with a runnable `biosci` CLI
+> (`version`, `info`, `env-check`). The domain pipeline (schemas, ingestion,
+> search, extraction, evidence tables) is built milestone by milestone — see
 > [`docs/PLAN.md`](docs/PLAN.md) and the live status on the website's
 > *Milestones* page. Do not read unimplemented milestones as done.
 
@@ -60,6 +62,10 @@ pip install -e '.[dev]'
 
 # Environment report (no network, no paid API):
 python3 scripts/00_check_environment.py
+biosci env-check          # same report, via the installed CLI
+
+# Inspect the tool's identity, epistemic levels, and safety stance:
+biosci info               # (or: python3 -m bioscientist_os info)
 
 # Run the test suite (offline):
 python3 -m pytest -q

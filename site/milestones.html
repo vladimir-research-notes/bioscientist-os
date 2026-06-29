@@ -47,7 +47,7 @@
 
       <table class="grid milestones">
         <tr><th>#</th><th>Milestone</th><th>Status</th></tr>
-        <tr><td>0</td><td>Package skeleton and runnable contract</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>0</td><td>Package skeleton and runnable contract</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>1</td><td>Data schemas and small fixtures</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>2</td><td>Ingestion and local storage</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>3</td><td>Search and topic grouping</td><td><span class="badge badge-planned">Planned</span></td></tr>
@@ -65,12 +65,30 @@
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
     </section>
     <section>
+      <h2>Milestone 0 &mdash; delivered</h2>
+
+      <p>The repository is now an importable, testable Python package with a runnable
+      CLI. Delivered: <code>src/bioscientist_os/</code> (package metadata, the four
+      epistemic levels, and the non-clinical safety note as importable constants); the
+      <code>biosci</code> CLI (<code>typer</code>) with <code>version</code>,
+      <code>info</code>, and <code>env-check</code> subcommands; seven empty-but-importable
+      subpackages (<code>ingest, search, evidence, databases, visualization, storage,
+      evals</code>); and a shared environment-check module that both
+      <code>biosci env-check</code> and <code>scripts/00_check_environment.py</code> call.</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 20 passed
+      (offline); <code>python3 -m bioscientist_os --help</code> and
+      <code>biosci --help</code> work. No functional ingestion/search/extraction yet
+      &mdash; the subpackages are skeletons.</p>
+    </section>
+    <section>
       <h2>Relevant files</h2>
 
     </section>
       <ul class="files">
         <li><code>docs/PLAN.md</code></li>
         <li><code>docs/milestones/</code></li>
+        <li><code>src/bioscientist_os/cli.py</code></li>
+        <li><code>src/bioscientist_os/__init__.py</code></li>
         <li><code>scripts/run_all_milestones_with_claude.sh</code></li>
       </ul>
   </main>

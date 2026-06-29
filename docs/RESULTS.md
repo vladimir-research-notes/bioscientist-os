@@ -10,6 +10,20 @@ output appends to this file with exact commands and denominators.
 > Do not cite any number here until the corresponding milestone has landed and
 > the table below is populated. Empty cells mean *not yet measured*, not zero.
 
+## Build / test status
+
+The only measured results so far concern the build itself, not the pipeline:
+
+| Milestone | Status | Offline test suite |
+|-----------|--------|--------------------|
+| 0 — package skeleton and runnable CLI | Done | `python3 -m pytest -q` → **20 passed** |
+
+These 20 tests are the repository-contract checks (8), package-import checks
+(7 — version/pyproject sync, the four epistemic levels, subpackage layout, the
+offline env-check), and CLI smoke checks (5 — `--help`, `version`, `info`,
+`env-check` text + JSON). No ingestion, search, extraction, evidence, or
+evaluation numbers exist yet; those land in Milestones 2–8.
+
 ## Result tables (populated by milestones)
 
 ### Ingestion (Milestone 2)
