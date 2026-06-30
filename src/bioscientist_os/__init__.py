@@ -32,6 +32,11 @@ databases       connector interface + offline-first adapters   M6
 visualization   timeline, clusters, evidence matrix, graph     M7
 evals           gold-label evaluation harness                  M8
 ============== ============================================== ==========
+
+One further subpackage is **optional and off the pipeline**: ``llm`` (Milestone 10)
+is a disabled-by-default, cost-guarded LLM-adapter layer that the default path and
+the test suite never use. It is intentionally *not* listed in :data:`SUBPACKAGES`
+(those are the core pipeline subpackages); see ``docs/LLM_ADAPTER.md``.
 """
 
 from __future__ import annotations

@@ -85,7 +85,12 @@ python3 scripts/04_build_evidence_table.py       # M5  -> results/processed/evid
 python3 scripts/05_generate_visualizations.py    # M7  -> results/figures/*
 python3 scripts/06_run_eval.py                   # M8  -> results/processed/eval_report.json
 python3 scripts/07_generate_memo.py              # M9  -> results/processed/memo.md
+python3 scripts/08_llm_adapter_demo.py           # M10 -> offline LLM-adapter demo (no artifacts)
 ```
+
+The M10 demo is **off the pipeline**: it needs no database and writes nothing
+committed — it exercises the optional LLM adapter (cost guard, dry-run, mock, cache)
+fully offline with no paid API and no API key.
 
 Each script is a thin, install-free wrapper around the package and prints exactly
 what it wrote. The canonical numbers are mirrored into `docs/RESULTS.md`.
@@ -106,6 +111,9 @@ biosci db lookup --source uniprot --id P05231 --db results/raw/bioscientist.db
 biosci memo --db results/raw/bioscientist.db \
   --question "What evidence links cellular senescence to chronic inflammation?" \
   --out results/processed/memo.md
+biosci llm info
+biosci llm complete "Summarize the senescence ↔ inflammation evidence." --task polish
+biosci llm complete "estimate" --input-price 3 --output-price 15 --max-cost-usd 9 --dry-run
 ```
 
 `biosci search --explain` prints, per hit, each query term's idf, the fields it
@@ -137,7 +145,13 @@ experiments emitted *only* as explicitly unsupported hypotheses — printing the
 Markdown memo (or `--json` for the structured report); `scripts/07_generate_memo.py`
 writes one `memo_<question_id>.md` per stored question plus `memo.md` and `memos.json`
 (gitignored, regenerable). It is a research-assistance artifact, not medical advice
-(see `docs/SAFETY.md`).
+(see `docs/SAFETY.md`). `biosci llm` (M10) drives the **optional** LLM adapter — `llm
+info` describes the layer and its safeguards, and `llm complete` runs one completion
+through the deterministic, offline **mock** adapter under the cost guard (`--max-cost-usd`,
+`--dry-run`, illustrative `--input-price`/`--output-price`, and `--cache`); it needs no
+database, no network, and no API key. The adapter is off the pipeline and disabled by
+default for the real (Anthropic) backend; `scripts/08_llm_adapter_demo.py` exercises the
+whole contract offline (see `docs/LLM_ADAPTER.md`).
 
 ### What is committed vs. regenerated
 

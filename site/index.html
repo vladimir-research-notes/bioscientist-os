@@ -23,6 +23,7 @@
       <a href="visualizations.html">Visualizations</a>
       <a href="evaluation.html">Evaluation</a>
       <a href="memo.html">Research memo</a>
+      <a href="llm.html">LLM adapter</a>
       <a href="results.html">Results</a>
       <a href="milestones.html">Milestones</a>
       <a href="reproducibility.html">Reproducibility</a>
@@ -72,7 +73,7 @@
       <h2>Status</h2>
 
       <p>The project contract (plan, docs, website, permission policy, and an
-      autonomous milestone runner) exists, and <strong>Milestones 0&ndash;9</strong>
+      autonomous milestone runner) exists, and <strong>Milestones 0&ndash;10</strong>
       have landed: the repository is an importable package with a runnable
       <code>biosci</code> CLI, the typed data model (pydantic schemas with
       provenance) plus small, clearly-labeled fixtures exist, those fixtures
@@ -97,12 +98,15 @@
       <strong><a href="memo.html">research memo</a></strong> per question &mdash; key
       papers, the evidence table, database links, conflicts/uncertainties, and
       suggested next experiments emitted only as explicitly unsupported hypotheses, with
-      no medical advice. See the <a href="milestones.html">Milestones</a> page for live
+      no medical advice. An <strong>optional, cost-guarded <a href="llm.html">LLM
+      adapter</a></strong> (mock / cache / opt-in Anthropic) is available but kept
+      <strong>off the default path</strong> &mdash; the pipeline and tests use no language
+      model. See the <a href="milestones.html">Milestones</a> page for live
       status and <a href="results.html">Results</a> for measured numbers.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Milestones 0&ndash;9 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>, <code>search</code>, <code>topics</code>, <code>extract</code>, <code>evidence</code>, <code>db</code>, <code>figures</code>, <code>eval</code>, <code>memo</code>); 9 typed schemas + provenance model in <code>schemas.py</code>; a fixture loader and labeled fixtures (18 papers, 10 proteins, 9 associations, 3 questions); idempotent, content-deterministic SQLite ingestion via <code>storage/</code>; transparent <a href="search.html">search + topic grouping</a> via <code>search/</code>; dictionary <a href="extraction.html">entity/claim extraction</a>, <a href="evidence.html">evidence-table assembly</a>, and the end-to-end <a href="memo.html">research memo</a> via <code>evidence/</code>; an offline-first <a href="databases.html">connector layer</a> (fixture / cache / opt-in live) via <code>databases/</code>; five <a href="visualizations.html">figures</a> (data + optional matplotlib PNGs) via <code>visualization/</code>; and a gold-label <a href="evaluation.html">self-evaluation</a> harness via <code>evals/</code>. The remaining pipeline work is the optional M10 LLM adapter.</td></tr>
-        <tr><th>Tests / results</th><td>243 offline tests pass, 1 skipped (contract + package-import + CLI smoke + schema/fixture + storage/ingestion + search/topics + extraction + evidence table + database connectors + visualizations + evaluation + research memo). The figure-rendering test is skipped when matplotlib is absent. See <a href="evaluation.html">Evaluation</a> and <a href="results.html">Results</a> for measured numbers.</td></tr>
+        <tr><th>Implementation</th><td>Milestones 0&ndash;10 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>, <code>search</code>, <code>topics</code>, <code>extract</code>, <code>evidence</code>, <code>db</code>, <code>figures</code>, <code>eval</code>, <code>memo</code>, <code>llm</code>); 9 typed schemas + provenance model in <code>schemas.py</code>; a fixture loader and labeled fixtures (18 papers, 10 proteins, 9 associations, 3 questions); idempotent, content-deterministic SQLite ingestion via <code>storage/</code>; transparent <a href="search.html">search + topic grouping</a> via <code>search/</code>; dictionary <a href="extraction.html">entity/claim extraction</a>, <a href="evidence.html">evidence-table assembly</a>, and the end-to-end <a href="memo.html">research memo</a> via <code>evidence/</code>; an offline-first <a href="databases.html">connector layer</a> (fixture / cache / opt-in live) via <code>databases/</code>; five <a href="visualizations.html">figures</a> (data + optional matplotlib PNGs) via <code>visualization/</code>; a gold-label <a href="evaluation.html">self-evaluation</a> harness via <code>evals/</code>; and an optional, cost-guarded, disabled-by-default <a href="llm.html">LLM adapter</a> via <code>llm/</code> (off the default path). The remaining work is portfolio polish (M11) and final quality gates (M12).</td></tr>
+        <tr><th>Tests / results</th><td>274 offline tests pass, 1 skipped (contract + package-import + CLI smoke + schema/fixture + storage/ingestion + search/topics + extraction + evidence table + database connectors + visualizations + evaluation + research memo + LLM adapter). The figure-rendering test is skipped when matplotlib is absent. See <a href="evaluation.html">Evaluation</a> and <a href="results.html">Results</a> for measured numbers.</td></tr>
         <tr><th>Open questions</th><td>Whether transparent baselines alone make claims auditable enough to be useful.</td></tr>
       </table>
     <section>

@@ -23,6 +23,7 @@
       <a href="visualizations.html">Visualizations</a>
       <a href="evaluation.html">Evaluation</a>
       <a href="memo.html">Research memo</a>
+      <a href="llm.html">LLM adapter</a>
       <a href="results.html" class="active">Results</a>
       <a href="milestones.html">Milestones</a>
       <a href="reproducibility.html">Reproducibility</a>
@@ -43,9 +44,10 @@
       ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4),
       evidence-table assembly (M5), the database-connector layer (M6), the figures
       (M7), the gold-label self-evaluation (M8), and the
-      <a href="memo.html">research memo</a> (M9); the later row (optional LLM adapter)
-      is still pending. Empty means <em>not yet measured</em>, not zero. Do not cite any
-      number until the corresponding milestone has landed.</p>
+      <a href="memo.html">research memo</a> (M9), and the optional, cost-guarded
+      <a href="llm.html">LLM adapter</a> (M10, off the default path). Empty means
+      <em>not yet measured</em>, not zero. Do not cite any number until the corresponding
+      milestone has landed.</p>
     </section>
     <section>
       <h2>Pending tables</h2>
@@ -62,11 +64,12 @@
         <tr><td>database connectors</td><td><strong>done (M6):</strong> 3 fixture connectors (uniprot/opentargets/papers = 10/9/18 records), all <code>data_source=fixture</code>; cache miss&rarr;<code>fixture</code>/hit&rarr;<code>cache</code> (offline-first); inventory, not quality</td></tr>
         <tr><td>figures</td><td><strong>done (M7):</strong> 5 figures (timeline 18 papers/17 years; 10 topic clusters; evidence matrix 14&times;5 = 18 support/3 conflict/1 unknown/48 none; link graph 53 nodes/80 edges; support-vs-conflict 36/13/19 over 3 questions); deterministic data JSON, PNGs optional (matplotlib)</td></tr>
         <tr><td>research memos</td><td><strong>done (M9):</strong> 1 deterministic memo per question (31 / 29 / 8 rows; 6 / 6 / 4 unsupported hypotheses), counts reconcile with the M5 table; the autophagy&harr;senescence direction conflict (006 vs 007) surfaces as a candidate disagreement; behavior, not quality</td></tr>
+        <tr><td>optional LLM adapter</td><td><strong>done (M10):</strong> off the default path (pipeline + tests use no model). 31 offline tests pin adapter <em>behavior</em>: the cost guard refuses an over-budget call <strong>before any backend invoke</strong> (default <code>--max-cost-usd 0.0</code>), the deterministic mock, the free/unbilled cache hit, the dry-run estimate, the off-by-default Anthropic adapter; no measured LLM quality is claimed</td></tr>
       </table>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Numbers appear here as each milestone produces them. Functional results so far: ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4), evidence-table assembly (M5), database connectors (M6), figures (M7), the gold-label self-evaluation (M8), and the research memo (M9).</td></tr>
-        <tr><th>Tests / results</th><td>243 offline tests pass (1 skipped). Ingestion counts/determinism, search/topic behavior, extraction counts/determinism, evidence-table counts/coverage/determinism, connector provenance/cache/retry behavior, figure-data determinism/consistency, the M8 self-evaluation (entity precision/recall, claim sanity, completeness, provenance &mdash; each with a denominator and Wilson interval), and the M9 memo (epistemic-level separation, unsupported-hypothesis framing, reconciliation with the M5 table, candidate-disagreement detection, determinism) are measured. Scoring the support/conflict label and the hypotheses against a human verdict remains future work (see <a href="roadmap.html">roadmap</a>).</td></tr>
+        <tr><th>Implementation</th><td>Numbers appear here as each milestone produces them. Functional results so far: ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4), evidence-table assembly (M5), database connectors (M6), figures (M7), the gold-label self-evaluation (M8), the research memo (M9), and the optional, off-path LLM adapter (M10).</td></tr>
+        <tr><th>Tests / results</th><td>274 offline tests pass (1 skipped). Ingestion counts/determinism, search/topic behavior, extraction counts/determinism, evidence-table counts/coverage/determinism, connector provenance/cache/retry behavior, figure-data determinism/consistency, the M8 self-evaluation (entity precision/recall, claim sanity, completeness, provenance &mdash; each with a denominator and Wilson interval), the M9 memo (epistemic-level separation, unsupported-hypothesis framing, reconciliation with the M5 table, candidate-disagreement detection, determinism), and the M10 LLM adapter (cost-guard over-budget refusal before any invoke, the deterministic mock, the free cache hit, the dry-run, the off-by-default Anthropic adapter, and the CLI) are measured. Scoring the support/conflict label and the hypotheses against a human verdict remains future work (see <a href="roadmap.html">roadmap</a>).</td></tr>
         <tr><th>Open questions</th><td>All results are on a tiny, partly-synthetic corpus &mdash; illustrative only. The M8 self-eval certifies <em>pipeline behavior</em>, with wide intervals at small N &mdash; not population performance or biological truth.</td></tr>
       </table>
     <section>

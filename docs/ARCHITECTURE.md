@@ -36,6 +36,7 @@ independently importable and unit-tested.
 | `databases/` | connector interface, fixture/cache/live adapters | M6 |
 | `visualization/` | timeline, clusters, evidence matrix, link graph, support-vs-conflict table **(done, M7)**; matplotlib optional | M7 |
 | `evals/` | gold-label evaluation harness | M8 |
+| `llm/` | **optional**, cost-guarded LLM adapter (mock / cache / opt-in Anthropic) — **off the default path** **(done, M10)** | M10 |
 | `cli.py` | `biosci` command surface | M0+ |
 
 **Storage.** SQLite is the default (stdlib, zero-dependency, deterministic file
@@ -45,7 +46,10 @@ output). DuckDB is an optional backend for analytical queries.
 so database creation and results are reproducible (a property tested in M2/M8).
 
 **Optionality.** `matplotlib` (figures) and `anthropic` (LLM adapter) are
-optional extras; the core import path and default tests do not require them.
+optional extras; the core import path and default tests do not require them. The
+`llm/` layer is off the pipeline entirely — the default path and the test suite use
+no language model — and is disabled-by-default, mock-backed, and cost-guarded
+(see `docs/LLM_ADAPTER.md`).
 
 ## Exact commands
 

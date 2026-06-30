@@ -34,12 +34,34 @@ The "support / conflict / unknown" signal describes **textual agreement between
 claims**, not biological truth or study quality. Confidence values reflect
 *extraction* confidence, not clinical certainty.
 
+## Optional LLM adapter (Milestone 10)
+
+The optional language-model layer (`src/bioscientist_os/llm/`, see
+`docs/LLM_ADAPTER.md`) is **off the default path**: the pipeline and the entire test
+suite use no model. When it *is* used, its output is held to the same epistemic
+discipline as everything else, at the **lowest** trust level:
+
+- model output enters the system only as an **unsupported hypothesis**, stamped
+  `llm:<adapter>`; it never replaces a transparent baseline and is never silently
+  promoted to observed metadata, an extracted claim, or an inferred relation;
+- the real adapter is **disabled by default** (it raises before any network call
+  unless explicitly opted in) and is never required for tests or CI;
+- a **cost guard** refuses any call over an explicit `--max-cost-usd` budget
+  (default `0.0`) *before* any backend is touched — nothing that costs money runs
+  out of the box;
+- the CLI uses a deterministic **mock** adapter only, so no paid call or API key
+  ever touches the command line.
+
+An LLM is never used to make, soften, or dress up a clinical or biological claim.
+
 ## Data handling
 
 - No patient data. Fixtures are public-style or synthetic and labeled.
 - No secrets, credentials, or private datasets are committed.
 - Optional live connectors hit only public, non-credentialed endpoints and are
   off by default.
+- The optional LLM adapter is disabled by default, cost-guarded, and never sends
+  data anywhere in the default or test path (see above).
 
 ## Suggested-experiment outputs
 

@@ -63,6 +63,18 @@ Milestone 9 assembles the end-to-end research memo over the whole pipeline:
   output is the Markdown memo itself; ``--json`` emits the structured report. No
   medical advice (see docs/SAFETY.md).
 
+Milestone 10 adds the optional, cost-guarded, **disabled-by-default** LLM-adapter
+subcommands (the language model is never on the default pipeline path):
+
+* ``biosci llm info``                        — describe the adapter layer, its
+  cost guard, and the disabled-by-default / mock-in-tests stance;
+* ``biosci llm complete "<prompt>" [...]``   — run one completion through the
+  deterministic, offline **mock** adapter with the cost guard. ``--max-cost-usd``
+  bounds spend (default ``0.0``); ``--dry-run`` estimates a call without making it;
+  ``--input-price`` / ``--output-price`` attach illustrative per-MTok pricing so the
+  guard is demonstrable offline; ``--cache`` serves repeats from a local file. Model
+  output is stamped ``llm:mock`` and is an *unsupported hypothesis* (see SAFETY.md).
+
 The console entry point is ``bioscientist_os.cli:main`` (see ``pyproject.toml``);
 ``python -m bioscientist_os`` routes here too via ``__main__``.
 """
@@ -123,10 +135,13 @@ def info() -> None:
         "Status: fixture ingestion, local SQLite storage, CPU-only search + topic "
         "grouping, rule-based entity/claim extraction, evidence-table assembly, an "
         "offline-first database-connector layer, workbench figures, a gold-label "
-        "self-evaluation harness, and end-to-end research-memo generation available "
-        "(Milestones 0-9).",
-        "Remaining milestones (optional LLM adapter, portfolio polish, final gates) "
-        "land milestone by milestone — see docs/PLAN.md and the website Milestones page.",
+        "self-evaluation harness, end-to-end research-memo generation, and an optional, "
+        "cost-guarded, disabled-by-default LLM adapter layer available (Milestones 0-10).",
+        "The LLM layer is OFF the default path: the pipeline above uses no language "
+        "model; the optional adapter is mock-backed in tests and never spends without an "
+        "explicit cost budget (see `biosci llm info`).",
+        "Remaining milestones (portfolio polish, final gates) land milestone by "
+        "milestone — see docs/PLAN.md and the website Milestones page.",
     ]
     typer.echo("\n".join(lines))
 
@@ -1031,6 +1046,193 @@ def db_lookup(
         "Observed metadata served by a connector; data_source is its provenance "
         "(fixture / cache / live). Not a clinical or diagnostic data source "
         "(see docs/SAFETY.md).",
+    ]
+    typer.echo("\n".join(lines))
+
+
+# ---------------------------------------------------------------------------
+# Milestone 10 — optional, cost-guarded LLM adapter (`biosci llm ...`)
+# ---------------------------------------------------------------------------
+
+# The default cache directory for `llm complete --cache`. Gitignored (under
+# data/cache/, see .gitignore); resolved relative to the current working directory.
+DEFAULT_LLM_CACHE_DIR = Path("data") / "cache" / "llm"
+
+llm_app = typer.Typer(
+    name="llm",
+    add_completion=False,
+    no_args_is_help=True,
+    help=(
+        "Optional, cost-guarded LLM adapter — OFF the default path. The pipeline uses "
+        "no language model; this layer is a disabled-by-default, mock-in-tests option "
+        "for LLM-assisted experiments. The CLI uses the deterministic, offline mock "
+        "adapter only and never spends without an explicit --max-cost-usd budget. Model "
+        "output is an unsupported hypothesis, never a transparent baseline "
+        "(see docs/LLM_ADAPTER.md and docs/SAFETY.md)."
+    ),
+)
+app.add_typer(llm_app, name="llm")
+
+
+@llm_app.command("info")
+def llm_info(
+    json_output: bool = typer.Option(False, "--json", help="emit JSON instead of text"),
+) -> None:
+    """Describe the optional LLM adapter layer and its safeguards (no model is called)."""
+    from bioscientist_os.llm import DEFAULT_ANTHROPIC_MODEL, MOCK_MODEL
+
+    payload = {
+        "on_default_path": False,
+        "test_backend": "mock",
+        "mock_model": MOCK_MODEL,
+        "default_max_cost_usd": 0.0,
+        "real_adapter": "anthropic (opt-in, off by default, requires explicit pricing)",
+        "real_default_model": DEFAULT_ANTHROPIC_MODEL,
+        "epistemic_level": "unsupported_hypothesis",
+        "cli_backend": "mock only (the real adapter is library-only, to keep paid "
+        "calls and API keys out of the CLI)",
+    }
+    if json_output:
+        typer.echo(_json.dumps(payload, indent=2, sort_keys=True))
+        return
+    lines = [
+        "Optional LLM adapter layer (Milestone 10) — OFF the default path.",
+        "",
+        "The workbench pipeline (ingest → search → extract → evidence → memo) uses NO",
+        "language model. This layer is an optional, clearly-labeled adapter for",
+        "LLM-assisted experiments, with three safeguards:",
+        "",
+        "  * Disabled by default. The real (Anthropic) adapter raises before any network",
+        "    call unless explicitly opted in; all tests use the deterministic offline",
+        f"    mock adapter ({MOCK_MODEL}).",
+        "  * Cost guard. Every call is pre-priced and refused before any backend is",
+        "    touched if it would exceed --max-cost-usd (default 0.0 — nothing that costs",
+        "    money runs out of the box). --dry-run estimates a call without making it.",
+        "    A real adapter requires the caller to pass CURRENT pricing explicitly; no",
+        "    vendor price list is hardcoded.",
+        "  * Least-trusted provenance. Model output enters as an UNSUPPORTED HYPOTHESIS",
+        "    stamped llm:<adapter>; it never replaces a transparent baseline and is never",
+        "    silently promoted to observed metadata, an extracted claim, or an inferred",
+        "    relation (see docs/SAFETY.md).",
+        "",
+        "The `biosci llm complete` CLI uses the mock adapter only, so it can demonstrate",
+        "the cost guard (via --input-price/--output-price) and the cache with no paid API",
+        "and no API key. The real adapter is used via the library "
+        "(bioscientist_os.llm.AnthropicLLMAdapter).",
+    ]
+    typer.echo("\n".join(lines))
+
+
+@llm_app.command("complete")
+def llm_complete(
+    prompt: str = typer.Argument(..., help="the user prompt for the completion"),
+    system: str = typer.Option("", "--system", help="optional system prompt"),
+    task: str = typer.Option(
+        None, "--task", help="free-form task label recorded for provenance, e.g. 'polish'"
+    ),
+    model: str = typer.Option(
+        None, "--model", help="model id override (default: the mock model)"
+    ),
+    max_output_tokens: int = typer.Option(
+        512, "--max-output-tokens", help="worst-case output tokens used to price the call"
+    ),
+    temperature: float = typer.Option(0.0, "--temperature", help="sampling temperature"),
+    max_cost_usd: float = typer.Option(
+        0.0, "--max-cost-usd", help="USD budget for this call (default 0.0 — refuse any spend)"
+    ),
+    input_price: float = typer.Option(
+        0.0, "--input-price", help="illustrative input price (USD per million tokens)"
+    ),
+    output_price: float = typer.Option(
+        0.0, "--output-price", help="illustrative output price (USD per million tokens)"
+    ),
+    dry_run: bool = typer.Option(
+        False, "--dry-run", help="estimate the cost without making the call"
+    ),
+    adapter: str = typer.Option(
+        "mock", "--adapter", help="adapter backend (only 'mock' is available from the CLI)"
+    ),
+    cache: bool = typer.Option(
+        False, "--cache", help="serve repeats from a local cache (data/cache/llm/, gitignored)"
+    ),
+    cache_dir: Path = typer.Option(
+        DEFAULT_LLM_CACHE_DIR, "--cache-dir", help="cache directory for --cache"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="emit JSON instead of text"),
+) -> None:
+    """Run one completion through the offline mock adapter, under the cost guard.
+
+    Deterministic and offline: the mock adapter performs no network I/O. Attach
+    illustrative pricing with ``--input-price`` / ``--output-price`` to *demonstrate*
+    the cost guard (a call over ``--max-cost-usd`` is refused before any backend runs);
+    ``--dry-run`` shows what a call would cost without making it. The output is
+    model-generated and is an **unsupported hypothesis**, never a transparent-baseline
+    result (see docs/SAFETY.md).
+    """
+    from bioscientist_os.llm import (
+        CachedLLMAdapter,
+        CostGuardError,
+        LLMRequest,
+        MockLLMAdapter,
+        Pricing,
+    )
+
+    if adapter != "mock":
+        typer.echo(
+            f"unknown --adapter {adapter!r}; only 'mock' is available from the CLI. The "
+            "real (Anthropic) adapter is opt-in and library-only (bioscientist_os.llm."
+            "AnthropicLLMAdapter), to keep paid calls and API keys out of the CLI.",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+
+    backend = MockLLMAdapter(
+        pricing=Pricing(input_price, output_price),
+        max_cost_usd=max_cost_usd,
+        dry_run=dry_run,
+    )
+    engine = CachedLLMAdapter(backend, cache_dir) if cache else backend
+
+    request = LLMRequest(
+        prompt=prompt,
+        system=system,
+        model=model,
+        max_output_tokens=max_output_tokens,
+        temperature=temperature,
+        task=task,
+    )
+    try:
+        response = engine.generate(request)
+    except CostGuardError as exc:
+        typer.echo(f"refused: {exc}", err=True)
+        raise typer.Exit(code=1) from None
+
+    if json_output:
+        typer.echo(_json.dumps(response.to_dict(), indent=2, sort_keys=True))
+        return
+
+    u = response.usage
+    lines = [
+        f"adapter={response.adapter} provider={response.provider} model={response.model}",
+        f"  served_from_cache={response.served_from_cache}  dry_run={response.dry_run}  "
+        f"data_source={response.data_source.value}",
+        f"  usage: input={u.input_tokens} output={u.output_tokens} "
+        f"total={u.total_tokens}{' (estimated)' if u.estimated else ''}",
+        f"  cost: ${response.cost_usd:.6f}  (budget ${max_cost_usd:.6f}, "
+        f"spent ${backend.guard.spent_usd:.6f})",
+        f"  epistemic level: {response.epistemic_level.value}  "
+        f"(extraction_method=llm:{response.adapter}:{response.model})",
+        "",
+    ]
+    if response.dry_run:
+        lines.append("[--dry-run: no call was made; the cost above is an estimate]")
+    else:
+        lines.append("--- completion ---")
+        lines.append(response.text)
+    lines += [
+        "",
+        "Model output is an UNSUPPORTED HYPOTHESIS — model-generated, least-trusted, and",
+        "never a substitute for the transparent non-LLM baselines (see docs/SAFETY.md).",
     ]
     typer.echo("\n".join(lines))
 

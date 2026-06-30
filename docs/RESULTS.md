@@ -25,15 +25,16 @@ The only measured results so far concern the build itself, not the pipeline:
 | 6 — database connector layer | Done | (subsumed) |
 | 7 — visualizations | Done | (subsumed) |
 | 8 — evaluation harness | Done | (subsumed) |
-| 9 — end-to-end research memo | Done | `python3 -m pytest -q` → **243 passed, 1 skipped** |
+| 9 — end-to-end research memo | Done | (subsumed) |
+| 10 — optional, cost-guarded LLM adapter | Done | `python3 -m pytest -q` → **274 passed, 1 skipped** |
 
-The 243 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
+The 274 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
 Milestone-1 schema and fixture checks (30), the Milestone-2 storage and
 ingestion checks (17), the Milestone-3 search and topic checks (28), the
 Milestone-4 extraction checks (24), the Milestone-5 evidence-table checks
 (24), the Milestone-6 connector checks (35), the Milestone-7 visualization
-checks (17 run + 1 skipped), the Milestone-8 evaluation checks (28), and the
-Milestone-9 research-memo checks (20):
+checks (17 run + 1 skipped), the Milestone-8 evaluation checks (28), the
+Milestone-9 research-memo checks (20), and the Milestone-10 LLM-adapter checks (31):
 schema JSON round-trips, the
 enforced provenance/epistemic/validation rules, fixture loading, ingestion into
 SQLite (count checks, idempotent re-ingest, two-build determinism, exact
@@ -61,8 +62,11 @@ no-medical-advice framing present, every suggested experiment emitted as an
 `unsupported` hypothesis, the memo's counts/links reconciling exactly with the M5
 table, the candidate directional-disagreement detector finding the autophagy 006/007
 pair, determinism, the DB-backed `load_memo` equalling the in-memory build, and the
-`biosci memo` CLI). The measured *evaluation* numbers are in the Self-evaluation
-section below.
+`biosci memo` CLI), and now the optional LLM adapter (the cost guard refusing an
+over-budget call **before any backend is invoked**, the deterministic mock adapter,
+the free-and-unbilled cache hit, the dry-run making no call, the opt-in Anthropic
+adapter being off by default, and the `biosci llm` CLI — all offline, no paid API).
+The measured *evaluation* numbers are in the Self-evaluation section below.
 
 ### Fixtures (Milestone 1)
 
@@ -352,6 +356,27 @@ paper-007 `autophagy --restrains--> senescence`) surfaces as a **candidate direc
 disagreement** for a human to verify, since the per-row support label cannot detect
 it (a documented limitation). These are **memo-builder counts and behavior**, not
 quality metrics or biological truth (see `docs/SAFETY.md`).
+
+### Optional LLM adapter (Milestone 10)
+
+Exercised by `python3 scripts/08_llm_adapter_demo.py` (or `biosci llm info` /
+`biosci llm complete`). This layer is **optional and off the default path** — the
+pipeline above uses no language model — so it adds **no measured pipeline
+capability**; the table below is adapter *behavior*, pinned by the 31 LLM tests
+(offline, no paid API, no `anthropic` package).
+
+| Behavior | What is pinned |
+|----------|----------------|
+| cost guard, over budget | a call estimated over `--max-cost-usd` (default `0.0`) raises `CostGuardError` **before any backend is invoked** (spy invoke count = 0) |
+| cost guard, under budget | the actual spend is recorded from reported usage and accumulates across calls |
+| dry-run | returns the worst-case estimate and makes **no** call; spend stays `$0` |
+| mock adapter | deterministic, offline, free by default; usage > 0; output stamped `unsupported_hypothesis` / `llm:mock` |
+| cache | miss → `data_source=fixture` then hit → `data_source=cache`, free and unbilled; canonical JSON; serves offline with a dead inner |
+| Anthropic adapter | off by default (raises before any client use); with an injected client, parses + prices + stamps `data_source=live` |
+
+These are correctness/safety properties of the adapter, **not** an LLM
+extraction-quality measurement (none is claimed). The default `max_cost_usd=0.0`
+means nothing that costs money runs out of the box. See `docs/LLM_ADAPTER.md`.
 
 ## Exact commands
 

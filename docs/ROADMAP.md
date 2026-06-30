@@ -11,7 +11,10 @@ auditable entity linking, and an empirical study of provenance's effect on trust
 
 See `docs/PLAN.md` and the website's *Milestones* page for live status. Each is a
 single autonomous Claude run that commits locally; the runner stops on any
-failure.
+failure. Milestones 0–10 are delivered, including the **optional, cost-guarded LLM
+adapter** (M10) — which is off the default path and mock-backed in tests (see
+`docs/LLM_ADAPTER.md`); the remaining milestones are website/report polish (M11) and
+final cleanup/quality gates (M12).
 
 ## Later — research directions (honest)
 

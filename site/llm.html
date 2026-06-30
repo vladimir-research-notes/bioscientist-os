@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LLM adapter — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="search.html">Search &amp; topics</a>
+      <a href="extraction.html">Extraction</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="memo.html">Research memo</a>
+      <a href="llm.html" class="active">LLM adapter</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Optional LLM adapter</h1>
+      <span class="badge badge-done">Done</span>
+    </div>
+    <p class="subtitle">A disabled-by-default, cost-guarded, mock-in-tests adapter &mdash; <strong>off</strong> the default pipeline path.</p>
+    <section>
+      <h2>Brief</h2>
+
+      <p>The workbench's methodological claim is that evidence can be made
+      <em>inspectable without an opaque model in the loop</em>. So the language model is
+      kept at arm's length: it is an <strong>optional adapter you can opt into</strong>
+      for prototyping (e.g. comparing rule-based extraction's recall against an LLM, or
+      polishing a memo's prose), <strong>not</strong> a step the default pipeline depends
+      on. The pipeline (ingest &rarr; search &rarr; extract &rarr; evidence &rarr; memo)
+      and the entire test suite run with <strong>no language model at all</strong>. The
+      layer mirrors the <a href="databases.html">database-connector layer</a> &mdash; one
+      tiny interface, an honest provenance stamp, a cache for determinism &mdash; plus the
+      safeguard unique to spending money: a <strong>cost guard</strong>.</p>
+      <pre>LLMAdapter
+  &#9500;&#9472; MockLLMAdapter        deterministic, offline   &rarr; data_source=fixture   [the test backend]
+  &#9500;&#9472; CachedLLMAdapter      read-through JSON cache   &rarr; data_source=cache     (data/cache/llm/, gitignored)
+  &#9492;&#9472; AnthropicLLMAdapter   opt-in, off by default    &rarr; data_source=live      [opt-in, never in CI]</pre>
+    </section>
+    <section>
+      <h2>Three safeguards</h2>
+
+      <p><strong>1. Cost guard (<code>--max-cost-usd</code>, dry-run).</strong> Every call
+      is <strong>pre-priced</strong> and refused <em>before any backend is touched</em> if
+      it would exceed the budget. The estimate prices the worst case (input tokens plus the
+      full <code>max_output_tokens</code>); the actual spend is recorded from the backend's
+      reported usage. The default budget is <strong><code>0.0</code></strong> &mdash; out of
+      the box nothing that costs money runs, and the free mock is always authorized.
+      <code>--dry-run</code> returns the estimate without making the call. Pricing is
+      <strong>never hardcoded</strong>: the real adapter requires the caller to pass current
+      pricing, since a guard is only honest with current prices.</p>
+      <p><strong>2. Response cache.</strong> <code>CachedLLMAdapter</code> persists each
+      completion as canonical JSON under <code>data/cache/llm/</code> (gitignored), keyed by
+      the request's content hash. A <strong>cache hit</strong> is stamped
+      <code>data_source=cache</code>, costs <strong>$0</strong>, and charges no budget; a
+      <strong>miss</strong> delegates to the inner adapter (which prices and charges) then
+      writes a copy. A cached run of an expensive model spends money exactly once and
+      repeats offline.</p>
+      <p><strong>3. Least-trusted provenance.</strong> Anything a model produces enters at
+      the <strong>lowest</strong> trust level: <code>epistemic_level =
+      unsupported_hypothesis</code>, stamped <code>llm:&lt;adapter&gt;</code>. Model output
+      never replaces a transparent baseline and is never silently promoted to observed
+      metadata, an extracted claim, or an inferred relation (<a href="safety.html">safety</a>).</p>
+    </section>
+    <section>
+      <h2>Mock (the test backend) and the opt-in Anthropic adapter</h2>
+
+      <p>The <code>MockLLMAdapter</code> is deterministic, offline, and free by default; its
+      output is a clearly-marked string ("[MOCK LLM OUTPUT &hellip;]"), never a real model
+      answer. Determinism is what lets the whole contract &mdash; guard, cache, provenance
+      &mdash; be exercised with no paid API and no network. The
+      <code>AnthropicLLMAdapter</code> is the LLM analogue of the opt-in live connector:
+      with <code>allow_network=False</code> (the default) it raises
+      <code>LLMDisabledError</code> <em>before</em> its client is built or used; its client
+      is injectable, so the parse/usage/provenance path is tested entirely offline; the real
+      client is imported lazily and only on an opted-in call. It is best-effort and
+      <strong>never run in CI</strong>.</p>
+    </section>
+    <section>
+      <h2>Commands</h2>
+
+      <pre>biosci llm info
+biosci llm complete "Summarize the senescence &harr; inflammation evidence." --task polish
+biosci llm complete "expensive" --input-price 3 --output-price 15 \
+    --max-output-tokens 4000 --max-cost-usd 0.0001        # refused by the cost guard
+biosci llm complete "estimate" --input-price 3 --output-price 15 \
+    --max-cost-usd 9 --dry-run                            # estimate, no call
+biosci llm complete "cache me" --cache                    # 1st: fixture; 2nd: cache</pre>
+      <p class="note">The CLI uses the <strong>mock adapter only</strong>, to keep paid
+      calls and API keys off the command line; the real adapter is used via the library
+      (<code>bioscientist_os.llm.AnthropicLLMAdapter</code>).
+      <code>scripts/08_llm_adapter_demo.py</code> runs the full contract offline.</p>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Done (Milestone 10): <code>base.py</code> (<code>Pricing</code>, <code>LLMRequest</code>/<code>LLMResponse</code>, <code>estimate_tokens</code>, <code>CostGuard</code>, the <code>LLMAdapter</code> ABC), <code>mock.py</code> (<code>MockLLMAdapter</code>), <code>cache.py</code> (<code>CachedLLMAdapter</code>), <code>anthropic_adapter.py</code> (opt-in <code>AnthropicLLMAdapter</code>), and the <code>biosci llm</code> CLI (mock-only).</td></tr>
+        <tr><th>Tests / results</th><td>31 LLM tests pass offline (274 total, 1 skipped without matplotlib): the value objects, the cost guard (incl. over-budget refusal <strong>before any invoke</strong>), the mock (determinism/usage/cost/provenance), the dry-run, the cache (miss/hit/free-hit/canonical/offline), the opt-in Anthropic adapter (disabled-by-default + injected-client parse), and the CLI. No network, no paid API, no <code>anthropic</code> package required.</td></tr>
+        <tr><th>Open questions</th><td>The layer adds <strong>no measured capability</strong>; it is infrastructure for optional experiments. <code>estimate_tokens</code> is a crude <code>len/4</code> used only to pre-price; <code>ILLUSTRATIVE_PRICING</code> may be stale; the real adapter is never run in CI.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>docs/LLM_ADAPTER.md</code></li>
+        <li><code>src/bioscientist_os/llm/base.py</code></li>
+        <li><code>src/bioscientist_os/llm/mock.py</code></li>
+        <li><code>src/bioscientist_os/llm/cache.py</code></li>
+        <li><code>src/bioscientist_os/llm/anthropic_adapter.py</code></li>
+        <li><code>scripts/08_llm_adapter_demo.py</code></li>
+        <li><code>tests/test_llm.py</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

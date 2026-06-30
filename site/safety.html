@@ -23,6 +23,7 @@
       <a href="visualizations.html">Visualizations</a>
       <a href="evaluation.html">Evaluation</a>
       <a href="memo.html">Research memo</a>
+      <a href="llm.html">LLM adapter</a>
       <a href="results.html">Results</a>
       <a href="milestones.html">Milestones</a>
       <a href="reproducibility.html">Reproducibility</a>
@@ -53,6 +54,20 @@
       "Support / conflict" describes textual agreement between claims, not biological
       truth. Suggested experiments are hypotheses for humans to evaluate, never
       protocols or recommendations.</p>
+    </section>
+    <section>
+      <h2>Optional LLM adapter (M10)</h2>
+
+      <p>The optional <a href="llm.html">language-model layer</a> is <strong>off the
+      default path</strong> (the pipeline and the whole test suite use no model) and held
+      to the same discipline at the <strong>lowest</strong> trust level: model output
+      enters only as an <strong>unsupported hypothesis</strong> stamped
+      <code>llm:&lt;adapter&gt;</code>, never replacing a transparent baseline; the real
+      adapter is <strong>disabled by default</strong> and never in CI; a <strong>cost
+      guard</strong> refuses any call over an explicit budget (default <code>$0</code>)
+      before any backend is touched; and the CLI uses a deterministic mock only, so no
+      paid call or API key touches the command line. An LLM is never used to make or
+      soften a clinical or biological claim.</p>
     </section>
       <table class="status">
         <tr><th>Implementation</th><td>Safety statement is part of the contract from the first commit.</td></tr>
