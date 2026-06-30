@@ -15,9 +15,21 @@ Milestone 4 (done) provides:
 * the result containers in :mod:`bioscientist_os.evidence.model`
   (:class:`EntityMention`, :class:`PaperExtraction`, :class:`ExtractionReport`).
 
+Milestone 5 (done) adds evidence-table assembly in
+:mod:`bioscientist_os.evidence.table`:
+
+* :func:`build_evidence_report` / :func:`load_evidence` — group the extracted
+  claims by a research question into an :class:`~bioscientist_os.schemas.EvidenceTable`
+  whose every row carries provenance, database links, and a support label;
+* :func:`classify_support` — the transparent textual support/conflict/unknown
+  heuristic (not a biological verdict);
+* :func:`resolve_question` / :func:`resolve_question_entities` — match the CLI
+  question to a stored question and recognize its entities of interest;
+* :class:`EvidenceReport` — the result container with CSV/JSON views.
+
 Recognized entities are *observed metadata* (read from the text); extracted claims
-are *extracted claims*; any subject–relation–object triple is part of the claim,
-not an inferred relation. See :mod:`bioscientist_os.evidence.extract`.
+are *extracted claims*; database links are *inferred relations*; the support label
+is a heuristic textual signal — the evidence table keeps these levels separate.
 """
 
 from __future__ import annotations
@@ -45,6 +57,18 @@ from bioscientist_os.evidence.model import (
     ExtractionReport,
     PaperExtraction,
 )
+from bioscientist_os.evidence.table import (
+    BUILDER_METHOD,
+    CONTRAST_CUES,
+    NEGATION_CUES,
+    SUPPORT_METHOD,
+    EvidenceReport,
+    build_evidence_report,
+    classify_support,
+    load_evidence,
+    resolve_question,
+    resolve_question_entities,
+)
 
 __all__ = [
     "DictionaryEntity",
@@ -64,4 +88,15 @@ __all__ = [
     "EntityMention",
     "PaperExtraction",
     "ExtractionReport",
+    # Milestone 5 — evidence table
+    "build_evidence_report",
+    "load_evidence",
+    "classify_support",
+    "resolve_question",
+    "resolve_question_entities",
+    "EvidenceReport",
+    "SUPPORT_METHOD",
+    "BUILDER_METHOD",
+    "NEGATION_CUES",
+    "CONTRAST_CUES",
 ]

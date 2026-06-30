@@ -64,15 +64,15 @@
         <tr><td><code>ingest/</code></td><td>fixture ingestion pipeline <strong>(done, M2)</strong></td><td>M2</td></tr>
         <tr><td><code>storage/</code></td><td>sqlite persistence <strong>(done, M2)</strong>; duckdb optional/unused</td><td>M2</td></tr>
         <tr><td><code>search/</code></td><td>BM25F + TF-IDF search, single-link topics <strong>(done, M3)</strong></td><td>M3</td></tr>
-        <tr><td><code>evidence/</code></td><td>entity + claim extraction <strong>(done, M4)</strong>; evidence-table builder (M5)</td><td>M4&ndash;M5</td></tr>
+        <tr><td><code>evidence/</code></td><td>entity + claim extraction <strong>(done, M4)</strong> + evidence-table builder <strong>(done, M5)</strong></td><td>M4&ndash;M5</td></tr>
         <tr><td><code>databases/</code></td><td>connector interface + adapters</td><td>M6</td></tr>
         <tr><td><code>visualization/</code></td><td>timeline, clusters, matrix, graph</td><td>M7</td></tr>
         <tr><td><code>evals/</code></td><td>gold-label evaluation harness</td><td>M8</td></tr>
       </table>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Milestones 0&ndash;4 done: the <code>biosci</code> CLI runs (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>, <code>search</code>, <code>topics</code>, <code>extract</code>), the typed schemas + fixture loader exist, ingestion writes the fixtures into a deterministic SQLite database via <code>storage/</code>, <code>search/</code> provides BM25F search and topic grouping, and <code>evidence/</code> provides dictionary entity recognition and rule-based claim extraction over the abstracts. The remaining pipeline subpackages (evidence-table builder, <code>databases/</code>, <code>visualization/</code>, <code>evals/</code>) are importable skeletons; functional behavior lands per milestone.</td></tr>
-        <tr><th>Tests / results</th><td>119 offline tests pass: repository-contract, package-import, CLI smoke, schema/fixture round-trip + validation, the M2 storage/ingestion tests, the M3 search/topics tests, and the M4 extraction tests (span-exact spans, dictionary build, longest-match, relation templates, transparent confidence, determinism, CLI).</td></tr>
+        <tr><th>Implementation</th><td>Milestones 0&ndash;5 done: the <code>biosci</code> CLI runs (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>, <code>search</code>, <code>topics</code>, <code>extract</code>, <code>evidence</code>), the typed schemas + fixture loader exist, ingestion writes the fixtures into a deterministic SQLite database via <code>storage/</code>, <code>search/</code> provides BM25F search and topic grouping, and <code>evidence/</code> provides dictionary entity recognition, rule-based claim extraction, and evidence-table assembly over the abstracts. The remaining pipeline subpackages (<code>databases/</code>, <code>visualization/</code>, <code>evals/</code>) are importable skeletons; functional behavior lands per milestone.</td></tr>
+        <tr><th>Tests / results</th><td>143 offline tests pass: repository-contract, package-import, CLI smoke, schema/fixture round-trip + validation, the M2 storage/ingestion tests, the M3 search/topics tests, the M4 extraction tests, and the M5 evidence-table tests (support heuristic, question resolution, span round-trips, 100% provenance coverage, column completeness, determinism, CLI).</td></tr>
         <tr><th>Open questions</th><td>SQLite is sufficient so far; DuckDB stays an unused optional backend. The search index is recomputed in memory per run (no persisted inverted index) &mdash; fine at this scale.</td></tr>
       </table>
     <section>

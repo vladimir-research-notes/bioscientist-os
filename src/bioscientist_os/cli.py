@@ -26,8 +26,14 @@ Milestone 4 adds the transparent, non-LLM extraction baseline:
   extraction (with optional subject–relation–object triples), each carrying a
   confidence and full provenance (paper, exact snippet span, method).
 
+Milestone 5 assembles the headline artifact, the evidence table:
+
+* ``biosci evidence --question "<text>" --db <path> [--out <csv>]`` — group the
+  extracted claims by a research question into a table whose every row carries
+  provenance, database links, and a heuristic support/conflict/unknown label.
+
 Later milestones add the remaining data subcommands defined in ``docs/PLAN.md``
-(``evidence``, ``eval``, ``memo``). The console entry point is
+(``eval``, ``memo``). The console entry point is
 ``bioscientist_os.cli:main`` (see ``pyproject.toml``); ``python -m bioscientist_os``
 routes here too via ``__main__``.
 """
@@ -86,9 +92,10 @@ def info() -> None:
         f"Safety: {SAFETY_NOTE}",
         "",
         "Status: fixture ingestion, local SQLite storage, CPU-only search + topic "
-        "grouping, and rule-based entity/claim extraction available (Milestones 0-4).",
-        "Evidence tables, evaluation, and memo subcommands land milestone by "
-        "milestone — see docs/PLAN.md and the website Milestones page.",
+        "grouping, rule-based entity/claim extraction, and evidence-table assembly "
+        "available (Milestones 0-5).",
+        "Evaluation and memo subcommands land milestone by milestone — see "
+        "docs/PLAN.md and the website Milestones page.",
     ]
     typer.echo("\n".join(lines))
 
@@ -433,6 +440,135 @@ def extract(
         "or biological claim is made here (see docs/SAFETY.md).",
     ]
     typer.echo("\n".join(lines))
+
+
+@app.command()
+def evidence(
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database to build from"
+    ),
+    question: str = typer.Option(
+        None,
+        "--question",
+        "-q",
+        help='research question text (or a stored question id), '
+        'e.g. "What evidence links cellular senescence to chronic inflammation?"',
+    ),
+    question_id: str = typer.Option(
+        None, "--question-id", help="select a stored research question by id"
+    ),
+    out: Path = typer.Option(
+        None, "--out", help="write the evidence table as CSV to this path (e.g. "
+        "results/processed/evidence_table.csv)"
+    ),
+    min_confidence: float = typer.Option(
+        0.0, "--min-confidence", help="only include claims with confidence >= this value"
+    ),
+    limit: int = typer.Option(
+        None, "--limit", "-n", help="keep only the top N rows after sorting"
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="emit the evidence table as JSON instead of text"
+    ),
+) -> None:
+    """Build an evidence table for a research question (transparent, non-LLM baseline).
+
+    Each row is one extracted claim that mentions a question entity, carrying full
+    provenance (paper, exact snippet span, claim method), recognized entity names,
+    database links (UniProt/HGNC xrefs + Open Targets-style associations), and a
+    *heuristic textual* support/conflict/unknown label. The label describes how the
+    sentence's phrasing reads (asserts vs. negates a relationship) — it is NOT a
+    biological or clinical verdict (see docs/SAFETY.md). Levels are kept separate:
+    the snippet is an extracted claim, entity names are observed metadata, database
+    links are inferred relations.
+    """
+    from bioscientist_os.evidence import load_evidence
+
+    if question is None and question_id is None:
+        typer.echo("provide --question \"<text>\" or --question-id <id>", err=True)
+        raise typer.Exit(code=2)
+
+    try:
+        report = load_evidence(
+            db,
+            question_text=question,
+            question_id=question_id,
+            min_confidence=min_confidence,
+            limit=limit,
+        )
+    except ValueError:
+        typer.echo(
+            f"{db} is not a bioscientist-os database (no ingested tables). "
+            "Run: biosci ingest data/fixtures --db " + str(db),
+            err=True,
+        )
+        raise typer.Exit(code=1) from None
+    except KeyError:
+        typer.echo(f"no stored research question with id {question_id!r} in {db}", err=True)
+        raise typer.Exit(code=1) from None
+
+    if out is not None:
+        _write_evidence_csv(out, report)
+
+    if json_output:
+        typer.echo(_json.dumps(report.to_dict(), indent=2, sort_keys=True))
+        return
+
+    counts = report.support_counts()
+    q = report.question
+    lines = [
+        f'Evidence table: "{q.text}"',
+        f"  question_id={q.question_id}  data_source={report.data_source}",
+        f"  question entities: {', '.join(report.question_entity_names) or '(none recognized)'}",
+    ]
+    if report.unmatched_terms:
+        lines.append(
+            "  unmatched entities_of_interest (not in dictionary): "
+            + ", ".join(report.unmatched_terms)
+        )
+    lines += [
+        f"  rows={report.num_rows} of {report.total_claims} corpus claims "
+        f"(support={counts['support']}, conflict={counts['conflict']}, "
+        f"unknown={counts['unknown']})"
+        + (f"  [min_confidence={min_confidence}]" if min_confidence > 0 else "")
+        + (f"  [limit={limit}]" if limit is not None else ""),
+        f"  provenance coverage: {report.provenance_coverage:.0%} of rows "
+        "name a paper and a source snippet",
+        "",
+    ]
+    if not report.rows:
+        lines.append("  (no claim mentions a recognized question entity)")
+    for r in report.rows:
+        links = ", ".join(r.database_links) or "—"
+        lines.append(
+            f"  [{r.support_conflict_unknown.value:>8}] conf={r.confidence:.2f}  "
+            f"{r.claim_id}  ({r.paper_id})"
+        )
+        lines.append(f"        {r.claim_text!r}")
+        lines.append(f"        entities: {', '.join(r.entity_names) or '—'}")
+        lines.append(f"        db links: {links}")
+        lines.append(f"        notes: {r.notes}")
+    lines += [
+        "",
+        "support/conflict/unknown is a heuristic textual signal, not a biological or "
+        "clinical verdict; database links are inferred relations (see docs/SAFETY.md).",
+    ]
+    if out is not None:
+        lines.append(f"Wrote {out}  ({report.num_rows} rows)")
+    typer.echo("\n".join(lines))
+
+
+def _write_evidence_csv(path: Path, report) -> None:
+    """Write an :class:`EvidenceReport` to ``path`` as CSV (creates parent dirs)."""
+    import csv
+
+    from bioscientist_os.evidence import EvidenceReport
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=list(EvidenceReport.EVIDENCE_COLUMNS))
+        writer.writeheader()
+        writer.writerows(report.evidence_rows())
 
 
 def main() -> None:

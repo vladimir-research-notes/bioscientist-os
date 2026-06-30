@@ -67,7 +67,9 @@ back at its source.
 - `Provenance.char_span` must be non-negative and ordered (`start <= end`).
 - A `Claim`'s `provenance.paper_id`, when set, must equal its `paper_id`.
 - `EvidenceTable.provenance_coverage` reports the fraction of rows whose
-  provenance names both a paper and a source snippet (used by the M8 evaluation).
+  provenance names both a paper and a source snippet — 100% by construction in the
+  evidence-table builder (M5, `evidence/table.py`) and re-checked by the M8
+  evaluation.
 - Round-trip (`model_dump_json` → `model_validate_json`) tests guard stability;
   the fixture loader rejects malformed records with file-and-index errors.
 

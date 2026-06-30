@@ -15,10 +15,16 @@ paper -> extracted claim -> biological entities -> database links -> support / c
 ```
 
 > **Status:** early-stage. The project contract (plan, docs, website, permission
-> policy, autonomous milestone runner) is in place and **Milestone 0** has landed:
-> the repository is an importable package with a runnable `biosci` CLI
-> (`version`, `info`, `env-check`). The domain pipeline (schemas, ingestion,
-> search, extraction, evidence tables) is built milestone by milestone — see
+> policy, autonomous milestone runner) is in place and **Milestones 0–5** have
+> landed: the repository is an importable package with a runnable `biosci` CLI
+> (`version`, `info`, `env-check`, `ingest`, `stats`, `search`, `topics`,
+> `extract`, `evidence`); typed schemas + labeled fixtures ingest into a
+> deterministic SQLite database; the corpus is searchable (BM25F) and groupable
+> into topics; a transparent non-LLM baseline recognizes entities and extracts
+> claims; and the workbench assembles **evidence tables** grouped by a research
+> question, every cell with provenance, database links, and a heuristic
+> support/conflict/unknown signal. The remaining pipeline (database connectors,
+> visualizations, evaluation, memo) is built milestone by milestone — see
 > [`docs/PLAN.md`](docs/PLAN.md) and the live status on the website's
 > *Milestones* page. Do not read unimplemented milestones as done.
 
@@ -76,9 +82,10 @@ The planned end-to-end run (built across milestones) will be:
 ```bash
 biosci ingest data/fixtures --db results/raw/bioscientist.db   # M2
 biosci search "cellular senescence inflammation" --db results/raw/bioscientist.db   # M3
+biosci extract --db results/raw/bioscientist.db   # M4
 biosci evidence --question "What evidence links cellular senescence to chronic inflammation?" \
   --db results/raw/bioscientist.db --out results/processed/evidence_table.csv        # M5
-biosci memo --question "..." --db results/raw/bioscientist.db --out results/processed/memo.md  # M9
+biosci memo --question "..." --db results/raw/bioscientist.db --out results/processed/memo.md  # M9 (planned)
 ```
 
 ## Repository layout

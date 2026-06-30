@@ -20,21 +20,26 @@ The only measured results so far concern the build itself, not the pipeline:
 | 1 — data schemas and small fixtures | Done | (subsumed) |
 | 2 — ingestion and local storage | Done | (subsumed) |
 | 3 — search and topic grouping | Done | (subsumed) |
-| 4 — entity and claim extraction baseline | Done | `python3 -m pytest -q` → **119 passed** |
+| 4 — entity and claim extraction baseline | Done | (subsumed) |
+| 5 — evidence table builder | Done | `python3 -m pytest -q` → **143 passed** |
 
-The 119 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
+The 143 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
 Milestone-1 schema and fixture checks (30), the Milestone-2 storage and
-ingestion checks (17), the Milestone-3 search and topic checks (28), and the
-Milestone-4 extraction checks (24): schema JSON round-trips, the enforced
-provenance/epistemic/validation rules, fixture loading, ingestion into SQLite
-(count checks, idempotent re-ingest, two-build determinism, exact round-trip,
-schema-validation-on-ingest), search and topic grouping (tokenizer behavior,
-BM25F scoring with `score == Σ contributions`, field weighting, tiny labeled
-queries, TF-IDF cosine self-similarity, topic partition/monotonicity), and now
-extraction (span-exact tokenizer/sentence splitter, dictionary build from
-fixtures, longest-match recognition, span round-trips against the abstract, the
-relation templates, the transparent confidence, determinism, and the CLI). No
-evidence-table or *evaluation* numbers exist yet; those land in Milestones 5–8.
+ingestion checks (17), the Milestone-3 search and topic checks (28), the
+Milestone-4 extraction checks (24), and the Milestone-5 evidence-table checks
+(24): schema JSON round-trips, the enforced provenance/epistemic/validation
+rules, fixture loading, ingestion into SQLite (count checks, idempotent
+re-ingest, two-build determinism, exact round-trip, schema-validation-on-ingest),
+search and topic grouping (tokenizer behavior, BM25F scoring with
+`score == Σ contributions`, field weighting, tiny labeled queries, TF-IDF cosine
+self-similarity, topic partition/monotonicity), extraction (span-exact
+tokenizer/sentence splitter, dictionary build from fixtures, longest-match
+recognition, span round-trips against the abstract, the relation templates, the
+transparent confidence, determinism, and the CLI), and now the evidence table
+(the support/conflict/unknown cue heuristic, question resolution, the relevance
+filter, span round-trips, 100% provenance coverage, column completeness,
+determinism, and the CLI). No *evaluation* numbers exist yet; those land in
+Milestone 8.
 
 ### Fixtures (Milestone 1)
 
@@ -165,12 +170,34 @@ Milestone 8:
 | entity recall | _pending (M8)_ | |
 | claim sanity pass rate | _pending (M8)_ | |
 
-### Evidence table / provenance (Milestones 5, 8)
+### Evidence table / provenance (Milestone 5)
 
-| Metric | Value | Denominator |
-|--------|-------|-------------|
-| evidence rows generated | _pending_ | |
-| provenance coverage | _pending_ | |
+Produced by `python3 scripts/04_build_evidence_table.py` (or `biosci evidence
+--question "..." --db ... --out ...`). One table is built per stored research
+question: each kept claim (one that mentions ≥1 dictionary-recognized question
+entity) becomes a row carrying full per-cell provenance, database links
+(UniProt/HGNC xrefs + Open Targets associations), and a heuristic
+support/conflict/unknown label. Assembly is deterministic
+(`evidence_tables.json` is byte-identical across runs).
+
+| Research question | Rows | support / conflict / unknown | Provenance coverage |
+|-------------------|------|------------------------------|---------------------|
+| `rq-senescence-inflammation` | 31 | 17 / 6 / 8 | 100% (31/31) |
+| `rq-autophagy-senescence` | 29 | 15 / 6 / 8 | 100% (29/29) |
+| `rq-longevity-pathways` | 8 | 4 / 1 / 3 | 100% (8/8) |
+
+Provenance coverage is the fraction of rows whose provenance names both a paper
+and a source snippet; it is 100% by construction, since a row is only emitted
+from a claim that already has both (the test suite asserts this, not just the
+script). The support/conflict/unknown label is a heuristic **textual** signal
+(`rule:support-cues`): a strong negation cue → conflict, an asserted relationship
+(a relation triple or a support cue) → support, otherwise unknown. It reads one
+sentence's phrasing and is **not** a biological or clinical verdict; in
+particular it does not detect cross-paper *directional* conflict — e.g. paper-006
+(`autophagy --promotes--> senescence`) and paper-007 (`autophagy --restrains-->
+senescence`) both read as `support` per row. These are **builder counts and
+behavior**, not quality metrics; support-label precision/recall against gold
+labels (with denominators and Wilson intervals) is Milestone 8.
 
 ### Figures (Milestone 7)
 

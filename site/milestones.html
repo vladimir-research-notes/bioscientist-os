@@ -54,7 +54,7 @@
         <tr><td>2</td><td>Ingestion and local storage</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>3</td><td>Search and topic grouping</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>4</td><td>Entity and claim extraction baseline</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>5</td><td>Evidence table builder</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>5</td><td>Evidence table builder</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>6</td><td>Database connector layer</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>7</td><td>Visualizations</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>8</td><td>Evaluation harness</td><td><span class="badge badge-planned">Planned</span></td></tr>
@@ -65,6 +65,37 @@
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 5 &mdash; delivered</h2>
+
+      <p>The workbench now assembles its headline artifact: an <strong>evidence
+      table</strong> grouped by a research question. Delivered:
+      <code>src/bioscientist_os/evidence/table.py</code> &mdash; question resolution
+      (match a stored fixture question by text/id, or synthesize one from free text;
+      recognize its entities with the same dictionary), a relevance filter (keep
+      claims that mention &ge;&nbsp;1 question entity), a transparent
+      support/conflict/unknown cue heuristic (<code>rule:support-cues</code>),
+      database-link assembly (UniProt/HGNC xrefs + Open Targets-style associations),
+      and the <code>EvidenceReport</code> container with CSV/JSON views; the
+      <code>biosci evidence</code> CLI command (<code>--question</code>,
+      <code>--question-id</code>, <code>--out</code>, <code>--min-confidence</code>,
+      <code>--limit</code>, <code>--json</code>); and a
+      <code>scripts/04_build_evidence_table.py</code> wrapper that writes one CSV per
+      question plus a combined JSON. Every row carries full per-cell provenance and
+      keeps the four epistemic levels separate (snippet = extracted claim, entity
+      names = observed metadata, database links = inferred relation, support label =
+      heuristic textual signal). On the three fixture questions the builder produces
+      <strong>31&nbsp;/&nbsp;29&nbsp;/&nbsp;8</strong> rows at
+      <strong>100% provenance coverage</strong>; the senescence&ndash;inflammation
+      table is 17&nbsp;support&nbsp;/&nbsp;6&nbsp;conflict&nbsp;/&nbsp;8&nbsp;unknown.</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 143 passed
+      (offline); <code>ruff check</code> clean on the new files. The
+      support/conflict/unknown label is a heuristic <em>textual</em> signal, never a
+      biological or clinical verdict (<a href="safety.html">safety</a>). It reads one
+      sentence's phrasing and does not detect cross-paper directional conflict &mdash;
+      a documented limitation. Counts describe builder behavior, <strong>not</strong>
+      quality (evaluation is M8).</p>
     </section>
     <section>
       <h2>Milestone 4 &mdash; delivered</h2>

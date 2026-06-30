@@ -61,8 +61,12 @@ a topic report reproduce exactly on every build. Entity/claim extraction (M4) is
 also a pure function of the database: the dictionary is rebuilt from the ingested
 records, papers are processed in `paper_id` order, results stay in document order,
 and every span is the verbatim `abstract[start:end]` — so
-`results/processed/claims.json` is byte-identical across runs. The evaluation
-harness (M8) emits the same numbers on every run from the same inputs.
+`results/processed/claims.json` is byte-identical across runs. Evidence-table
+assembly (M5) is the same: questions resolve deterministically, claims are kept in
+corpus order, database links and rows are sorted, and rows are ordered by
+`(-confidence, paper_id, claim_id)` — so `results/processed/evidence_tables.json`
+is byte-identical across runs. The evaluation harness (M8) emits the same numbers
+on every run from the same inputs.
 
 ### End-to-end run (assembled across milestones)
 
@@ -86,6 +90,9 @@ biosci search "cellular senescence inflammation" --db results/raw/bioscientist.d
 biosci search "IL-6 SASP senescence" --db results/raw/bioscientist.db --explain
 biosci topics --db results/raw/bioscientist.db --threshold 0.15
 biosci extract --db results/raw/bioscientist.db --paper biosci-paper-006
+biosci evidence --db results/raw/bioscientist.db \
+  --question "What evidence links cellular senescence to chronic inflammation?" \
+  --out results/processed/evidence_table.csv
 ```
 
 `biosci search --explain` prints, per hit, each query term's idf, the fields it
@@ -94,7 +101,12 @@ hit's score). `--json` emits the same structure for downstream use. `biosci
 extract` recognizes dictionary entities and entity-grounded claim sentences from
 abstracts, each with a confidence and an exact source-snippet span;
 `scripts/03_extract_claims.py` writes `results/processed/claims.{json,csv}` and
-`entities.csv` (gitignored, regenerable).
+`entities.csv` (gitignored, regenerable). `biosci evidence` builds an evidence
+table for a research question — every row with full provenance, database links,
+and a heuristic support/conflict/unknown label;
+`scripts/04_build_evidence_table.py` writes one `evidence_<question_id>.csv` per
+question plus `evidence_table.csv` and `evidence_tables.json` (gitignored,
+regenerable).
 
 ### What is committed vs. regenerated
 

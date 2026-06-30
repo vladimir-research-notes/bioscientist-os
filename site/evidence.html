@@ -32,20 +32,22 @@
   <main class="content">
     <div class="page-head">
       <h1>Evidence tables</h1>
-      <span class="badge badge-planned">Planned</span>
+      <span class="badge badge-done">Done (M5)</span>
     </div>
-    <p class="subtitle">The core artifact: claims linked to papers, entities, and databases, with visible provenance.</p>
+    <p class="subtitle">The core artifact: claims grouped by a research question, linked to papers, entities, and databases, with visible per-cell provenance.</p>
     <section>
       <h2>Brief</h2>
 
-      <p>An evidence table is built for a research question. Each row links a claim to
-      its paper, source snippet, entities, database links, a support/conflict/unknown
-      signal, the extraction method, and a confidence value.</p>
+      <p>An evidence table is built for a research question. Each row is one extracted
+      claim that mentions a question entity, carrying its paper, exact source snippet
+      and span, recognized entity names, database links, a heuristic
+      support/conflict/unknown signal, the claim's extraction method, a confidence, and
+      a notes field that records how the support label and links were derived.</p>
       <pre>biosci evidence \
   --question "What evidence links cellular senescence to chronic inflammation?" \
   --db results/raw/bioscientist.db --out results/processed/evidence_table.csv</pre>
-      <p class="note">The entities and claims that fill these rows already exist
-      (Milestone&nbsp;4, done &mdash; see <a href="extraction.html">Extraction</a>):
+      <p class="note">The entities and claims that fill these rows come from
+      Milestone&nbsp;4 (see <a href="extraction.html">Extraction</a>):
       dictionary-recognized entities with <code>db_xrefs</code> and exact spans, and
       entity-grounded claim sentences with optional relation triples and a confidence.
       Milestone&nbsp;5 groups them by a research question and adds the
@@ -53,26 +55,57 @@
       a biological verdict (<a href="safety.html">safety</a>).</p>
     </section>
     <section>
+      <h2>How a row is built</h2>
+
+      <ol>
+        <li><strong>Question entities.</strong> The question text and its
+        <code>entities_of_interest</code> are run through the same entity dictionary, so
+        a curated fixture question or a free-text question both resolve to recognized
+        entity ids. Terms with no fixture record are reported as unmatched, not hidden.</li>
+        <li><strong>Relevance.</strong> A claim is kept iff it mentions &ge;&nbsp;1 of
+        those entities &mdash; a transparent, grounded filter.</li>
+        <li><strong>Support / conflict / unknown.</strong> A transparent cue heuristic
+        (<code>rule:support-cues</code>): a strong negation cue (e.g. <em>not
+        associated</em>) &rarr; <em>conflict</em>; an asserted relationship (a relation
+        triple or a support cue) &rarr; <em>support</em>; otherwise &rarr;
+        <em>unknown</em> (the honest default). The cue that fired is written into
+        <code>notes</code>.</li>
+        <li><strong>Database links.</strong> UniProt/HGNC cross-references for the
+        claim's entities plus any Open Targets-style association records naming their
+        gene &mdash; an <em>inferred relation</em>, labeled as such.</li>
+      </ol>
+      <p class="note">The four epistemic levels stay separate within one row: the
+      snippet is an <em>extracted claim</em>, <code>entity_names</code> are
+      <em>observed metadata</em>, <code>database_links</code> are <em>inferred
+      relations</em>, and the support label is a heuristic textual signal. The row's
+      provenance is anchored to the claim snippet, so provenance coverage is 100% by
+      construction.</p>
+    </section>
+    <section>
       <h2>Columns</h2>
 
-      <p><code>claim_id</code>, <code>claim_text</code>, <code>entity_names</code>,
-      <code>paper_id</code>, <code>source_snippet</code>,
-      <code>support_conflict_unknown</code>, <code>extraction_method</code>,
-      <code>confidence</code>, <code>database_links</code>, <code>notes</code>.</p>
+      <p><code>claim_id</code>, <code>paper_id</code>, <code>claim_text</code>,
+      <code>entity_names</code>, <code>support_conflict_unknown</code>,
+      <code>confidence</code>, <code>extraction_method</code>,
+      <code>source_snippet</code>, <code>char_start</code>, <code>char_end</code>,
+      <code>database_links</code>, <code>notes</code>, <code>data_source</code>,
+      <code>epistemic_level</code> &mdash; the columns <code>docs/PLAN.md</code> requires,
+      plus the exact span, data source, and epistemic level.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Entity/claim extraction <strong>done (M4)</strong> in <code>evidence/</code> (see <a href="extraction.html">Extraction</a>); the research-question-driven table builder and the support/conflict/unknown signal are Milestone&nbsp;5.</td></tr>
-        <tr><th>Tests / results</th><td>M4 produces 63 entity mentions and 42 claims (15 with relation triples) over the 18 abstracts. Provenance-coverage and column-completeness tests are added with the builder (M5).</td></tr>
-        <tr><th>Open questions</th><td>How to represent conflict when two claims disagree only in degree, not direction.</td></tr>
+        <tr><th>Implementation</th><td><strong>Done (M5).</strong> <code>evidence/table.py</code> (builder, support heuristic, question resolution, <code>EvidenceReport</code>), the <code>biosci evidence</code> command, and <code>scripts/04_build_evidence_table.py</code>.</td></tr>
+        <tr><th>Tests / results</th><td>24 new tests (143 total, offline). On the three fixture questions: 31&nbsp;/&nbsp;29&nbsp;/&nbsp;8 rows, all at <strong>100% provenance coverage</strong>; all three labels exercised (e.g. senescence&ndash;inflammation: 17&nbsp;support, 6&nbsp;conflict, 8&nbsp;unknown). Counts are behavior, not quality (eval is M8).</td></tr>
+        <tr><th>Open questions</th><td>The per-row label reads one sentence's phrasing; it does not detect when two papers conflict only in <em>direction</em> (e.g. autophagy promotes vs. restrains senescence) &mdash; both rows read as support. Cross-paper conflict detection is future work.</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>
 
     </section>
       <ul class="files">
-        <li><code>src/bioscientist_os/evidence/</code></li>
-        <li><code>scripts/03_extract_claims.py</code></li>
+        <li><code>src/bioscientist_os/evidence/table.py</code></li>
+        <li><code>src/bioscientist_os/cli.py</code> (<code>evidence</code> command)</li>
         <li><code>scripts/04_build_evidence_table.py</code></li>
+        <li><code>tests/test_evidence_table.py</code></li>
       </ul>
   </main>
   <footer class="site-footer">
