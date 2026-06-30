@@ -27,6 +27,20 @@ Milestone 5 (done) adds evidence-table assembly in
   question to a stored question and recognize its entities of interest;
 * :class:`EvidenceReport` — the result container with CSV/JSON views.
 
+Milestone 9 (done) adds end-to-end research-memo generation in
+:mod:`bioscientist_os.evidence.memo`:
+
+* :func:`build_memo_report` / :func:`load_memo` — compose the M3 retrieval, M4
+  extraction, and M5 evidence table for one research question into a structured
+  :class:`MemoReport` (key papers, evidence table, database links,
+  conflicts/uncertainties, unsupported hypotheses) with Markdown and JSON views;
+* :class:`MemoReport`, :class:`KeyPaper`, :class:`EntityLinks`,
+  :class:`DirectionalDisagreement`, :class:`Hypothesis` — the result containers.
+
+The memo keeps the four epistemic levels separate and emits suggested next
+experiments *only* as unsupported hypotheses — it is never medical advice
+(see ``docs/SAFETY.md``).
+
 Recognized entities are *observed metadata* (read from the text); extracted claims
 are *extracted claims*; database links are *inferred relations*; the support label
 is a heuristic textual signal — the evidence table keeps these levels separate.
@@ -51,6 +65,16 @@ from bioscientist_os.evidence.extract import (
     extract_paper,
     load_dictionary,
     load_extraction,
+)
+from bioscientist_os.evidence.memo import (
+    MEMO_METHOD,
+    DirectionalDisagreement,
+    EntityLinks,
+    Hypothesis,
+    KeyPaper,
+    MemoReport,
+    build_memo_report,
+    load_memo,
 )
 from bioscientist_os.evidence.model import (
     EntityMention,
@@ -99,4 +123,13 @@ __all__ = [
     "BUILDER_METHOD",
     "NEGATION_CUES",
     "CONTRAST_CUES",
+    # Milestone 9 — research memo
+    "build_memo_report",
+    "load_memo",
+    "MemoReport",
+    "KeyPaper",
+    "EntityLinks",
+    "DirectionalDisagreement",
+    "Hypothesis",
+    "MEMO_METHOD",
 ]

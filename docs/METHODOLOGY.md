@@ -22,7 +22,7 @@ The system is a pipeline of small, individually testable stages:
    provenance (Milestone 5, done).
 6. **Visualize** timeline, clusters, evidence matrix, and link graph (Milestone 7).
 7. **Evaluate** against tiny gold labels with explicit denominators (Milestone 8).
-8. **Report** a structured, non-clinical research memo (Milestone 9).
+8. **Report** a structured, non-clinical research memo (Milestone 9, done).
 
 ## Longer explanation
 

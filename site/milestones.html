@@ -22,6 +22,7 @@
       <a href="databases.html">Database connectors</a>
       <a href="visualizations.html">Visualizations</a>
       <a href="evaluation.html">Evaluation</a>
+      <a href="memo.html">Research memo</a>
       <a href="results.html">Results</a>
       <a href="milestones.html" class="active">Milestones</a>
       <a href="reproducibility.html">Reproducibility</a>
@@ -58,13 +59,43 @@
         <tr><td>6</td><td>Database connector layer</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>7</td><td>Visualizations</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>8</td><td>Evaluation harness</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>9</td><td>End-to-end research memo generation</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>9</td><td>End-to-end research memo generation</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>10</td><td>Optional LLM adapter (not required)</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>11</td><td>Website, final report, portfolio polish</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>12</td><td>Final cleanup and quality gates</td><td><span class="badge badge-planned">Planned</span></td></tr>
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 9 &mdash; delivered</h2>
+
+      <p>The workbench now produces its <strong>narrative capstone</strong>: a structured
+      <a href="memo.html">research memo</a> per research question, assembled from the
+      pipeline <strong>without any new, unaudited computation</strong>. Delivered:
+      <code>src/bioscientist_os/evidence/memo.py</code> &mdash; the <code>MemoReport</code>
+      (Markdown + deterministic JSON views), <code>build_memo_report</code> /
+      <code>load_memo</code>, BM25F key-paper ranking with an honest retrieval recall
+      gap, a candidate cross-paper directional-disagreement detector, and a mechanical
+      <strong>unsupported-hypothesis</strong> generator &mdash; plus the <code>biosci
+      memo</code> CLI command (<code>--question</code>, <code>--question-id</code>,
+      <code>--out</code>, <code>--json</code>, <code>--min-confidence</code>,
+      <code>--limit</code>, <code>--max-papers</code>, <code>--max-hypotheses</code>) and
+      <code>scripts/07_generate_memo.py</code>. The memo has nine sections, each tagged
+      with its epistemic level so the four levels are never collapsed; suggested next
+      experiments are emitted <strong>only</strong> as explicitly unsupported, UNTESTED
+      hypotheses framed as research questions. Its counts and links <strong>reconcile
+      exactly</strong> with the M5 evidence table. On the three fixture questions:
+      <strong>31&nbsp;/&nbsp;29&nbsp;/&nbsp;8</strong> evidence rows at 100% provenance
+      coverage; the designed autophagy&harr;senescence disagreement (papers 006 vs 007)
+      surfaces as a candidate directional disagreement.</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 243 passed,
+      1 skipped (offline); <code>ruff check</code> clean on the new files. A memo is a
+      research-assistance artifact, <strong>not</strong> medical, diagnostic, or
+      treatment advice; the support label is a heuristic <em>textual</em> signal,
+      database links are <em>inferred relations</em>, and the suggested experiments are
+      <em>unsupported hypotheses</em> for a human to evaluate &mdash; never
+      recommendations (<a href="safety.html">safety</a>).</p>
     </section>
     <section>
       <h2>Milestone 8 &mdash; delivered</h2>

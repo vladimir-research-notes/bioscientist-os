@@ -24,14 +24,16 @@ The only measured results so far concern the build itself, not the pipeline:
 | 5 — evidence table builder | Done | (subsumed) |
 | 6 — database connector layer | Done | (subsumed) |
 | 7 — visualizations | Done | (subsumed) |
-| 8 — evaluation harness | Done | `python3 -m pytest -q` → **223 passed, 1 skipped** |
+| 8 — evaluation harness | Done | (subsumed) |
+| 9 — end-to-end research memo | Done | `python3 -m pytest -q` → **243 passed, 1 skipped** |
 
-The 223 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
+The 243 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
 Milestone-1 schema and fixture checks (30), the Milestone-2 storage and
 ingestion checks (17), the Milestone-3 search and topic checks (28), the
 Milestone-4 extraction checks (24), the Milestone-5 evidence-table checks
 (24), the Milestone-6 connector checks (35), the Milestone-7 visualization
-checks (17 run + 1 skipped), and the Milestone-8 evaluation checks (28):
+checks (17 run + 1 skipped), the Milestone-8 evaluation checks (28), and the
+Milestone-9 research-memo checks (20):
 schema JSON round-trips, the
 enforced provenance/epistemic/validation rules, fixture loading, ingestion into
 SQLite (count checks, idempotent re-ingest, two-build determinism, exact
@@ -54,7 +56,12 @@ the safety framing, and the `biosci figures` CLI; the PNG-rendering test is
 skipped when `matplotlib` is absent), and the self-evaluation (Wilson-interval
 math and edge cases, the gold-label loader with its `modeled`-flag cross-check,
 each evaluator against its committed denominators, `run_eval` determinism, and the
-`biosci eval` CLI). The measured *evaluation* numbers are in the Self-evaluation
+`biosci eval` CLI), and now the research memo (the four epistemic-level tags and the
+no-medical-advice framing present, every suggested experiment emitted as an
+`unsupported` hypothesis, the memo's counts/links reconciling exactly with the M5
+table, the candidate directional-disagreement detector finding the autophagy 006/007
+pair, determinism, the DB-backed `load_memo` equalling the in-memory build, and the
+`biosci memo` CLI). The measured *evaluation* numbers are in the Self-evaluation
 section below.
 
 ### Fixtures (Milestone 1)
@@ -317,6 +324,34 @@ recovered by k=5. Claim sanity, completeness, and provenance are 1.0 by construc
 and serve as **regression floors**, not achievements. Passing the self-eval means
 the pipeline behaves as specified — **not** that its extractions are biologically
 authoritative (see `docs/SAFETY.md`).
+
+### Research memo (Milestone 9)
+
+Produced by `python3 scripts/07_generate_memo.py` (or `biosci memo --question "..."
+--db ... --out results/processed/memo.md`). One memo is assembled per stored research
+question by **composing** the M3 BM25F retrieval (key papers), the M5 evidence table
+(the spine), the UniProt/HGNC + Open Targets database links, and a mechanical
+hypothesis generator — no new, unaudited computation is introduced. Assembly is
+deterministic (`memos.json` and the Markdown are byte-identical across runs).
+
+| Research question | Evidence rows (S / C / U) | Key papers shown | Candidate disagreements | Unsupported hypotheses |
+|-------------------|---------------------------|------------------|-------------------------|------------------------|
+| `rq-senescence-inflammation` | 31 (17 / 6 / 8) | 8 | 0 | 6 |
+| `rq-autophagy-senescence`    | 29 (15 / 6 / 8) | 8 | 1 | 6 |
+| `rq-longevity-pathways`      | 8 (4 / 1 / 3)   | 4 | 0 | 4 |
+
+The memo's row counts, support labels, and database links **reconcile exactly** with
+the Milestone-5 evidence tables above (the test suite asserts this). Each memo has
+nine sections, every one tagged with its epistemic level so the four levels are never
+collapsed: the research question and key papers are *observed metadata*, the evidence
+rows are *extracted claims*, the database links are *inferred relations*, and the
+suggested next experiments are *unsupported hypotheses* — framed as research questions
+("Whether X …"), explicitly UNTESTED, and never recommendations or clinical advice.
+The designed direction conflict (paper-006 `autophagy --promotes--> senescence` vs.
+paper-007 `autophagy --restrains--> senescence`) surfaces as a **candidate directional
+disagreement** for a human to verify, since the per-row support label cannot detect
+it (a documented limitation). These are **memo-builder counts and behavior**, not
+quality metrics or biological truth (see `docs/SAFETY.md`).
 
 ## Exact commands
 

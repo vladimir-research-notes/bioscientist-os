@@ -84,6 +84,7 @@ python3 scripts/03_extract_claims.py             # M4  -> results/processed/clai
 python3 scripts/04_build_evidence_table.py       # M5  -> results/processed/evidence_table.csv
 python3 scripts/05_generate_visualizations.py    # M7  -> results/figures/*
 python3 scripts/06_run_eval.py                   # M8  -> results/processed/eval_report.json
+python3 scripts/07_generate_memo.py              # M9  -> results/processed/memo.md
 ```
 
 Each script is a thin, install-free wrapper around the package and prints exactly
@@ -102,6 +103,9 @@ biosci evidence --db results/raw/bioscientist.db \
   --out results/processed/evidence_table.csv
 biosci db sources --db results/raw/bioscientist.db
 biosci db lookup --source uniprot --id P05231 --db results/raw/bioscientist.db
+biosci memo --db results/raw/bioscientist.db \
+  --question "What evidence links cellular senescence to chronic inflammation?" \
+  --out results/processed/memo.md
 ```
 
 `biosci search --explain` prints, per hit, each query term's idf, the fields it
@@ -126,7 +130,14 @@ extra is installed; `scripts/05_generate_visualizations.py` is the thin wrapper,
 `--no-render` writes the data only. `biosci eval` (M8) scores the pipeline against
 the committed gold labels (`data/fixtures/gold/`) and writes
 `results/processed/eval_report.json` — every metric with its denominator and a 95%
-Wilson interval; `scripts/06_run_eval.py` is the thin wrapper.
+Wilson interval; `scripts/06_run_eval.py` is the thin wrapper. `biosci memo` (M9)
+assembles the end-to-end research memo for a question — key papers (BM25F), the
+evidence table, database links, conflicts/uncertainties, and suggested next
+experiments emitted *only* as explicitly unsupported hypotheses — printing the
+Markdown memo (or `--json` for the structured report); `scripts/07_generate_memo.py`
+writes one `memo_<question_id>.md` per stored question plus `memo.md` and `memos.json`
+(gitignored, regenerable). It is a research-assistance artifact, not medical advice
+(see `docs/SAFETY.md`).
 
 ### What is committed vs. regenerated
 

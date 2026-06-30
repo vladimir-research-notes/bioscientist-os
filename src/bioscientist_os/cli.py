@@ -54,10 +54,17 @@ Milestone 8 adds the self-evaluation harness over the workbench's own outputs:
   sets, claim-extraction sanity, evidence-table completeness, and provenance
   coverage, each reported with its denominator and a 95% Wilson interval.
 
-Later milestones add the remaining data subcommand defined in ``docs/PLAN.md``
-(``memo``). The console entry point is
-``bioscientist_os.cli:main`` (see ``pyproject.toml``); ``python -m bioscientist_os``
-routes here too via ``__main__``.
+Milestone 9 assembles the end-to-end research memo over the whole pipeline:
+
+* ``biosci memo --question "<text>" --db <path> [--out <md>]`` — compose the key
+  papers (BM25F), the evidence table, the database links, conflicts/uncertainties,
+  and suggested next experiments (emitted *only* as explicitly unsupported
+  hypotheses) into one structured Markdown memo with full provenance. The default
+  output is the Markdown memo itself; ``--json`` emits the structured report. No
+  medical advice (see docs/SAFETY.md).
+
+The console entry point is ``bioscientist_os.cli:main`` (see ``pyproject.toml``);
+``python -m bioscientist_os`` routes here too via ``__main__``.
 """
 
 from __future__ import annotations
@@ -115,10 +122,11 @@ def info() -> None:
         "",
         "Status: fixture ingestion, local SQLite storage, CPU-only search + topic "
         "grouping, rule-based entity/claim extraction, evidence-table assembly, an "
-        "offline-first database-connector layer, workbench figures, and a gold-label "
-        "self-evaluation harness available (Milestones 0-8).",
-        "The memo subcommand lands milestone by milestone — see "
-        "docs/PLAN.md and the website Milestones page.",
+        "offline-first database-connector layer, workbench figures, a gold-label "
+        "self-evaluation harness, and end-to-end research-memo generation available "
+        "(Milestones 0-9).",
+        "Remaining milestones (optional LLM adapter, portfolio polish, final gates) "
+        "land milestone by milestone — see docs/PLAN.md and the website Milestones page.",
     ]
     typer.echo("\n".join(lines))
 
@@ -765,6 +773,93 @@ def eval_cmd(
     typer.echo(report.format_text())
     if out is not None:
         typer.echo(f"\nWrote {out}")
+
+
+@app.command()
+def memo(
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database to build from"
+    ),
+    question: str = typer.Option(
+        None,
+        "--question",
+        "-q",
+        help='research question text (or a stored question id), '
+        'e.g. "What evidence links cellular senescence to chronic inflammation?"',
+    ),
+    question_id: str = typer.Option(
+        None, "--question-id", help="select a stored research question by id"
+    ),
+    out: Path = typer.Option(
+        None, "--out", help="write the Markdown memo to this path (e.g. "
+        "results/processed/memo.md)"
+    ),
+    min_confidence: float = typer.Option(
+        0.0, "--min-confidence", help="only include claims with confidence >= this value"
+    ),
+    limit: int = typer.Option(
+        None, "--limit", "-n", help="keep only the top N evidence rows after sorting"
+    ),
+    max_papers: int = typer.Option(
+        8, "--max-papers", help="maximum key papers to list (default: 8)"
+    ),
+    max_hypotheses: int = typer.Option(
+        6, "--max-hypotheses", help="maximum unsupported hypotheses to suggest (default: 6)"
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="emit the structured memo as JSON instead of Markdown"
+    ),
+) -> None:
+    """Generate an end-to-end research memo for a research question (no medical advice).
+
+    Composes the workbench's transparent layers — BM25F key papers, the M5 evidence
+    table, UniProt/HGNC + Open Targets database links, textual-conflict rows and
+    candidate cross-paper disagreements — into one structured memo, and suggests next
+    experiments *only* as explicitly **unsupported hypotheses**. The four epistemic
+    levels are kept separate and every evidence row carries full provenance. The
+    default output is the Markdown memo itself; ``--json`` emits the structured
+    report. This is a research-assistance artifact, NOT medical, diagnostic, or
+    treatment advice (see docs/SAFETY.md).
+    """
+    from bioscientist_os.evidence import load_memo
+
+    if question is None and question_id is None:
+        typer.echo("provide --question \"<text>\" or --question-id <id>", err=True)
+        raise typer.Exit(code=2)
+
+    try:
+        report = load_memo(
+            db,
+            question_text=question,
+            question_id=question_id,
+            max_papers=max_papers,
+            max_hypotheses=max_hypotheses,
+            min_confidence=min_confidence,
+            limit=limit,
+        )
+    except ValueError:
+        typer.echo(
+            f"{db} is not a bioscientist-os database (no ingested tables). "
+            "Run: biosci ingest data/fixtures --db " + str(db),
+            err=True,
+        )
+        raise typer.Exit(code=1) from None
+    except KeyError:
+        typer.echo(f"no stored research question with id {question_id!r} in {db}", err=True)
+        raise typer.Exit(code=1) from None
+
+    markdown = report.to_markdown()
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(markdown, encoding="utf-8")
+
+    if json_output:
+        typer.echo(_json.dumps(report.to_dict(), indent=2, sort_keys=True))
+        return
+
+    typer.echo(markdown)
+    if out is not None:
+        typer.echo(f"Wrote {out}  ({report.num_rows} evidence rows)")
 
 
 # ---------------------------------------------------------------------------
