@@ -15,7 +15,7 @@ The system is a pipeline of small, individually testable stages:
 1. **Ingest** small fixture corpora and normalize fields (Milestone 2).
 2. **Search / cluster** with lexical + TF-IDF baselines (Milestone 3).
 3. **Extract** entities and claim sentences from abstracts with dictionaries and
-   templates (Milestone 4).
+   templates (Milestone 4, done).
 4. **Link** claims to biological entities and database records via connectors
    (Milestones 5–6).
 5. **Assemble** evidence tables tagged with support / conflict / unknown and full
@@ -42,8 +42,10 @@ collapsed:
 ### Provenance fields
 
 Each claim / link / evidence cell records: `paper_id`, `source_snippet`
-(span where available), `extraction_method` (e.g. `rule:svo`, `dict:entity`,
-`tfidf:cluster`), `confidence`, and `data_source` (`fixture` / `cache` / `live`).
+(span where available), `extraction_method` (the named method that produced it —
+e.g. `dict:exact` for a recognized entity, `rule:svo` / `rule:assoc` /
+`rule:claim-sentence` for a claim), `confidence`, and `data_source`
+(`fixture` / `cache` / `live`).
 **Provenance coverage** (the fraction of cells with complete provenance) is itself
 an evaluated metric (Milestone 8).
 

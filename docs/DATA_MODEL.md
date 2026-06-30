@@ -86,7 +86,9 @@ python3 -c "from bioscientist_os.fixtures import load_all; print(load_all().summ
 
 - The schema set is intentionally minimal; it is not a full biomedical ontology.
 - Entity typing is coarse (`gene`/`protein`/`disease`/`process`/`pathway`/
-  `cell_type`/`chemical`/`other`) and will be dictionary-driven (M4).
+  `cell_type`/`chemical`/`other`) and is dictionary-driven (done, M4:
+  `evidence/dictionary.py` builds the dictionary from the UniProt/Open Targets
+  fixtures plus a small curated process seed).
 - `db_xrefs` are only as complete as the fixtures/connectors provide.
 - The loader does parsing/validation only; normalization, deduplication, and
   storage are Milestone 2.

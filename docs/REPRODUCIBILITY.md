@@ -57,8 +57,12 @@ libsqlite versions; the content digest is the robust, logical guarantee.) Search
 and topic grouping (M3) are likewise deterministic: the in-memory index is a pure
 function of the database, BM25F hits sort by score then `paper_id` (a stable
 tie-break), and topic groups, members, and labels are all sorted — so a query and
-a topic report reproduce exactly on every build. The evaluation harness (M8)
-emits the same numbers on every run from the same inputs.
+a topic report reproduce exactly on every build. Entity/claim extraction (M4) is
+also a pure function of the database: the dictionary is rebuilt from the ingested
+records, papers are processed in `paper_id` order, results stay in document order,
+and every span is the verbatim `abstract[start:end]` — so
+`results/processed/claims.json` is byte-identical across runs. The evaluation
+harness (M8) emits the same numbers on every run from the same inputs.
 
 ### End-to-end run (assembled across milestones)
 
@@ -81,11 +85,16 @@ Once the database exists, search and topic grouping can be driven directly
 biosci search "cellular senescence inflammation" --db results/raw/bioscientist.db
 biosci search "IL-6 SASP senescence" --db results/raw/bioscientist.db --explain
 biosci topics --db results/raw/bioscientist.db --threshold 0.15
+biosci extract --db results/raw/bioscientist.db --paper biosci-paper-006
 ```
 
 `biosci search --explain` prints, per hit, each query term's idf, the fields it
 matched in, and its additive score contribution (the contributions sum to the
-hit's score). `--json` emits the same structure for downstream use.
+hit's score). `--json` emits the same structure for downstream use. `biosci
+extract` recognizes dictionary entities and entity-grounded claim sentences from
+abstracts, each with a confidence and an exact source-snippet span;
+`scripts/03_extract_claims.py` writes `results/processed/claims.{json,csv}` and
+`entities.csv` (gitignored, regenerable).
 
 ### What is committed vs. regenerated
 

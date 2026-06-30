@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Extraction — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="search.html">Search &amp; topics</a>
+      <a href="extraction.html" class="active">Extraction</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Entity &amp; claim extraction</h1>
+      <span class="badge badge-done">Done (M4)</span>
+    </div>
+    <p class="subtitle">A transparent, non-LLM baseline: dictionary entity recognition and claim-sentence extraction, every result with a confidence and an exact source span.</p>
+    <section>
+      <h2>Brief</h2>
+
+      <p>Extraction turns an ingested corpus into <strong>recognized entities</strong>
+      and <strong>extracted claims</strong>. Entities are found by matching a
+      dictionary built from the fixtures against each abstract; claims are the
+      abstract sentences that mention at least one recognized entity, optionally with
+      a naive subject&ndash;relation&ndash;object triple. Nothing here is a model: a
+      reviewer can print the whole dictionary, and every result records the paper, the
+      exact character span it was read from, the named method, a confidence, and the
+      data source.</p>
+      <pre>biosci extract --db results/raw/bioscientist.db
+biosci extract --db results/raw/bioscientist.db --paper biosci-paper-006
+biosci extract --db results/raw/bioscientist.db --json
+python3 scripts/03_extract_claims.py   # writes results/processed/claims.{json,csv}, entities.csv</pre>
+      <p>Recognized entities are <em>observed metadata</em> (read from the text);
+      extracted claims are <em>extracted claims</em>; a triple, when filled, is part of
+      the claim, <strong>not</strong> an inferred relation. No support/conflict
+      judgement and no biological assertion is made here &mdash; that is the
+      <a href="evidence.html">evidence table</a> (M5).</p>
+    </section>
+    <section>
+      <h2>Deeper</h2>
+
+      <p>The <strong>dictionary</strong> is built from the committed fixtures plus a
+      small, explicit curated seed. Each UniProt protein record contributes one
+      entity whose surface forms are its gene symbol, common name, full protein name,
+      and accession, and whose <code>db_xrefs</code> are the real UniProt accession
+      and HGNC symbol. Open Targets associations add <em>extra surface synonyms</em>
+      to the protein they name (e.g. <code>IL-6</code> for the IL6 protein &mdash; a
+      form UniProt does not list but abstracts use). A short, fully-listed curated
+      seed adds process / phenotype / chemical terms with no protein record
+      (senescence, autophagy, inflammation, the SASP, &hellip;). On the committed
+      corpus that is <strong>26</strong> entities over <strong>61</strong> surface
+      forms.</p>
+
+      <p><strong>Recognition</strong> is longest-match (max-munch): at each position
+      the recognizer prefers the longest dictionary surface, so
+      <code>senescence-associated secretory phenotype</code> is one SASP mention
+      rather than three. Tokenization matches the search tokenizer (lower-cased,
+      internal hyphens kept), so <code>IL-6</code> and <code>IL6</code> stay distinct
+      tokens &mdash; the dictionary, not the tokenizer, unifies them. Extraction reads
+      the <strong>abstract only</strong>, so every span indexes one well-defined field
+      and <code>abstract[start:end]</code> reproduces the stored snippet exactly (a
+      tested invariant: 0 of 105 round-trips fail). Entities that appear only in a
+      title are not recognized &mdash; a documented limitation, not a hidden one.</p>
+
+      <p><strong>Claims</strong> are abstract sentences containing at least one
+      recognized entity &mdash; a deliberately high-precision, limited-recall rule that
+      keeps each claim grounded. <strong>Relation templates</strong> are proximity
+      based and syntax-free: when a sentence contains a relation cue with a recognized
+      entity on each side, the nearest entity before the cue is the subject and the
+      nearest after it is the object. Directed verbs yield <code>rule:svo</code> (e.g.
+      <code>autophagy&nbsp;&mdash;promotes&rarr;&nbsp;cellular senescence</code>);
+      association cues yield <code>rule:assoc</code> (<code>associated_with</code>).
+      This misses paraphrase and complex syntax by construction.</p>
+
+      <p><strong>Confidence</strong> is a transparent additive salience score in
+      [0,&nbsp;1], <em>not</em> a probability: 0.35 base (grounded in an entity),
+      +0.25 (&ge;2 distinct entities), +0.30 (a triple was extracted), +0.10 (a
+      reporting cue such as &ldquo;observed&rdquo;/&ldquo;found&rdquo;). The components
+      are named so any score can be reconstructed. Recognized entities are exact
+      dictionary matches, so their confidence is 1.0 (this baseline does not attempt
+      disambiguation).</p>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Done (M4): <code>evidence/dictionary.py</code> (fixture-built <code>EntityDictionary</code>, longest-match), <code>evidence/text.py</code> (span-exact tokenizer + sentence splitter), <code>evidence/extract.py</code> (entity/claim/relation extraction + DB loaders), and result containers in <code>evidence/model.py</code>, wired to <code>biosci extract</code> and <code>scripts/03_extract_claims.py</code>.</td></tr>
+        <tr><th>Tests / results</th><td>24 new tests (119 total, offline). On the 18 ingested abstracts: <strong>26</strong> dictionary entities / 61 surfaces, <strong>63</strong> entity mentions, <strong>42</strong> claims, <strong>15</strong> with a relation triple; all 105 spans round-trip against the abstract. The designed conflict pair surfaces (autophagy <em>promotes</em> vs <em>restrains</em> senescence). These are extraction counts, not quality metrics &mdash; precision/recall against gold labels is <a href="evaluation.html">Milestone&nbsp;8</a>.</td></tr>
+        <tr><th>Open questions</th><td>Whether subject/object should be the canonical entity name (current) or the verbatim surface; how much recall the abstract-only, entity-grounded rule sacrifices; whether to add light morphology to the relation cues without losing auditability.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>src/bioscientist_os/evidence/dictionary.py</code></li>
+        <li><code>src/bioscientist_os/evidence/text.py</code></li>
+        <li><code>src/bioscientist_os/evidence/extract.py</code></li>
+        <li><code>src/bioscientist_os/evidence/model.py</code></li>
+        <li><code>src/bioscientist_os/cli.py</code> (<code>extract</code>)</li>
+        <li><code>scripts/03_extract_claims.py</code></li>
+        <li><code>tests/test_extract.py</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

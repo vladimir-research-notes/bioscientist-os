@@ -17,6 +17,7 @@
       <a href="data-model.html">Data model</a>
       <a href="ingestion.html">Ingestion</a>
       <a href="search.html">Search &amp; topics</a>
+      <a href="extraction.html">Extraction</a>
       <a href="evidence.html" class="active">Evidence tables</a>
       <a href="databases.html">Database connectors</a>
       <a href="visualizations.html">Visualizations</a>
@@ -43,6 +44,13 @@
       <pre>biosci evidence \
   --question "What evidence links cellular senescence to chronic inflammation?" \
   --db results/raw/bioscientist.db --out results/processed/evidence_table.csv</pre>
+      <p class="note">The entities and claims that fill these rows already exist
+      (Milestone&nbsp;4, done &mdash; see <a href="extraction.html">Extraction</a>):
+      dictionary-recognized entities with <code>db_xrefs</code> and exact spans, and
+      entity-grounded claim sentences with optional relation triples and a confidence.
+      Milestone&nbsp;5 groups them by a research question and adds the
+      support/conflict/unknown signal &mdash; a heuristic <em>textual</em> signal, never
+      a biological verdict (<a href="safety.html">safety</a>).</p>
     </section>
     <section>
       <h2>Columns</h2>
@@ -53,8 +61,8 @@
       <code>confidence</code>, <code>database_links</code>, <code>notes</code>.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Entity/claim extraction at Milestone 4; table builder at Milestone 5.</td></tr>
-        <tr><th>Tests / results</th><td>Provenance-coverage and column-completeness tests added with the builder.</td></tr>
+        <tr><th>Implementation</th><td>Entity/claim extraction <strong>done (M4)</strong> in <code>evidence/</code> (see <a href="extraction.html">Extraction</a>); the research-question-driven table builder and the support/conflict/unknown signal are Milestone&nbsp;5.</td></tr>
+        <tr><th>Tests / results</th><td>M4 produces 63 entity mentions and 42 claims (15 with relation triples) over the 18 abstracts. Provenance-coverage and column-completeness tests are added with the builder (M5).</td></tr>
         <tr><th>Open questions</th><td>How to represent conflict when two claims disagree only in degree, not direction.</td></tr>
       </table>
     <section>

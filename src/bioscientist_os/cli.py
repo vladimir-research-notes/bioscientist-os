@@ -20,6 +20,12 @@ Milestone 3 adds CPU-only search and topic grouping over the ingested corpus:
   per-field score explanation (optional TF-IDF cosine mode);
 * ``biosci topics --db <path>``           — single-link cosine topic grouping.
 
+Milestone 4 adds the transparent, non-LLM extraction baseline:
+
+* ``biosci extract --db <path>`` — dictionary entity recognition plus claim-sentence
+  extraction (with optional subject–relation–object triples), each carrying a
+  confidence and full provenance (paper, exact snippet span, method).
+
 Later milestones add the remaining data subcommands defined in ``docs/PLAN.md``
 (``evidence``, ``eval``, ``memo``). The console entry point is
 ``bioscientist_os.cli:main`` (see ``pyproject.toml``); ``python -m bioscientist_os``
@@ -79,10 +85,10 @@ def info() -> None:
         "",
         f"Safety: {SAFETY_NOTE}",
         "",
-        "Status: fixture ingestion, local SQLite storage, and CPU-only search + "
-        "topic grouping available (Milestones 0-3).",
-        "Extraction, evidence, and memo subcommands land milestone by milestone —",
-        "see docs/PLAN.md and the website Milestones page.",
+        "Status: fixture ingestion, local SQLite storage, CPU-only search + topic "
+        "grouping, and rule-based entity/claim extraction available (Milestones 0-4).",
+        "Evidence tables, evaluation, and memo subcommands land milestone by "
+        "milestone — see docs/PLAN.md and the website Milestones page.",
     ]
     typer.echo("\n".join(lines))
 
@@ -328,6 +334,103 @@ def topics(
         "",
         "Groups are a transparent clustering of observed-metadata papers; the labels "
         "describe a group, they are not claims (see docs/SAFETY.md).",
+    ]
+    typer.echo("\n".join(lines))
+
+
+def _load_extraction_or_exit(db: Path):
+    """Build the dictionary and extract the corpus, or print the error and exit 1."""
+    from bioscientist_os.evidence import load_extraction
+
+    try:
+        return load_extraction(db)
+    except ValueError:
+        typer.echo(
+            f"{db} is not a bioscientist-os database (no ingested tables). "
+            "Run: biosci ingest data/fixtures --db " + str(db),
+            err=True,
+        )
+        raise typer.Exit(code=1) from None
+
+
+@app.command()
+def extract(
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database to extract from"
+    ),
+    paper: str = typer.Option(
+        None, "--paper", help="restrict output to one paper_id (default: all papers)"
+    ),
+    min_confidence: float = typer.Option(
+        0.0, "--min-confidence", help="only show claims with confidence >= this value"
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="emit the full extraction as JSON instead of text"
+    ),
+) -> None:
+    """Recognize entities and extract claims from abstracts (transparent, non-LLM baseline).
+
+    Entities are dictionary matches (``dict:exact``) at level *observed metadata*;
+    claims are entity-grounded abstract sentences (level *extracted claim*) with an
+    optional subject–relation–object triple. Every result carries a confidence and
+    full provenance (paper, exact source-snippet span, method). No support/conflict
+    judgement and no biological assertion is made here (that is the evidence table,
+    M5; see docs/SAFETY.md).
+    """
+    report = _load_extraction_or_exit(db)
+
+    if json_output:
+        typer.echo(_json.dumps(report.to_dict(), indent=2, sort_keys=True))
+        return
+
+    selected = [p for p in report.papers if paper in (None, p.paper_id)]
+    if paper is not None and not selected:
+        typer.echo(f"no paper with paper_id {paper!r} in {db}", err=True)
+        raise typer.Exit(code=1)
+
+    lines = [
+        f"Extraction  (method={report.method})",
+        f"  N={report.total_papers} papers  data_source={report.data_source}  "
+        f"dictionary={report.params['dictionary_entities']} entities / "
+        f"{report.params['dictionary_surfaces']} surfaces",
+        f"  totals: {report.num_entities} entity mentions, {report.num_claims} claims, "
+        f"{report.num_relations} relation triples"
+        + (f"  (claims filtered to confidence >= {min_confidence})" if min_confidence > 0 else ""),
+        "",
+    ]
+    for pe in selected:
+        claims = [c for c in pe.claims if c.confidence >= min_confidence]
+        lines.append(f"{pe.paper_id}  {pe.title}")
+        lines.append("  entities:")
+        if not pe.entities:
+            lines.append("      (none recognized)")
+        for e in pe.entities:
+            xrefs = ", ".join(f"{k}:{v}" for k, v in sorted(e.db_xrefs.items())) or "—"
+            span = e.provenance.char_span
+            lines.append(
+                f"      {e.entity_id:<34} {e.entity_type.value:<8} [{xrefs}]  "
+                f"conf={e.confidence:.2f}  snippet={e.provenance.source_snippet!r}@{list(span)}"
+            )
+        lines.append("  claims:")
+        if not claims:
+            lines.append("      (none)")
+        for c in claims:
+            if c.relation:
+                triple = f"  {c.subject} --{c.relation}--> {c.object}"
+            else:
+                triple = ""
+            lines.append(
+                f"      [{c.claim_id}] conf={c.confidence:.2f} "
+                f"{c.provenance.extraction_method}{triple}"
+            )
+            lines.append(f"          {c.claim_text!r} @{list(c.provenance.char_span)}")
+            lines.append(f"          entities: {', '.join(c.entity_ids) or '—'}")
+        lines.append("")
+    lines += [
+        "Entities are observed metadata (recognized mentions); claims are extracted "
+        "claims read from abstracts.",
+        "Relation triples are read from the sentence, not inferred; no support/conflict "
+        "or biological claim is made here (see docs/SAFETY.md).",
     ]
     typer.echo("\n".join(lines))
 

@@ -19,19 +19,22 @@ The only measured results so far concern the build itself, not the pipeline:
 | 0 — package skeleton and runnable CLI | Done | (subsumed) |
 | 1 — data schemas and small fixtures | Done | (subsumed) |
 | 2 — ingestion and local storage | Done | (subsumed) |
-| 3 — search and topic grouping | Done | `python3 -m pytest -q` → **95 passed** |
+| 3 — search and topic grouping | Done | (subsumed) |
+| 4 — entity and claim extraction baseline | Done | `python3 -m pytest -q` → **119 passed** |
 
-The 95 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
+The 119 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
 Milestone-1 schema and fixture checks (30), the Milestone-2 storage and
-ingestion checks (17), and the Milestone-3 search and topic checks (28): schema
-JSON round-trips, the enforced provenance/epistemic/validation rules, fixture
-loading, ingestion into SQLite (count checks, idempotent re-ingest, two-build
-determinism, exact round-trip, schema-validation-on-ingest), and now search and
-topic grouping (tokenizer behavior, BM25F scoring with `score == Σ
-contributions`, field weighting, tiny labeled queries, TF-IDF cosine
-self-similarity, topic partition/monotonicity, and the CLI). No extraction,
-evidence, or evaluation *pipeline* numbers exist yet; those land in
-Milestones 4–8.
+ingestion checks (17), the Milestone-3 search and topic checks (28), and the
+Milestone-4 extraction checks (24): schema JSON round-trips, the enforced
+provenance/epistemic/validation rules, fixture loading, ingestion into SQLite
+(count checks, idempotent re-ingest, two-build determinism, exact round-trip,
+schema-validation-on-ingest), search and topic grouping (tokenizer behavior,
+BM25F scoring with `score == Σ contributions`, field weighting, tiny labeled
+queries, TF-IDF cosine self-similarity, topic partition/monotonicity), and now
+extraction (span-exact tokenizer/sentence splitter, dictionary build from
+fixtures, longest-match recognition, span round-trips against the abstract, the
+relation templates, the transparent confidence, determinism, and the CLI). No
+evidence-table or *evaluation* numbers exist yet; those land in Milestones 5–8.
 
 ### Fixtures (Milestone 1)
 
@@ -117,13 +120,50 @@ Topic grouping (single-link cosine clustering) at the default threshold `0.15`:
 Group labels are the most distinctive terms of each group; they describe a group
 and are **not** asserted topics of the field.
 
-### Entity / claim extraction (Milestones 4, 8)
+### Entity / claim extraction (Milestone 4)
+
+Produced by `python3 scripts/03_extract_claims.py` (or `biosci extract --db ...`).
+The dictionary is built from the ingested database records (10 UniProt protein
+records + 9 Open Targets associations that add surface synonyms) plus a small,
+explicit curated seed of 16 process / phenotype / chemical terms; extraction reads
+the **abstracts only**, and is deterministic (`claims.json` is byte-identical
+across runs).
+
+| Quantity | Value |
+|----------|-------|
+| dictionary entities | 26 (10 protein, 9 process, 6 other, 1 chemical) |
+| dictionary surface forms | 61 |
+| papers processed | 18 |
+| entity mentions recognized (`BiomedicalEntity` rows) | 63 |
+| claim sentences extracted (`Claim` rows) | 42 |
+| claims with a subject–relation–object triple | 15 |
+| span-round-trip failures (`abstract[start:end] == snippet`) | 0 / 105 |
+
+Claim-confidence distribution (transparent additive salience, see
+`docs/METHODOLOGY.md` and `evidence/extract.py`):
+
+| Confidence | Claims | Composition |
+|-----------|--------|-------------|
+| 0.35 | 9 | one entity, no triple, no reporting cue |
+| 0.45 | 5 | one entity + reporting cue |
+| 0.60 | 8 | ≥2 entities |
+| 0.70 | 5 | ≥2 entities + reporting cue |
+| 0.90 | 11 | triple + ≥2 entities |
+| 1.00 | 4 | triple + ≥2 entities + reporting cue |
+
+The designed conflict pair surfaces: paper-006 yields `autophagy --promotes-->
+cellular senescence` while paper-007 yields `autophagy --restrains--> cellular
+senescence` — material the Milestone-5 support/conflict logic will use.
+
+These are **extraction counts and behavior**, not quality metrics. Precision /
+recall against tiny gold labels (with denominators and Wilson intervals) is
+Milestone 8:
 
 | Metric | Value (95% Wilson CI) | Denominator |
 |--------|-----------------------|-------------|
-| entity precision | _pending_ | |
-| entity recall | _pending_ | |
-| claim sanity pass rate | _pending_ | |
+| entity precision | _pending (M8)_ | |
+| entity recall | _pending (M8)_ | |
+| claim sanity pass rate | _pending (M8)_ | |
 
 ### Evidence table / provenance (Milestones 5, 8)
 

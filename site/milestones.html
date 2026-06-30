@@ -17,6 +17,7 @@
       <a href="data-model.html">Data model</a>
       <a href="ingestion.html">Ingestion</a>
       <a href="search.html">Search &amp; topics</a>
+      <a href="extraction.html">Extraction</a>
       <a href="evidence.html">Evidence tables</a>
       <a href="databases.html">Database connectors</a>
       <a href="visualizations.html">Visualizations</a>
@@ -52,7 +53,7 @@
         <tr><td>1</td><td>Data schemas and small fixtures</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>2</td><td>Ingestion and local storage</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>3</td><td>Search and topic grouping</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>4</td><td>Entity and claim extraction baseline</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>4</td><td>Entity and claim extraction baseline</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>5</td><td>Evidence table builder</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>6</td><td>Database connector layer</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>7</td><td>Visualizations</td><td><span class="badge badge-planned">Planned</span></td></tr>
@@ -64,6 +65,38 @@
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 4 &mdash; delivered</h2>
+
+      <p>The corpus now yields recognized <strong>entities</strong> and extracted
+      <strong>claims</strong> through a transparent, non-LLM baseline. Delivered: a
+      fixture-built <code>EntityDictionary</code>
+      (<code>src/bioscientist_os/evidence/dictionary.py</code>) with longest-match
+      recognition, built from the UniProt protein records (real accession/HGNC
+      <code>db_xrefs</code>) plus Open Targets surface synonyms and a short, explicit
+      curated process/phenotype seed; a span-exact tokenizer and sentence splitter
+      (<code>evidence/text.py</code>); the rule-based extractors
+      (<code>evidence/extract.py</code>) producing <code>BiomedicalEntity</code> (level
+      <em>observed metadata</em>, <code>dict:exact</code>) and <code>Claim</code> (level
+      <em>extracted claim</em>) objects with optional proximity
+      subject&ndash;relation&ndash;object triples (<code>rule:svo</code> /
+      <code>rule:assoc</code>); the <code>biosci extract</code> CLI command (with
+      <code>--paper</code>, <code>--min-confidence</code>, <code>--json</code>); and a
+      <code>scripts/03_extract_claims.py</code> wrapper that writes
+      <code>results/processed/claims.{json,csv}</code> and <code>entities.csv</code>.
+      Over the 18 abstracts: <strong>26</strong> dictionary entities / 61 surfaces
+      &rarr; <strong>63</strong> entity mentions, <strong>42</strong> claims, and
+      <strong>15</strong> relation triples; all <strong>105</strong> spans round-trip
+      against the source abstract. The designed conflict pair surfaces (autophagy
+      <em>promotes</em> vs <em>restrains</em> senescence) &mdash; material for the
+      Milestone&nbsp;5 support/conflict logic.</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 119 passed
+      (offline); <code>ruff check</code> clean on the new files. Entities are observed
+      metadata (recognized mentions); claims are extracted claims read from abstracts;
+      a triple is part of the claim, not an inferred relation. Counts describe
+      extraction behavior, <strong>not</strong> quality &mdash; precision/recall against
+      gold labels is M8. No support/conflict or biological assertion is made here.</p>
     </section>
     <section>
       <h2>Milestone 3 &mdash; delivered</h2>
@@ -163,6 +196,7 @@
         <li><code>src/bioscientist_os/ingest/pipeline.py</code></li>
         <li><code>src/bioscientist_os/storage/sqlite_store.py</code></li>
         <li><code>src/bioscientist_os/search/</code></li>
+        <li><code>src/bioscientist_os/evidence/</code></li>
         <li><code>data/fixtures/</code></li>
         <li><code>scripts/run_all_milestones_with_claude.sh</code></li>
       </ul>
