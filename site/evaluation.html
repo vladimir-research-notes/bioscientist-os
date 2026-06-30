@@ -32,22 +32,56 @@
   <main class="content">
     <div class="page-head">
       <h1>Evaluation</h1>
-      <span class="badge badge-planned">Planned</span>
+      <span class="badge badge-done">Done</span>
     </div>
-    <p class="subtitle">Small but rigorous self-evaluation with explicit denominators and confidence intervals.</p>
+    <p class="subtitle">Small but rigorous self-evaluation with explicit denominators and Wilson confidence intervals.</p>
     <section>
       <h2>Brief</h2>
 
       <p>Evaluates the <em>pipeline</em>, not biological truth: ingestion correctness,
-      search recall on labeled queries, entity precision/recall against tiny gold
-      labels, claim sanity, evidence completeness, and provenance coverage. Every
-      metric reports its denominator; proportions report a 95% Wilson interval.</p>
-      <pre>biosci eval --db results/raw/bioscientist.db --out results/processed/eval_report.json</pre>
+      BM25F search recall on labeled queries, entity precision/recall against tiny gold
+      labels, claim-extraction sanity, evidence-table completeness, and provenance
+      coverage. Every rate is a count <code>k/n</code> that carries its
+      <strong>denominator</strong> and a 95% <strong>Wilson</strong> interval;
+      heterogeneous tasks are never collapsed into one headline number, and small N is
+      stated honestly.</p>
+      <pre>biosci eval --db results/raw/bioscientist.db --out results/processed/eval_report.json
+python3 scripts/06_run_eval.py
+python3 scripts/06_run_eval.py --confidence 0.9 --recall-k 1 --recall-k 5</pre>
+    </section>
+    <section>
+      <h2>Measured on the fixtures + gold labels</h2>
+
+      <p>Gold labels are committed under <code>data/fixtures/gold/</code> (6 queries /
+      16 relevant pairs; 6 abstracts / 24 gold entities) and were authored by reading
+      the corpus, <em>independently of the ranker</em>. These are <strong>pipeline</strong>
+      numbers on a tiny, partly-synthetic corpus &mdash; not biological truth.</p>
+      <table class="grid">
+        <tr><th>Metric</th><th>Value (95% Wilson CI)</th><th>Denominator</th></tr>
+        <tr><td>ingestion correctness</td><td>1.000 [0.912, 1.000]</td><td>40 / 40 fixture records</td></tr>
+        <tr><td>search recall@3 (micro)</td><td>0.875 [0.640, 0.965]</td><td>14 / 16 relevant pairs</td></tr>
+        <tr><td>search recall@5 (micro)</td><td>1.000 [0.806, 1.000]</td><td>16 / 16 relevant pairs</td></tr>
+        <tr><td>entity precision</td><td>1.000 [0.851, 1.000]</td><td>22 / 22 recognized</td></tr>
+        <tr><td>entity recall</td><td>0.917 [0.742, 0.977]</td><td>22 / 24 gold entities</td></tr>
+        <tr><td>entity F1</td><td>0.957</td><td>TP=22, FP=0, FN=2</td></tr>
+        <tr><td>claim sanity (well-formed + traceable)</td><td>1.000 [0.916, 1.000]</td><td>42 / 42 claims</td></tr>
+        <tr><td>evidence completeness</td><td>1.000 [0.947, 1.000]</td><td>68 / 68 rows</td></tr>
+        <tr><td>provenance coverage</td><td>1.000 [0.947, 1.000]</td><td>68 / 68 rows</td></tr>
+      </table>
+      <p class="note">Honest reading: small N &rarr; wide intervals (a perfect 40/40
+      still has a lower bound of 0.912). The dictionary recognizer is high-precision
+      <em>by construction</em> (no fuzzy matching &rarr; no false positives here) and
+      loses on <strong>recall</strong>: the two misses are documented &mdash; IL-8 has
+      no fixture record, and <code>p16INK4a-expressing</code> is one hyphenated token
+      so the <code>p16INK4a</code> surface does not match. Search recall@3 &lt; 1.0
+      because two relevant papers rank just outside the top 3 and are recovered by k=5.
+      Claim sanity, completeness, and provenance are 1.0 by construction &mdash;
+      regression floors, not achievements.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Planned for Milestone 8.</td></tr>
-        <tr><th>Tests / results</th><td>Gold labels are committed; the eval is fully reproducible offline.</td></tr>
-        <tr><th>Open questions</th><td>N is small by construction; intervals are wide and meant to convey uncertainty.</td></tr>
+        <tr><th>Implementation</th><td>Done (Milestone 8): the <code>evals</code> package &mdash; <code>metrics.py</code> (the <code>Proportion</code> + Wilson interval, critical value from the stdlib <code>statistics.NormalDist</code>), <code>gold.py</code> (typed loaders for the committed gold labels), and <code>harness.py</code> (six evaluators, the <code>EvalReport</code> container, and the database-backed <code>run_eval(db)</code>) &mdash; plus the <code>biosci eval</code> CLI command and <code>scripts/06_run_eval.py</code>.</td></tr>
+        <tr><th>Tests / results</th><td>28 evaluation tests (223 total): the Wilson math and its edge cases, the gold loader with a <code>modeled</code>-flag cross-check against the live dictionary, each evaluator against its committed denominators (including the two documented entity misses), <code>run_eval</code> determinism, and the <code>biosci eval</code> CLI. The report (<code>eval_report.json</code>) is byte-identical across runs.</td></tr>
+        <tr><th>Open questions</th><td>N is small and gold labels are single-annotator; intervals are wide and convey uncertainty, not certification. The support/conflict label is not yet scored against a human verdict (M8 measures structural quality only) &mdash; see <a href="roadmap.html">roadmap</a>.</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>
@@ -55,8 +89,12 @@
     </section>
       <ul class="files">
         <li><code>docs/EVALUATION.md</code></li>
-        <li><code>src/bioscientist_os/evals/</code></li>
+        <li><code>src/bioscientist_os/evals/metrics.py</code></li>
+        <li><code>src/bioscientist_os/evals/gold.py</code></li>
+        <li><code>src/bioscientist_os/evals/harness.py</code></li>
+        <li><code>data/fixtures/gold/</code></li>
         <li><code>scripts/06_run_eval.py</code></li>
+        <li><code>tests/test_evals.py</code></li>
       </ul>
   </main>
   <footer class="site-footer">

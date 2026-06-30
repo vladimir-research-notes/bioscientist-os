@@ -70,8 +70,10 @@ of the database: it re-presents the M3/M4/M5 reports and sorts every series, nod
 and edge before emitting them, so `results/figures/visualizations.json` is
 byte-identical across runs. Only the optional PNG bytes can vary (across
 `matplotlib` versions/fonts); the network-graph layout is seeded so a render is at
-least visually stable run-to-run. The evaluation harness (M8) emits the same
-numbers on every run from the same inputs.
+least visually stable run-to-run. The evaluation harness (M8) is a pure function of
+the ingested corpus and the committed gold labels — its evaluators sort every
+per-query/per-abstract/per-question detail before emitting it — so
+`results/processed/eval_report.json` is byte-identical across runs.
 
 ### End-to-end run (assembled across milestones)
 
@@ -121,7 +123,10 @@ real source, the second reports `data_source=cache`. `biosci figures` (M7) build
 the five figures over the corpus and writes `results/figures/visualizations.json`
 (the inspectable figure data, always) plus the PNGs when the optional `matplotlib`
 extra is installed; `scripts/05_generate_visualizations.py` is the thin wrapper, and
-`--no-render` writes the data only.
+`--no-render` writes the data only. `biosci eval` (M8) scores the pipeline against
+the committed gold labels (`data/fixtures/gold/`) and writes
+`results/processed/eval_report.json` — every metric with its denominator and a 95%
+Wilson interval; `scripts/06_run_eval.py` is the thin wrapper.
 
 ### What is committed vs. regenerated
 

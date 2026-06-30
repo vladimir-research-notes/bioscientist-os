@@ -40,10 +40,10 @@
 
       <p>This page mirrors <code>docs/RESULTS.md</code>. Functional results exist for
       ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4),
-      evidence-table assembly (M5), the database-connector layer (M6), and the
-      figures (M7); later rows are still pending. Empty means <em>not yet
-      measured</em>, not zero. Do not cite any number until the corresponding
-      milestone has landed.</p>
+      evidence-table assembly (M5), the database-connector layer (M6), the figures
+      (M7), and the gold-label self-evaluation (M8); later rows (memo, optional LLM
+      adapter) are still pending. Empty means <em>not yet measured</em>, not zero. Do
+      not cite any number until the corresponding milestone has landed.</p>
     </section>
     <section>
       <h2>Pending tables</h2>
@@ -54,17 +54,17 @@
         <tr><td>search hit@k (8 single-target labeled queries)</td><td><strong>done (M3):</strong> hit@1 = 7/8 (0.88), hit@3 = hit@5 = 8/8 (1.00); sanity check, not a benchmark</td></tr>
         <tr><td>topic grouping</td><td><strong>done (M3):</strong> 10 groups at threshold 0.15 (4 multi-paper, 6 singletons); deterministic, monotone in threshold</td></tr>
         <tr><td>entity / claim extraction counts</td><td><strong>done (M4):</strong> 26 dictionary entities / 61 surfaces &rarr; 63 entity mentions, 42 claims, 15 relation triples over 18 abstracts; 0/105 span round-trip failures</td></tr>
-        <tr><td>entity precision / recall (95% CI)</td><td>pending (M8)</td></tr>
+        <tr><td>entity precision / recall (95% CI)</td><td><strong>done (M8):</strong> precision 1.000 [0.851, 1.000] (22/22), recall 0.917 [0.742, 0.977] (22/24), F1 0.957; the 2 recall misses (IL-8 unmodeled, <code>p16INK4a-expressing</code> mis-tokenized) are documented</td></tr>
         <tr><td>evidence rows + provenance coverage</td><td><strong>done (M5):</strong> 31 / 29 / 8 rows for the three fixture questions, all at 100% provenance coverage; senescence&ndash;inflammation = 17 support / 6 conflict / 8 unknown (behavior, not quality)</td></tr>
-        <tr><td>evidence-table support-label quality (95% CI)</td><td>pending (M8)</td></tr>
+        <tr><td>self-evaluation (95% Wilson CI)</td><td><strong>done (M8):</strong> ingestion 40/40 [0.912, 1.000]; search recall@3 14/16 [0.640, 0.965], recall@5 16/16 [0.806, 1.000]; claim sanity 42/42 [0.916, 1.000]; evidence completeness + provenance 68/68 each [0.947, 1.000] &mdash; pipeline, not biology</td></tr>
         <tr><td>database connectors</td><td><strong>done (M6):</strong> 3 fixture connectors (uniprot/opentargets/papers = 10/9/18 records), all <code>data_source=fixture</code>; cache miss&rarr;<code>fixture</code>/hit&rarr;<code>cache</code> (offline-first); inventory, not quality</td></tr>
         <tr><td>figures</td><td><strong>done (M7):</strong> 5 figures (timeline 18 papers/17 years; 10 topic clusters; evidence matrix 14&times;5 = 18 support/3 conflict/1 unknown/48 none; link graph 53 nodes/80 edges; support-vs-conflict 36/13/19 over 3 questions); deterministic data JSON, PNGs optional (matplotlib)</td></tr>
       </table>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Numbers appear here as each milestone produces them. Functional results so far: ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4), evidence-table assembly (M5), database connectors (M6), figures (M7).</td></tr>
-        <tr><th>Tests / results</th><td>195 offline tests pass (1 skipped). Ingestion counts/determinism, search/topic behavior, extraction counts/determinism, evidence-table counts/coverage/determinism, connector provenance/cache/retry behavior, and figure-data determinism/consistency are measured; extraction <em>quality</em> and evidence-table support-label <em>quality</em> (precision/recall) are pending (M8).</td></tr>
-        <tr><th>Open questions</th><td>All results are on a tiny, partly-synthetic corpus &mdash; illustrative only. Search hit@k uses single-target labeled queries; the rigorous evaluation is M8.</td></tr>
+        <tr><th>Implementation</th><td>Numbers appear here as each milestone produces them. Functional results so far: ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4), evidence-table assembly (M5), database connectors (M6), figures (M7), and the gold-label self-evaluation (M8).</td></tr>
+        <tr><th>Tests / results</th><td>223 offline tests pass (1 skipped). Ingestion counts/determinism, search/topic behavior, extraction counts/determinism, evidence-table counts/coverage/determinism, connector provenance/cache/retry behavior, figure-data determinism/consistency, and the M8 self-evaluation (entity precision/recall, claim sanity, completeness, provenance &mdash; each with a denominator and Wilson interval) are measured. Scoring the support/conflict label against a human verdict remains future work (see <a href="roadmap.html">roadmap</a>).</td></tr>
+        <tr><th>Open questions</th><td>All results are on a tiny, partly-synthetic corpus &mdash; illustrative only. The M8 self-eval certifies <em>pipeline behavior</em>, with wide intervals at small N &mdash; not population performance or biological truth.</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>

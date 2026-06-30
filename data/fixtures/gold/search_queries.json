@@ -1,0 +1,38 @@
+[
+  {
+    "query_id": "q-autophagy-senescence",
+    "query": "autophagy senescence",
+    "relevant_paper_ids": ["biosci-paper-006", "biosci-paper-007", "biosci-paper-014"],
+    "note": "Papers centrally about the autophagy<->senescence relationship; 006 and 007 disagree on its direction, 014 treats the two as distinct but intersecting axes."
+  },
+  {
+    "query_id": "q-senolytic-clearance",
+    "query": "senolytic senescent cell clearance",
+    "relevant_paper_ids": ["biosci-paper-003", "biosci-paper-008", "biosci-paper-018"],
+    "note": "Senescent-cell clearance / senolytic intervention papers (a genetic clearance model, a senolytic combination, and a senolytic meta-analysis)."
+  },
+  {
+    "query_id": "q-rapamycin-mtor-lifespan",
+    "query": "rapamycin mTOR lifespan",
+    "relevant_paper_ids": ["biosci-paper-004", "biosci-paper-014"],
+    "note": "mTOR-modulating longevity interventions: rapamycin extending lifespan (004) and caloric restriction lowering mTOR (014)."
+  },
+  {
+    "query_id": "q-senescence-marker-p16",
+    "query": "p16INK4a senescence marker",
+    "relevant_paper_ids": ["biosci-paper-002", "biosci-paper-012", "biosci-paper-016"],
+    "note": "Papers about identifying senescence by markers (p16INK4a, Lamin B1, single-cell heterogeneity of marker expression). 016 uses no marker term in its title and is the harder retrieval."
+  },
+  {
+    "query_id": "q-il6-inflammation",
+    "query": "IL-6 chronic inflammation inflammaging",
+    "relevant_paper_ids": ["biosci-paper-001", "biosci-paper-008", "biosci-paper-013", "biosci-paper-018"],
+    "note": "IL-6 linked to chronic / low-grade inflammation (inflammaging), including senolytic effects on circulating IL-6."
+  },
+  {
+    "query_id": "q-foxo3-longevity",
+    "query": "FOXO3 longevity variants",
+    "relevant_paper_ids": ["biosci-paper-011"],
+    "note": "A single-target query: only one corpus paper concerns FOXO3 longevity-associated variants."
+  }
+]

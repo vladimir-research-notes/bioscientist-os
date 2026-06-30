@@ -47,8 +47,15 @@ Milestone 7 adds figure generation over the workbench's own reports:
   always write ``visualizations.json``, and render PNGs when the optional
   ``matplotlib`` extra is installed.
 
-Later milestones add the remaining data subcommands defined in ``docs/PLAN.md``
-(``eval``, ``memo``). The console entry point is
+Milestone 8 adds the self-evaluation harness over the workbench's own outputs:
+
+* ``biosci eval --db <path> [--out <json>]`` — score ingestion correctness, BM25F
+  search recall on labeled queries, dictionary entity precision/recall against gold
+  sets, claim-extraction sanity, evidence-table completeness, and provenance
+  coverage, each reported with its denominator and a 95% Wilson interval.
+
+Later milestones add the remaining data subcommand defined in ``docs/PLAN.md``
+(``memo``). The console entry point is
 ``bioscientist_os.cli:main`` (see ``pyproject.toml``); ``python -m bioscientist_os``
 routes here too via ``__main__``.
 """
@@ -108,9 +115,9 @@ def info() -> None:
         "",
         "Status: fixture ingestion, local SQLite storage, CPU-only search + topic "
         "grouping, rule-based entity/claim extraction, evidence-table assembly, an "
-        "offline-first database-connector layer, and workbench figures available "
-        "(Milestones 0-7).",
-        "Evaluation and memo subcommands land milestone by milestone — see "
+        "offline-first database-connector layer, workbench figures, and a gold-label "
+        "self-evaluation harness available (Milestones 0-8).",
+        "The memo subcommand lands milestone by milestone — see "
         "docs/PLAN.md and the website Milestones page.",
     ]
     typer.echo("\n".join(lines))
@@ -694,6 +701,70 @@ def figures(
         "verdict (see docs/SAFETY.md).",
     ]
     typer.echo("\n".join(lines))
+
+
+@app.command("eval")
+def eval_cmd(
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database to evaluate"
+    ),
+    out: Path = typer.Option(
+        None, "--out", help="write the eval report as JSON to this path (e.g. "
+        "results/processed/eval_report.json)"
+    ),
+    confidence: float = typer.Option(
+        0.95, "--confidence", help="confidence level for the Wilson intervals (default: 0.95)"
+    ),
+    recall_k: list[int] = typer.Option(
+        None, "--recall-k", help="recall@k cut-off; repeatable (default: 3 and 5)"
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="emit the report as JSON instead of text"
+    ),
+) -> None:
+    """Evaluate the workbench against committed gold labels (offline, deterministic).
+
+    Scores the *pipeline* — not biological truth — on the fixed fixture corpus:
+    ingestion correctness, BM25F search recall@k on labeled queries, dictionary
+    entity precision/recall against gold sets, claim-extraction sanity,
+    evidence-table completeness, and provenance coverage. Every rate is reported
+    with its denominator and a Wilson confidence interval; small N is stated
+    honestly and heterogeneous tasks are never collapsed into one number
+    (see docs/EVALUATION.md and docs/SAFETY.md).
+    """
+    from bioscientist_os.evals import DEFAULT_RECALL_K, run_eval
+
+    if not 0.0 < confidence < 1.0:
+        typer.echo("--confidence must be in (0, 1)", err=True)
+        raise typer.Exit(code=2)
+    ks = tuple(recall_k) if recall_k else DEFAULT_RECALL_K
+
+    try:
+        report = run_eval(db, confidence=confidence, recall_k=ks)
+    except ValueError as exc:
+        if "not a bioscientist-os database" in str(exc):
+            typer.echo(
+                f"{db} is not a bioscientist-os database (no ingested tables). "
+                "Run: biosci ingest data/fixtures --db " + str(db),
+                err=True,
+            )
+        else:
+            typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=1) from None
+
+    if out is not None:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(
+            _json.dumps(report.to_dict(), indent=2, sort_keys=True), encoding="utf-8"
+        )
+
+    if json_output:
+        typer.echo(_json.dumps(report.to_dict(), indent=2, sort_keys=True))
+        return
+
+    typer.echo(report.format_text())
+    if out is not None:
+        typer.echo(f"\nWrote {out}")
 
 
 # ---------------------------------------------------------------------------

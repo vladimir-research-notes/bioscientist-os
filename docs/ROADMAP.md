@@ -16,6 +16,9 @@ failure.
 ## Later — research directions (honest)
 
 - Larger, properly-licensed corpora and richer, multi-annotator gold labels.
+- Gold support/conflict annotations so the evidence table's support label can be
+  scored against a human verdict (Milestone 8 scores only the table's *structural*
+  quality — completeness and provenance coverage).
 - Ontology-grounded entity linking that preserves auditability (no opaque steps).
 - A controlled comparison of transparent baselines vs. an optional LLM adapter on
   *provenance fidelity*, not just extraction recall.

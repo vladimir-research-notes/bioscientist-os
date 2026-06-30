@@ -15,10 +15,10 @@ paper -> extracted claim -> biological entities -> database links -> support / c
 ```
 
 > **Status:** early-stage. The project contract (plan, docs, website, permission
-> policy, autonomous milestone runner) is in place and **Milestones 0–7** have
+> policy, autonomous milestone runner) is in place and **Milestones 0–8** have
 > landed: the repository is an importable package with a runnable `biosci` CLI
 > (`version`, `info`, `env-check`, `ingest`, `stats`, `search`, `topics`,
-> `extract`, `evidence`, `db`, `figures`); typed schemas + labeled fixtures ingest
+> `extract`, `evidence`, `db`, `figures`, `eval`); typed schemas + labeled fixtures ingest
 > into a deterministic SQLite database; the corpus is searchable (BM25F) and
 > groupable into topics; a transparent non-LLM baseline recognizes entities and
 > extracts claims; the workbench assembles **evidence tables** grouped by a research
@@ -27,10 +27,12 @@ paper -> extracted claim -> biological entities -> database links -> support / c
 > serves records with an explicit `data_source` provenance (fixture / cache / live);
 > and the workbench generates five **figures** (timeline, topic clusters, evidence
 > matrix, link graph, support-vs-conflict) — inspectable data always, PNGs when the
-> optional `matplotlib` extra is installed. The remaining pipeline (evaluation, memo)
-> is built milestone by milestone — see [`docs/PLAN.md`](docs/PLAN.md) and the live
-> status on the website's *Milestones* page. Do not read unimplemented milestones as
-> done.
+> optional `matplotlib` extra is installed; and a gold-label **self-evaluation**
+> scores the pipeline (ingestion, search recall, entity precision/recall, claim
+> sanity, evidence completeness, provenance coverage) with explicit denominators and
+> Wilson intervals. The remaining pipeline (memo, optional LLM adapter) is built
+> milestone by milestone — see [`docs/PLAN.md`](docs/PLAN.md) and the live status on
+> the website's *Milestones* page. Do not read unimplemented milestones as done.
 
 ## Why this exists
 
@@ -81,7 +83,7 @@ biosci info               # (or: python3 -m bioscientist_os info)
 python3 -m pytest -q
 ```
 
-The planned end-to-end run (built across milestones) will be:
+The end-to-end run (assembled across milestones; M9 memo still planned):
 
 ```bash
 biosci ingest data/fixtures --db results/raw/bioscientist.db   # M2
@@ -91,6 +93,7 @@ biosci evidence --question "What evidence links cellular senescence to chronic i
   --db results/raw/bioscientist.db --out results/processed/evidence_table.csv        # M5
 biosci db lookup --source uniprot --id P05231 --db results/raw/bioscientist.db   # M6
 biosci figures --db results/raw/bioscientist.db   # M7 (PNGs need: pip install -e '.[viz]')
+biosci eval --db results/raw/bioscientist.db --out results/processed/eval_report.json  # M8
 biosci memo --question "..." --db results/raw/bioscientist.db --out results/processed/memo.md  # M9 (planned)
 ```
 

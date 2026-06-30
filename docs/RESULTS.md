@@ -23,14 +23,16 @@ The only measured results so far concern the build itself, not the pipeline:
 | 4 — entity and claim extraction baseline | Done | (subsumed) |
 | 5 — evidence table builder | Done | (subsumed) |
 | 6 — database connector layer | Done | (subsumed) |
-| 7 — visualizations | Done | `python3 -m pytest -q` → **195 passed, 1 skipped** |
+| 7 — visualizations | Done | (subsumed) |
+| 8 — evaluation harness | Done | `python3 -m pytest -q` → **223 passed, 1 skipped** |
 
-The 195 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
+The 223 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
 Milestone-1 schema and fixture checks (30), the Milestone-2 storage and
 ingestion checks (17), the Milestone-3 search and topic checks (28), the
 Milestone-4 extraction checks (24), the Milestone-5 evidence-table checks
-(24), the Milestone-6 connector checks (35), and the Milestone-7 visualization
-checks (17 run + 1 skipped): schema JSON round-trips, the
+(24), the Milestone-6 connector checks (35), the Milestone-7 visualization
+checks (17 run + 1 skipped), and the Milestone-8 evaluation checks (28):
+schema JSON round-trips, the
 enforced provenance/epistemic/validation rules, fixture loading, ingestion into
 SQLite (count checks, idempotent re-ingest, two-build determinism, exact
 round-trip, schema-validation-on-ingest), search and topic grouping (tokenizer
@@ -49,8 +51,11 @@ opt-in live connector exercised offline with a mock transport, and the
 `biosci db` CLI), and the visualizations (figure-data determinism, the matrix
 cell rule, link-graph consistency, support-count agreement with the M5 tables,
 the safety framing, and the `biosci figures` CLI; the PNG-rendering test is
-skipped when `matplotlib` is absent). No *evaluation* numbers exist yet; those
-land in Milestone 8.
+skipped when `matplotlib` is absent), and the self-evaluation (Wilson-interval
+math and edge cases, the gold-label loader with its `modeled`-flag cross-check,
+each evaluator against its committed denominators, `run_eval` determinism, and the
+`biosci eval` CLI). The measured *evaluation* numbers are in the Self-evaluation
+section below.
 
 ### Fixtures (Milestone 1)
 
@@ -173,13 +178,13 @@ senescence` — material the Milestone-5 support/conflict logic will use.
 
 These are **extraction counts and behavior**, not quality metrics. Precision /
 recall against tiny gold labels (with denominators and Wilson intervals) is
-Milestone 8:
+measured in Milestone 8 (see the Self-evaluation section below):
 
 | Metric | Value (95% Wilson CI) | Denominator |
 |--------|-----------------------|-------------|
-| entity precision | _pending (M8)_ | |
-| entity recall | _pending (M8)_ | |
-| claim sanity pass rate | _pending (M8)_ | |
+| entity precision | 1.000 [0.851, 1.000] | 22 / 22 recognized |
+| entity recall | 0.917 [0.742, 0.977] | 22 / 24 gold entities |
+| claim sanity pass rate | 1.000 [0.916, 1.000] | 42 / 42 claims |
 
 ### Evidence table / provenance (Milestone 5)
 
@@ -207,8 +212,10 @@ sentence's phrasing and is **not** a biological or clinical verdict; in
 particular it does not detect cross-paper *directional* conflict — e.g. paper-006
 (`autophagy --promotes--> senescence`) and paper-007 (`autophagy --restrains-->
 senescence`) both read as `support` per row. These are **builder counts and
-behavior**, not quality metrics; support-label precision/recall against gold
-labels (with denominators and Wilson intervals) is Milestone 8.
+behavior**, not quality metrics. Milestone 8 measures the evidence table's
+*structural* quality — column completeness and provenance coverage (both 100%, see
+the Self-evaluation section below); scoring the support/conflict label itself
+against gold support annotations is left as future work (see `docs/ROADMAP.md`).
 
 ### Database connectors (Milestone 6)
 
@@ -275,6 +282,41 @@ These are figure-data **counts and structure**, not quality metrics. The matrix
 and table support signal is a heuristic **textual** signal (`rule:support-cues`)
 and the link-graph database edges are **inferred relations** (combined records) —
 neither is a biological or clinical verdict (see `docs/SAFETY.md`).
+
+### Self-evaluation (Milestone 8)
+
+Produced by `python3 scripts/06_run_eval.py` (or `biosci eval --db ... --out
+results/processed/eval_report.json`). The harness scores the **pipeline** — not
+biological truth — against the committed gold labels under `data/fixtures/gold/`
+(6 labeled queries / 16 relevant pairs; 6 labeled abstracts / 24 gold entities).
+Every rate carries its denominator and a 95% Wilson interval; the report is
+deterministic (`eval_report.json` is byte-identical across runs).
+
+| Metric | Value (95% Wilson CI) | Denominator |
+|--------|-----------------------|-------------|
+| ingestion correctness | 1.000 [0.912, 1.000] | 40 / 40 fixture records |
+| search recall@3 (micro) | 0.875 [0.640, 0.965] | 14 / 16 relevant pairs |
+| search recall@5 (micro) | 1.000 [0.806, 1.000] | 16 / 16 relevant pairs |
+| entity precision | 1.000 [0.851, 1.000] | 22 / 22 recognized |
+| entity recall | 0.917 [0.742, 0.977] | 22 / 24 gold entities |
+| entity F1 | 0.957 | TP=22, FP=0, FN=2 |
+| claim sanity (well-formed + span-traceable) | 1.000 [0.916, 1.000] | 42 / 42 claims |
+| evidence completeness | 1.000 [0.947, 1.000] | 68 / 68 rows |
+| provenance coverage | 1.000 [0.947, 1.000] | 68 / 68 rows |
+
+Honest reading. **Small N → wide intervals**: a perfect 40/40 ingestion score still
+has a 95% lower bound of 0.912, which is the point of reporting the interval rather
+than the bare percentage. The dictionary recognizer is **high precision by
+construction** (no fuzzy/morphological matching, so no false positives on these
+abstracts) and loses on **recall** — the two misses are deliberate and documented
+(`data/fixtures/gold/README.md`): IL-8 has no UniProt fixture record, and
+`p16INK4a-expressing` tokenizes as one hyphenated token so the `p16INK4a` surface
+does not match. Search **recall@3 < 1.0** because two relevant papers
+(`biosci-paper-016`, `biosci-paper-018`) rank just outside the top 3 and are
+recovered by k=5. Claim sanity, completeness, and provenance are 1.0 by construction
+and serve as **regression floors**, not achievements. Passing the self-eval means
+the pipeline behaves as specified — **not** that its extractions are biologically
+authoritative (see `docs/SAFETY.md`).
 
 ## Exact commands
 

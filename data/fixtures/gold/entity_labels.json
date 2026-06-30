@@ -1,0 +1,62 @@
+[
+  {
+    "paper_id": "biosci-paper-001",
+    "gold_entities": [
+      {"entity_id": "ent-IL6", "surface": "IL-6", "modeled": true},
+      {"entity_id": "ent-cellular-senescence", "surface": "senescent", "modeled": true},
+      {"entity_id": "ent-senescence-associated-secretory-phenotype", "surface": "SASP", "modeled": true},
+      {"entity_id": "ent-IL8", "surface": "IL-8", "modeled": false}
+    ],
+    "note": "IL-8 is in-theme but has no UniProt fixture record, so the dictionary cannot recognize it (an honest recall miss)."
+  },
+  {
+    "paper_id": "biosci-paper-002",
+    "gold_entities": [
+      {"entity_id": "ent-CDKN2A", "surface": "p16INK4a", "modeled": true},
+      {"entity_id": "ent-cellular-senescence", "surface": "cellular senescence", "modeled": true}
+    ],
+    "note": "A clean case: both gold entities are recognized; precision and recall are 1.0 here."
+  },
+  {
+    "paper_id": "biosci-paper-003",
+    "gold_entities": [
+      {"entity_id": "ent-CDKN2A", "surface": "p16INK4a-expressing", "modeled": true},
+      {"entity_id": "ent-cellular-senescence", "surface": "senescent cells", "modeled": true},
+      {"entity_id": "ent-inflammation", "surface": "inflammation", "modeled": true}
+    ],
+    "note": "CDKN2A is present as 'p16INK4a-expressing', which tokenizes as one hyphenated token and so is NOT recognized — an honest recall miss caused by tokenization."
+  },
+  {
+    "paper_id": "biosci-paper-004",
+    "gold_entities": [
+      {"entity_id": "ent-rapamycin", "surface": "rapamycin", "modeled": true},
+      {"entity_id": "ent-MTOR", "surface": "mTOR", "modeled": true},
+      {"entity_id": "ent-lifespan", "surface": "lifespan", "modeled": true},
+      {"entity_id": "ent-autophagy", "surface": "autophagy", "modeled": true}
+    ],
+    "note": "All four gold entities are recognized."
+  },
+  {
+    "paper_id": "biosci-paper-009",
+    "gold_entities": [
+      {"entity_id": "ent-dna-damage", "surface": "DNA damage", "modeled": true},
+      {"entity_id": "ent-TP53", "surface": "p53", "modeled": true},
+      {"entity_id": "ent-CDKN1A", "surface": "p21", "modeled": true},
+      {"entity_id": "ent-cell-cycle-arrest", "surface": "cell-cycle arrest", "modeled": true},
+      {"entity_id": "ent-cellular-senescence", "surface": "senescence", "modeled": true},
+      {"entity_id": "ent-CDKN2A", "surface": "p16INK4a", "modeled": true}
+    ],
+    "note": "A dense, all-recognized abstract: p53, p21, p16INK4a and the senescence processes are all matched."
+  },
+  {
+    "paper_id": "biosci-paper-013",
+    "gold_entities": [
+      {"entity_id": "ent-IL6", "surface": "IL-6", "modeled": true},
+      {"entity_id": "ent-cellular-senescence", "surface": "senescent cells", "modeled": true},
+      {"entity_id": "ent-senescence-associated-secretory-phenotype", "surface": "SASP", "modeled": true},
+      {"entity_id": "ent-inflammation", "surface": "inflammation", "modeled": true},
+      {"entity_id": "ent-inflammaging", "surface": "inflammaging", "modeled": true}
+    ],
+    "note": "All recognized. 'paracrine senescence' is a keyword but the abstract says 'paracrine effect', so it is not a gold mention here."
+  }
+]

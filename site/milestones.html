@@ -57,7 +57,7 @@
         <tr><td>5</td><td>Evidence table builder</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>6</td><td>Database connector layer</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>7</td><td>Visualizations</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>8</td><td>Evaluation harness</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>8</td><td>Evaluation harness</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>9</td><td>End-to-end research memo generation</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>10</td><td>Optional LLM adapter (not required)</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>11</td><td>Website, final report, portfolio polish</td><td><span class="badge badge-planned">Planned</span></td></tr>
@@ -65,6 +65,37 @@
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 8 &mdash; delivered</h2>
+
+      <p>The workbench now <strong>evaluates its own pipeline</strong> against
+      committed gold labels &mdash; not biological truth. Delivered: a new
+      <code>evals</code> package &mdash; <code>metrics.py</code> (a
+      <code>Proportion</code> that carries its denominator plus a 95%
+      <strong>Wilson</strong> interval, with the critical value from the stdlib
+      <code>statistics.NormalDist</code>), <code>gold.py</code> (typed loaders for the
+      committed labels under <code>data/fixtures/gold/</code>), and
+      <code>harness.py</code> (six evaluators, the <code>EvalReport</code> container,
+      and the database-backed <code>run_eval(db)</code>) &mdash; plus the gold labels
+      themselves (6 queries / 16 relevant pairs; 6 abstracts / 24 gold entities), the
+      <code>biosci eval</code> CLI command, and
+      <code>scripts/06_run_eval.py</code>. It scores <strong>ingestion
+      correctness</strong> (40/40), <strong>BM25F search recall</strong>
+      (recall@3 = 14/16, recall@5 = 16/16), <strong>entity precision/recall</strong>
+      (1.000 / 0.917, F1 0.957), <strong>claim sanity</strong> (42/42),
+      <strong>evidence completeness</strong> (68/68), and <strong>provenance
+      coverage</strong> (68/68), each with its denominator and Wilson interval. The
+      report is deterministic (byte-identical <code>eval_report.json</code> across
+      runs).</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 223 passed,
+      1 skipped (offline); <code>ruff check</code> clean on the new files. This
+      evaluates the <strong>pipeline</strong> on a tiny, partly-synthetic corpus &mdash;
+      N is small by construction, so intervals are wide (even 40/40 has a 95% lower
+      bound of 0.912) and the rule-based recall <em>misses</em> are surfaced, not
+      hidden (IL-8 is unmodeled; <code>p16INK4a-expressing</code> mis-tokenizes).
+      Passing it means the pipeline behaves as specified, <strong>not</strong> that
+      its extractions are biologically authoritative (<a href="safety.html">safety</a>).</p>
     </section>
     <section>
       <h2>Milestone 7 &mdash; delivered</h2>
