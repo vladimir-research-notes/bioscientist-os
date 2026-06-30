@@ -69,6 +69,17 @@ The research memo (Milestone 9) may list "suggested next experiments." These are
 **hypotheses for human researchers to evaluate**, explicitly marked as
 unsupported, and are never instructions, protocols, or clinical recommendations.
 
+## Verification (automated, not human sign-off)
+
+The non-clinical framing is enforced by the offline test suite, not merely
+asserted in prose: tests check that `SAFETY.md` and `site/safety.html` carry the
+non-medical / no-diagnosis disclaimer, that every memo's suggested experiments are
+emitted at the `unsupported` epistemic level (never as recommendations), and that
+the four epistemic levels stay distinct in generated output. The Milestone-12 pass
+re-ran these checks (`python3 -m pytest -q` → 274 passed, 1 skipped). This is
+**automated** verification of the safety properties; it is **not** a human safety
+review, which has not been performed.
+
 ## Reporting a safety concern
 
 If any output reads as clinical advice or hides provenance, open an issue / note

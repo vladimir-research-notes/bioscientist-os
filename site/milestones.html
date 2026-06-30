@@ -63,10 +63,41 @@
         <tr><td>9</td><td>End-to-end research memo generation</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>10</td><td>Optional LLM adapter (not required)</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>11</td><td>Website, final report, portfolio polish</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>12</td><td>Final cleanup and quality gates</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>12</td><td>Final cleanup and quality gates</td><td><span class="badge badge-done">Done</span></td></tr>
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
-      yet implemented &mdash; the website never describes unimplemented features as done.</p>
+      yet implemented &mdash; the website never describes unimplemented features as done.
+      All 13 milestones (0&ndash;12) are now delivered.</p>
+    </section>
+    <section>
+      <h2>Milestone 12 &mdash; delivered</h2>
+
+      <p>The <strong>final cleanup and quality-gate pass</strong>. No new pipeline
+      code &mdash; this milestone <strong>verifies</strong> the finished workbench and
+      finalizes the docs. Every gate is green: the offline suite is
+      <strong>274 passed, 1 skipped</strong> (the <code>matplotlib</code> PNG test);
+      <code>ruff check .</code> is clean (one pre-existing <code>E501</code> in
+      <code>tests/test_repo_contract.py</code> was fixed); the
+      <strong>end-to-end run reproduces every artifact</strong> from an empty
+      <code>results/</code> and re-running is <strong>byte-identical</strong> (db
+      content digest, claims, evidence tables, eval report, figure data, memos); and a
+      hygiene scan confirms <strong>172 tracked files, ~1.0&nbsp;MiB</strong>, with no
+      secrets, caches, virtualenvs, model weights, databases, or generated
+      <code>results/</code> artifacts tracked. <code>mypy</code> is advisory and
+      non-gating by design (see <code>pyproject.toml</code>). Docs finalized:
+      <a href="results.html">Results</a> gained a quality-gates table,
+      <a href="limitations.html">Limitations</a>/<a href="safety.html">Safety</a> were
+      reconciled with the finished state, <a href="reproducibility.html">Reproducibility</a>
+      gained a from-scratch verification recipe, and a new
+      <strong><code>docs/PAPER_PATH.md</code></strong> gives a candid
+      prototype&rarr;paper assessment (what is established, what is deliberately
+      missing, and the threats to validity).</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 274 passed,
+      1 skipped; <code>ruff check .</code> clean; clean-tree end-to-end reproduction
+      confirmed. This milestone adds <strong>no measured pipeline capability</strong>
+      and makes <strong>no new claim</strong>; it confirms the existing, honestly-scoped
+      claims hold and that the working tree is clean and reproducible. The planned build
+      is complete.</p>
     </section>
     <section>
       <h2>Milestone 11 &mdash; delivered</h2>

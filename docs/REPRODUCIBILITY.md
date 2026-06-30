@@ -159,6 +159,28 @@ whole contract offline (see `docs/LLM_ADAPTER.md`).
 - **Regenerated (gitignored):** everything under `results/` (db, tables, figures)
   and any `data/cache/` — all reproducible from fixtures.
 
+### Verifying the build from scratch (Milestone 12 quality gates)
+
+To repeat the final quality-gate pass on a clean tree:
+
+```bash
+python3 -m pytest -q          # offline test suite -> 274 passed, 1 skipped
+ruff check .                  # lint gate -> clean
+# Reproduce every artifact from nothing, then prove determinism:
+rm -rf data/cache && find results -type f ! -name README.md ! -name .gitkeep -delete
+python3 scripts/01_ingest_fixtures.py        # ... through 08_llm_adapter_demo.py
+# (re-running the pipeline a second time leaves the artifacts byte-identical)
+git status                    # working tree clean; results/ stays gitignored
+```
+
+`mypy` is **advisory and non-gating** in this project (see the comment in
+`pyproject.toml`): it is useful as a hint but its findings — mostly pydantic and
+`**kwargs` false positives — do not block the build, and CI does not run it as a
+gate. The gates that matter are the test suite, `ruff`, the end-to-end
+reproduction, and the no-secrets/no-large-data hygiene check. The matplotlib PNG
+test is skipped unless the `viz` extra is installed; the figure *data*
+(`results/figures/visualizations.json`) is written regardless.
+
 ### Optional extras
 
 ```bash

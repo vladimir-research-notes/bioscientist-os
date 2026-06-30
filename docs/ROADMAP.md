@@ -11,10 +11,12 @@ auditable entity linking, and an empirical study of provenance's effect on trust
 
 See `docs/PLAN.md` and the website's *Milestones* page for live status. Each is a
 single autonomous Claude run that commits locally; the runner stops on any
-failure. Milestones 0–10 are delivered, including the **optional, cost-guarded LLM
-adapter** (M10) — which is off the default path and mock-backed in tests (see
-`docs/LLM_ADAPTER.md`); the remaining milestones are website/report polish (M11) and
-final cleanup/quality gates (M12).
+failure. **All 13 milestones (0–12) are delivered** — including the **optional,
+cost-guarded LLM adapter** (M10), off the default path and mock-backed in tests
+(see `docs/LLM_ADAPTER.md`); the website/report polish (M11); and the final
+cleanup / quality-gate pass (M12), whose green gates are recorded in
+`docs/RESULTS.md`. The planned build is complete; what follows is research
+direction, not committed work.
 
 ## Later — research directions (honest)
 
@@ -30,7 +32,8 @@ final cleanup/quality gates (M12).
 
 These are directions, not promises. The repository is a platform/prototype unless
 and until a novel empirical result is demonstrated. A candid assessment of the
-publishable path is written at Milestone 12 in `docs/PAPER_PATH.md`.
+publishable path — what the prototype establishes, what is deliberately missing,
+and the threats to validity — is in `docs/PAPER_PATH.md`.
 
 ## Non-goals (unchanged)
 

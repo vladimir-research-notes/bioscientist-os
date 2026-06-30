@@ -3,12 +3,14 @@
 ## TL;DR
 
 This document holds **measured** results (counts, metrics, figures) produced by
-the milestones. It is intentionally near-empty in the scaffold commit: there are
-no functional results to report yet. Each milestone that produces measurable
-output appends to this file with exact commands and denominators.
+the milestones. As of Milestone 12 it is fully populated: every section below is
+produced by a landed milestone, with exact commands and denominators, and every
+number is reproduced by the end-to-end run in `docs/REPRODUCIBILITY.md`.
 
-> Do not cite any number here until the corresponding milestone has landed and
-> the table below is populated. Empty cells mean *not yet measured*, not zero.
+> Every number here describes **pipeline behavior on a tiny, partly-synthetic,
+> theme-focused fixture set** — not population performance or biological truth.
+> Small N means wide intervals; that is the point of reporting the interval, not
+> the bare percentage.
 
 ## Build / test status
 
@@ -28,6 +30,7 @@ The only measured results so far concern the build itself, not the pipeline:
 | 9 — end-to-end research memo | Done | (subsumed) |
 | 10 — optional, cost-guarded LLM adapter | Done | `python3 -m pytest -q` → **274 passed, 1 skipped** |
 | 11 — website, final report, and portfolio polish | Done | docs/website only; suite unchanged at **274 passed, 1 skipped** |
+| 12 — final cleanup and quality gates | Done | all gates green (see below); suite unchanged at **274 passed, 1 skipped** |
 
 The 274 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
 Milestone-1 schema and fixture checks (30), the Milestone-2 storage and
@@ -68,6 +71,26 @@ over-budget call **before any backend is invoked**, the deterministic mock adapt
 the free-and-unbilled cache hit, the dry-run making no call, the opt-in Anthropic
 adapter being off by default, and the `biosci llm` CLI — all offline, no paid API).
 The measured *evaluation* numbers are in the Self-evaluation section below.
+
+### Quality gates (Milestone 12)
+
+Milestone 12 ran no new pipeline code; it is the final verification pass. Every
+gate below was run from this working tree and is green:
+
+| Gate | Command | Result |
+|------|---------|--------|
+| Offline test suite | `python3 -m pytest -q` | **274 passed, 1 skipped** (the `matplotlib` PNG-render test) |
+| Lint | `ruff check .` | **clean** (one pre-existing `E501` in `tests/test_repo_contract.py` was fixed) |
+| Type check (advisory, non-gating) | `mypy src/bioscientist_os` | 23 advisory findings, mostly pydantic/`**kwargs` false positives; **not** a CI gate by design (see `pyproject.toml`) |
+| End-to-end reproduction | `scripts/01_…`–`08_…` from an empty `results/` | all artifacts regenerate; re-running is **byte-identical** (db content digest, `claims.json`, `evidence_tables.json`, `eval_report.json`, `visualizations.json`, `memos.json`) |
+| Hygiene / secrets | tracked-file scan | 172 tracked files, **~1.0 MiB** content; no secrets, caches, venvs, model weights, `.db`, or generated `results/` artifacts tracked (only `README.md` / `.gitkeep` under `results/`) |
+| Website | static-HTML link check | all 14 required pages present (plus 4 extra), **no broken internal links**, viewable over `file://` with no build step |
+
+The end-to-end run was verified by deleting every regenerable file under
+`results/` and `data/cache/`, re-running the eight pipeline scripts, and confirming
+each artifact returned with the same content (the ingestion content digest is
+`f040627…5123da94`). PNGs require the optional `viz` extra (`pip install -e '.[viz]'`);
+the inspectable `visualizations.json` figure data is written regardless.
 
 ### Fixtures (Milestone 1)
 

@@ -115,5 +115,13 @@ def test_safety_statement_is_non_clinical() -> None:
 
 def test_gitignore_protects_artifacts_and_secrets() -> None:
     gi = (ROOT / ".gitignore").read_text(encoding="utf-8")
-    for needle in (".env", ".venv/", "data/cache/", "results/", "*.safetensors", "settings.local.json"):
+    needles = (
+        ".env",
+        ".venv/",
+        "data/cache/",
+        "results/",
+        "*.safetensors",
+        "settings.local.json",
+    )
+    for needle in needles:
         assert needle in gi, f".gitignore should mention {needle}"

@@ -14,9 +14,10 @@ The key artifact is not a summary. It is an auditable chain:
 paper -> extracted claim -> biological entities -> database links -> support / conflict / uncertainty -> visual report
 ```
 
-> **Status:** working prototype. **Milestones 0–11** of the
-> [13-milestone plan](docs/PLAN.md) have landed; only the final cleanup /
-> quality-gate pass (M12) remains. The whole pipeline runs **CPU-only and offline**:
+> **Status:** working prototype. **All 13 milestones (0–12)** of the
+> [13-milestone plan](docs/PLAN.md) have landed, including the final cleanup /
+> quality-gate pass (M12; green gates recorded in
+> [`docs/RESULTS.md`](docs/RESULTS.md)). The whole pipeline runs **CPU-only and offline**:
 > the repository is an importable package with a runnable `biosci` CLI (`version`,
 > `info`, `env-check`, `ingest`, `stats`, `search`, `topics`, `extract`, `evidence`,
 > `db`, `figures`, `eval`, `memo`, `llm`); typed schemas + labeled fixtures ingest
@@ -171,8 +172,9 @@ verdict (today only the table's *structural* quality is measured); ontology-grou
 entity linking that preserves auditability; a controlled comparison of transparent
 baselines vs. an optional LLM adapter on *provenance fidelity*; and — the core
 payoff — a user study of which provenance fields actually change a scientist's trust
-or decision. These are directions, not promises; a candid assessment is written at
-Milestone 12 in `docs/PAPER_PATH.md`. See [`docs/ROADMAP.md`](docs/ROADMAP.md).
+or decision. These are directions, not promises; a candid assessment of what the
+prototype establishes, what is missing, and the threats to validity is in
+[`docs/PAPER_PATH.md`](docs/PAPER_PATH.md). See [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Repository layout
 
@@ -215,6 +217,7 @@ commits locally, and stops on any failure or dirty tree. See
 - [`docs/SAFETY.md`](docs/SAFETY.md) — non-clinical-use statement
 - [`docs/REPRODUCIBILITY.md`](docs/REPRODUCIBILITY.md) — how to reproduce everything
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — research directions and the path to a paper
+- [`docs/PAPER_PATH.md`](docs/PAPER_PATH.md) — candid prototype→paper assessment (gaps, threats to validity)
 
 ## License
 

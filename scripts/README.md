@@ -12,8 +12,10 @@ Thin, install-free wrappers and the autonomous milestone runner.
 | `04_build_evidence_table.py` | build evidence table for a question | Milestone 5 |
 | `05_generate_visualizations.py` | regenerate figures under `results/figures/` | Milestone 7 |
 | `06_run_eval.py` | run the evaluation harness | Milestone 8 |
+| `07_generate_memo.py` | assemble the end-to-end research memo | Milestone 9 |
+| `08_llm_adapter_demo.py` | offline demo of the optional LLM adapter (no artifacts) | Milestone 10 |
 
-The numbered pipeline scripts (`01`–`06`) are created by the milestones that
+The numbered pipeline scripts (`01`–`08`) are created by the milestones that
 introduce their functionality. Each is a thin wrapper around the
 `bioscientist_os` package and prints exactly what it wrote.
 

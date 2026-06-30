@@ -65,7 +65,7 @@ python3 scripts/08_llm_adapter_demo.py           # M10 -> offline LLM-adapter de
       regenerable; nothing here requires the network, a GPU, or a paid API.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>All milestone scripts (<code>00_</code>&ndash;<code>08_</code>) and the offline test suite are present; the end-to-end run reproduces the database, search index, claims, evidence tables, figures, evaluation report, and research memo. Final reproduction is re-verified at the M12 quality gate.</td></tr>
+        <tr><th>Implementation</th><td>All milestone scripts (<code>00_</code>&ndash;<code>08_</code>) and the offline test suite are present; the end-to-end run reproduces the database, search index, claims, evidence tables, figures, evaluation report, and research memo. Final reproduction was re-verified at the M12 quality gate: deleting every regenerable file under <code>results/</code> and <code>data/cache/</code> and re-running the eight pipeline scripts returns each artifact byte-identical (ingestion content digest <code>f040627&hellip;</code>).</td></tr>
         <tr><th>Tests / results</th><td>274 offline tests pass (1 skipped). Committed: source, fixtures, gold labels, docs, site. Regenerated (gitignored): everything under <code>results/</code> and <code>data/cache/</code>.</td></tr>
         <tr><th>Open questions</th><td>Determinism guarantees apply to the offline fixture/cache path only; the opt-in live connectors and the real LLM adapter are best-effort and off by default.</td></tr>
       </table>

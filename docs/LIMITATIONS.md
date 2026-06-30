@@ -60,3 +60,12 @@ cat docs/RESULTS.md           # what is actually measured
   columns.
 - Synthetic fixtures look like real papers; they are marked `synthetic: true`.
 - Visualizations summarize a tiny corpus and should not be read as field maps.
+
+## Status (as of Milestone 12)
+
+All 13 milestones (0–12) have landed; the final quality-gate pass is recorded in
+`docs/RESULTS.md` (tests, lint, end-to-end reproduction, hygiene, website). This is
+the end of the planned build, not the end of the *limitations*: the repository
+remains a **prototype workbench**, not a validated instrument. For a candid account
+of what would have to be true for this line of work to become a research paper —
+and what is deliberately missing today — see `docs/PAPER_PATH.md`.
