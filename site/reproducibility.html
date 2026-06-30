@@ -34,7 +34,7 @@
   <main class="content">
     <div class="page-head">
       <h1>Reproducibility</h1>
-      <span class="badge badge-scaffold">Scaffold</span>
+      <span class="badge badge-prototype">Prototype</span>
     </div>
     <p class="subtitle">Everything in the default path is reproducible offline on a CPU.</p>
     <section>
@@ -47,19 +47,27 @@ python3 -m pytest -q                          # offline test suite</pre>
       <p>No network, no GPU, no paid API are required for any of the above.</p>
     </section>
     <section>
-      <h2>End-to-end run (assembled across milestones)</h2>
+      <h2>End-to-end run (the full pipeline)</h2>
 
-      <pre>python3 scripts/01_ingest_fixtures.py
-python3 scripts/02_build_index.py
-python3 scripts/03_extract_claims.py
-python3 scripts/04_build_evidence_table.py
-python3 scripts/05_generate_visualizations.py
-python3 scripts/06_run_eval.py</pre>
+      <pre>python3 scripts/01_ingest_fixtures.py            # M2  -> results/raw/bioscientist.db
+python3 scripts/02_build_index.py                # M3  -> search index
+python3 scripts/03_extract_claims.py             # M4  -> results/processed/claims.{json,csv}
+python3 scripts/04_build_evidence_table.py       # M5  -> results/processed/evidence_table.csv
+python3 scripts/05_generate_visualizations.py    # M7  -> results/figures/*
+python3 scripts/06_run_eval.py                   # M8  -> results/processed/eval_report.json
+python3 scripts/07_generate_memo.py              # M9  -> results/processed/memo.md
+python3 scripts/08_llm_adapter_demo.py           # M10 -> offline LLM-adapter demo (no artifacts)</pre>
+      <p>Each script is a thin wrapper over the corresponding <code>biosci</code>
+      subcommand; see <code>docs/REPRODUCIBILITY.md</code> for the CLI equivalents,
+      the determinism guarantees (byte-identical JSON across runs; a content-digest
+      check on the database), and the optional <code>matplotlib</code> path for PNGs.
+      All generated artifacts under <code>results/</code> are gitignored and
+      regenerable; nothing here requires the network, a GPU, or a paid API.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Environment check + offline tests available now; pipeline scripts land per milestone.</td></tr>
-        <tr><th>Tests / results</th><td>Committed: source, fixtures, gold labels, docs, site. Regenerated (gitignored): results/.</td></tr>
-        <tr><th>Open questions</th><td>Determinism guarantees apply to the offline fixture/cache path only.</td></tr>
+        <tr><th>Implementation</th><td>All milestone scripts (<code>00_</code>&ndash;<code>08_</code>) and the offline test suite are present; the end-to-end run reproduces the database, search index, claims, evidence tables, figures, evaluation report, and research memo. Final reproduction is re-verified at the M12 quality gate.</td></tr>
+        <tr><th>Tests / results</th><td>274 offline tests pass (1 skipped). Committed: source, fixtures, gold labels, docs, site. Regenerated (gitignored): everything under <code>results/</code> and <code>data/cache/</code>.</td></tr>
+        <tr><th>Open questions</th><td>Determinism guarantees apply to the offline fixture/cache path only; the opt-in live connectors and the real LLM adapter are best-effort and off by default.</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>

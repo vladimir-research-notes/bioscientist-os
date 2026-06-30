@@ -110,7 +110,7 @@ biosci db lookup --source uniprot --id P05231 --db results/raw/bioscientist.db -
     </section>
       <table class="status">
         <tr><th>Implementation</th><td>Done (Milestone 6): <code>BaseConnector</code> + errors + retry (<code>base.py</code>), <code>FixtureConnector</code> + <code>uniprot</code>/<code>opentargets</code>/<code>papers</code> factories (<code>fixture.py</code>), <code>CachedConnector</code> (<code>cache.py</code>), opt-in <code>LiveConnector</code> (<code>live.py</code>), <code>ConnectorRegistry</code> + <code>open_connectors</code> (<code>registry.py</code>), and the <code>biosci db</code> CLI.</td></tr>
-        <tr><th>Tests / results</th><td>35 connector tests pass offline (178 total): fixture lookup + provenance, registry, cache miss&rarr;<code>fixture</code>/hit&rarr;<code>cache</code> with offline-first serving and canonical round-trip, transient-only retry with deterministic backoff, the live connector via a mock transport, and the CLI. Live mode is never exercised in CI.</td></tr>
+        <tr><th>Tests / results</th><td>35 connector tests pass offline (274 total, 1 skipped without matplotlib): fixture lookup + provenance, registry, cache miss&rarr;<code>fixture</code>/hit&rarr;<code>cache</code> with offline-first serving and canonical round-trip, transient-only retry with deterministic backoff, the live connector via a mock transport, and the CLI. Live mode is never exercised in CI.</td></tr>
         <tr><th>Open questions</th><td>Where licensing is uncertain, fixtures are synthetic and labeled; only the fixture/cache path carries reproducibility guarantees.</td></tr>
       </table>
     <section>

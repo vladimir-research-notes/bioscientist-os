@@ -71,7 +71,7 @@ biosci stats   --db results/raw/bioscientist.db</pre>
     </section>
       <table class="status">
         <tr><th>Implementation</th><td>Done (M2): <code>SQLiteStore</code> in <code>storage/sqlite_store.py</code> and the <code>ingest_fixtures()</code> pipeline in <code>ingest/pipeline.py</code>, wired to <code>biosci ingest</code> / <code>biosci stats</code>.</td></tr>
-        <tr><th>Tests / results</th><td>17 new tests (67 total, offline): count checks (18 papers / 10 proteins / 9 associations / 3 questions), idempotent re-ingest, two-build determinism, exact round-trip, and schema-validation-on-ingest. <code>biosci stats</code> reports the same digest on every build.</td></tr>
+        <tr><th>Tests / results</th><td>17 ingestion tests (274 total, 1 skipped without matplotlib, offline): count checks (18 papers / 10 proteins / 9 associations / 3 questions), idempotent re-ingest, two-build determinism, exact round-trip, and schema-validation-on-ingest. <code>biosci stats</code> reports the same digest on every build.</td></tr>
         <tr><th>Open questions</th><td>Dedupe is currently by stable local id only; deduping near-duplicate papers by DOI/PMID or title hash is deferred. DuckDB remains an unused optional backend.</td></tr>
       </table>
     <section>

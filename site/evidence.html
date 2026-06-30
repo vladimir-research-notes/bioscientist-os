@@ -96,7 +96,7 @@
     </section>
       <table class="status">
         <tr><th>Implementation</th><td><strong>Done (M5).</strong> <code>evidence/table.py</code> (builder, support heuristic, question resolution, <code>EvidenceReport</code>), the <code>biosci evidence</code> command, and <code>scripts/04_build_evidence_table.py</code>.</td></tr>
-        <tr><th>Tests / results</th><td>24 new tests (143 total, offline). On the three fixture questions: 31&nbsp;/&nbsp;29&nbsp;/&nbsp;8 rows, all at <strong>100% provenance coverage</strong>; all three labels exercised (e.g. senescence&ndash;inflammation: 17&nbsp;support, 6&nbsp;conflict, 8&nbsp;unknown). Counts are behavior, not quality (eval is M8).</td></tr>
+        <tr><th>Tests / results</th><td>24 evidence-table tests (274 total, 1 skipped without matplotlib, offline). On the three fixture questions: 31&nbsp;/&nbsp;29&nbsp;/&nbsp;8 rows, all at <strong>100% provenance coverage</strong>; all three labels exercised (e.g. senescence&ndash;inflammation: 17&nbsp;support, 6&nbsp;conflict, 8&nbsp;unknown). Counts are behavior, not quality (eval is M8).</td></tr>
         <tr><th>Open questions</th><td>The per-row label reads one sentence's phrasing; it does not detect when two papers conflict only in <em>direction</em> (e.g. autophagy promotes vs. restrains senescence) &mdash; both rows read as support. Cross-paper conflict detection is future work.</td></tr>
       </table>
     <section>

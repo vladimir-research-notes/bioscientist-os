@@ -34,7 +34,7 @@
   <main class="content">
     <div class="page-head">
       <h1>Milestones</h1>
-      <span class="badge badge-scaffold">Scaffold</span>
+      <span class="badge badge-prototype">Prototype</span>
     </div>
     <p class="subtitle">Live build status. Each milestone is one autonomous Claude run that commits locally.</p>
     <section>
@@ -62,11 +62,42 @@
         <tr><td>8</td><td>Evaluation harness</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>9</td><td>End-to-end research memo generation</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>10</td><td>Optional LLM adapter (not required)</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>11</td><td>Website, final report, portfolio polish</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>11</td><td>Website, final report, portfolio polish</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>12</td><td>Final cleanup and quality gates</td><td><span class="badge badge-planned">Planned</span></td></tr>
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 11 &mdash; delivered</h2>
+
+      <p>A <strong>portfolio-polish pass</strong>: the README, the docs, and this
+      multi-page website were reconciled with the <strong>actual</strong> repository
+      state now that the full pipeline (M0&ndash;M10) has landed. No new pipeline code
+      &mdash; <strong>274 offline tests still pass</strong> (1 skipped without
+      <code>matplotlib</code>). Changes: the README status block moved from
+      &ldquo;Milestones 0&ndash;8&rdquo; to a working-prototype framing, gained a
+      <strong>measured-results table</strong> (with denominators and Wilson intervals),
+      an explicit <strong>&ldquo;what this does <em>not</em> claim&rdquo;</strong>
+      section, a <strong>who-it&rsquo;s-for</strong> section, and a
+      <strong>prototype&rarr;research-paper</strong> section; the stale end-to-end run
+      block (which still marked the memo &ldquo;planned&rdquo;) now shows the full
+      pipeline. On the site, the misleading amber <em>Scaffold</em> page badge was
+      retired in favour of an honest <em>Prototype</em> badge; the
+      <a href="index.html">Overview</a> gained a results snapshot and a non-claims box;
+      the <a href="architecture.html">Architecture</a> page (stuck at &ldquo;M0&ndash;9,
+      243 tests&rdquo;) was corrected to M0&ndash;11 / 274 tests and now lists the
+      <code>llm/</code> subpackage; the <a href="reproducibility.html">Reproducibility</a>
+      page now lists all eight pipeline scripts (including the memo and LLM-demo
+      wrappers); and the <a href="results.html">Results</a> and
+      <a href="roadmap.html">Roadmap</a> pages were tightened. The website remains plain
+      committed HTML + one stylesheet, viewable over <code>file://</code> with no build
+      step.</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 274 passed,
+      1 skipped (offline). This milestone is documentation/website only &mdash; it adds
+      <strong>no measured pipeline capability</strong> and makes no new claim; it makes
+      the existing, honestly-scoped claims easier to find and audit. The final
+      quality-gate pass and <code>docs/PAPER_PATH.md</code> are Milestone 12.</p>
     </section>
     <section>
       <h2>Milestone 10 &mdash; delivered</h2>

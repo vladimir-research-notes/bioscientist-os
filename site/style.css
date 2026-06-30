@@ -62,6 +62,7 @@ table.status th { background: #eef3f3; width: 170px; }
 table.milestones td:first-child { text-align: center; width: 36px; color: var(--muted); }
 .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .74rem; font-weight: 700; letter-spacing: .3px; text-transform: uppercase; }
 .badge-scaffold { background: #fde9c8; color: #8a5a00; }
+.badge-prototype { background: #d6e4fb; color: #1f4c8a; }
 .badge-planned { background: #e6e9ee; color: #555f6e; }
 .badge-done { background: #c8ecd6; color: #1a6b3c; }
 .note { color: var(--muted); font-size: .88rem; }

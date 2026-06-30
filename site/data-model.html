@@ -70,7 +70,7 @@
     </section>
       <table class="status">
         <tr><th>Implementation</th><td><strong>Done (Milestone&nbsp;1).</strong> 9 schemas + <code>Provenance</code> + 4 enums in <code>schemas.py</code>; a thin fixture loader in <code>fixtures.py</code> (parse + validate only; no storage).</td></tr>
-        <tr><th>Tests / results</th><td><code>python3 -m pytest -q</code> &rarr; <strong>50 passed</strong> (offline). 30 new: schema JSON round-trips, enforced validation rules, and fixture loading/labeling.</td></tr>
+        <tr><th>Tests / results</th><td><code>python3 -m pytest -q</code> &rarr; <strong>274 passed</strong>, 1 skipped (offline). 30 of them are the data-model tests: schema JSON round-trips, enforced validation rules, and fixture loading/labeling.</td></tr>
         <tr><th>Open questions</th><td>Coarse entity typing &mdash; is that granularity enough? Should <code>db_xrefs</code> be a typed model rather than a free-form mapping?</td></tr>
       </table>
     <section>

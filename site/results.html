@@ -34,23 +34,46 @@
   <main class="content">
     <div class="page-head">
       <h1>Results</h1>
-      <span class="badge badge-scaffold">Scaffold</span>
+      <span class="badge badge-prototype">Prototype</span>
     </div>
     <p class="subtitle">Measured numbers, with denominators &mdash; populated as milestones land.</p>
     <section>
       <h2>Brief</h2>
 
-      <p>This page mirrors <code>docs/RESULTS.md</code>. Functional results exist for
+      <p>This page mirrors <code>docs/RESULTS.md</code>. The full pipeline has landed,
+      so every milestone that produces measurable output is reported below:
       ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4),
       evidence-table assembly (M5), the database-connector layer (M6), the figures
-      (M7), the gold-label self-evaluation (M8), and the
+      (M7), the gold-label self-evaluation (M8), the
       <a href="memo.html">research memo</a> (M9), and the optional, cost-guarded
-      <a href="llm.html">LLM adapter</a> (M10, off the default path). Empty means
-      <em>not yet measured</em>, not zero. Do not cite any number until the corresponding
-      milestone has landed.</p>
+      <a href="llm.html">LLM adapter</a> (M10, off the default path). Every rate
+      carries its <strong>denominator</strong>; small N means the intervals are wide
+      on purpose. These measure <strong>pipeline behaviour</strong> on a tiny,
+      partly-synthetic corpus &mdash; not population performance or biological truth.</p>
     </section>
     <section>
-      <h2>Pending tables</h2>
+      <h2>Headline self-evaluation (M8)</h2>
+
+      <p>Produced by <code>biosci eval</code> against committed gold labels; 95% Wilson
+      intervals. The dictionary recognizer is high precision by construction and loses
+      on recall (both misses documented in <code>data/fixtures/gold/README.md</code>);
+      claim sanity, completeness, and provenance are 1.0 by construction and act as
+      regression floors, not achievements.</p>
+      <table class="grid">
+        <tr><th>Metric</th><th>Value (95% Wilson CI)</th><th>Denominator</th></tr>
+        <tr><td>ingestion correctness</td><td>1.000 [0.912, 1.000]</td><td>40 / 40 fixture records</td></tr>
+        <tr><td>search recall@3 (micro)</td><td>0.875 [0.640, 0.965]</td><td>14 / 16 relevant pairs</td></tr>
+        <tr><td>search recall@5 (micro)</td><td>1.000 [0.806, 1.000]</td><td>16 / 16 relevant pairs</td></tr>
+        <tr><td>entity precision</td><td>1.000 [0.851, 1.000]</td><td>22 / 22 recognized</td></tr>
+        <tr><td>entity recall</td><td>0.917 [0.742, 0.977]</td><td>22 / 24 gold entities</td></tr>
+        <tr><td>entity F1</td><td>0.957</td><td>TP=22, FP=0, FN=2</td></tr>
+        <tr><td>claim sanity (well-formed + span-traceable)</td><td>1.000 [0.916, 1.000]</td><td>42 / 42 claims</td></tr>
+        <tr><td>evidence completeness</td><td>1.000 [0.947, 1.000]</td><td>68 / 68 rows</td></tr>
+        <tr><td>provenance coverage</td><td>1.000 [0.947, 1.000]</td><td>68 / 68 rows</td></tr>
+      </table>
+    </section>
+    <section>
+      <h2>Per-milestone results</h2>
 
       <table class="grid">
         <tr><th>Result</th><th>Status</th></tr>
@@ -68,7 +91,7 @@
       </table>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Numbers appear here as each milestone produces them. Functional results so far: ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4), evidence-table assembly (M5), database connectors (M6), figures (M7), the gold-label self-evaluation (M8), the research memo (M9), and the optional, off-path LLM adapter (M10).</td></tr>
+        <tr><th>Implementation</th><td>The full pipeline has landed; the numbers above cover every results-producing milestone: ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4), evidence-table assembly (M5), database connectors (M6), figures (M7), the gold-label self-evaluation (M8), the research memo (M9), and the optional, off-path LLM adapter (M10). This page, the README, and the docs were reconciled with the actual repository state at M11; the M12 quality gate re-verifies the end-to-end reproduction.</td></tr>
         <tr><th>Tests / results</th><td>274 offline tests pass (1 skipped). Ingestion counts/determinism, search/topic behavior, extraction counts/determinism, evidence-table counts/coverage/determinism, connector provenance/cache/retry behavior, figure-data determinism/consistency, the M8 self-evaluation (entity precision/recall, claim sanity, completeness, provenance &mdash; each with a denominator and Wilson interval), the M9 memo (epistemic-level separation, unsupported-hypothesis framing, reconciliation with the M5 table, candidate-disagreement detection, determinism), and the M10 LLM adapter (cost-guard over-budget refusal before any invoke, the deterministic mock, the free cache hit, the dry-run, the off-by-default Anthropic adapter, and the CLI) are measured. Scoring the support/conflict label and the hypotheses against a human verdict remains future work (see <a href="roadmap.html">roadmap</a>).</td></tr>
         <tr><th>Open questions</th><td>All results are on a tiny, partly-synthetic corpus &mdash; illustrative only. The M8 self-eval certifies <em>pipeline behavior</em>, with wide intervals at small N &mdash; not population performance or biological truth.</td></tr>
       </table>

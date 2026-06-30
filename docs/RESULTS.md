@@ -27,6 +27,7 @@ The only measured results so far concern the build itself, not the pipeline:
 | 8 — evaluation harness | Done | (subsumed) |
 | 9 — end-to-end research memo | Done | (subsumed) |
 | 10 — optional, cost-guarded LLM adapter | Done | `python3 -m pytest -q` → **274 passed, 1 skipped** |
+| 11 — website, final report, and portfolio polish | Done | docs/website only; suite unchanged at **274 passed, 1 skipped** |
 
 The 274 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
 Milestone-1 schema and fixture checks (30), the Milestone-2 storage and

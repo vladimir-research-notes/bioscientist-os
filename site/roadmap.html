@@ -34,7 +34,7 @@
   <main class="content">
     <div class="page-head">
       <h1>Roadmap</h1>
-      <span class="badge badge-scaffold">Scaffold</span>
+      <span class="badge badge-prototype">Prototype</span>
     </div>
     <p class="subtitle">From a provenance-first prototype toward a possibly publishable methodology.</p>
     <section>
@@ -42,26 +42,48 @@
 
       <p>Schemas &rarr; ingestion &rarr; search &rarr; extraction &rarr; evidence tables
       &rarr; connectors &rarr; visualizations &rarr; evaluation &rarr; memo &rarr;
-      optional LLM adapter &rarr; polish &rarr; cleanup. See
+      optional LLM adapter &rarr; polish &rarr; cleanup. Milestones 0&ndash;11 are
+      delivered; only the final cleanup / quality-gate pass (M12) remains. See
       <a href="milestones.html">Milestones</a>.</p>
     </section>
     <section>
-      <h2>Later (research directions)</h2>
+      <h2>From prototype to a research paper</h2>
 
+      <p>What this prototype aims at is <em>methodological and infrastructural</em>: a
+      reproducible, auditable pipeline whose every output traces back to a specific
+      paper, snippet, and extraction method, and which never collapses the four
+      epistemic levels. That is a <strong>platform, not yet a result</strong>. A
+      credible empirical paper would need, at least:</p>
       <ul>
-        <li>Larger, properly-licensed corpora and richer gold labels.</li>
-        <li>Stronger entity linking (ontology grounding) while preserving auditability.</li>
-        <li>Comparing transparent baselines vs. an LLM adapter on provenance fidelity.</li>
-        <li>A study of which provenance fields actually change scientists' trust/decisions.</li>
+        <li>larger, properly-licensed corpora and richer, <strong>multi-annotator</strong>
+        gold labels;</li>
+        <li><strong>gold support/conflict annotations</strong> so the evidence table's
+        support label can be scored against a human verdict &mdash; today only the
+        table's <em>structural</em> quality (completeness, provenance coverage) is
+        measured;</li>
+        <li>ontology-grounded entity linking that preserves auditability (no opaque
+        steps);</li>
+        <li>a controlled comparison of transparent baselines vs. an optional LLM adapter
+        on <strong>provenance fidelity</strong>, not just extraction recall;</li>
+        <li>the core payoff &mdash; a user study of which provenance fields actually
+        change a scientist's trust or decision.</li>
       </ul>
-      <p>These are honest <em>directions</em>. The current repo is a platform/prototype
-      unless and until a novel empirical result is demonstrated &mdash; see
-      <code>docs/PAPER_PATH.md</code> (added at Milestone 12).</p>
+      <p>These are honest <em>directions</em>, not promises. The repository remains a
+      platform/prototype unless and until a novel empirical result is demonstrated; a
+      candid written assessment of the publishable path lands at Milestone 12 in
+      <code>docs/PAPER_PATH.md</code>.</p>
+    </section>
+    <section>
+      <h2>Non-goals (unchanged)</h2>
+
+      <p>No clinical decision support, no diagnosis/treatment claims, no production
+      knowledge graph, no benchmark leaderboard. See <a href="safety.html">Safety</a>
+      and <a href="limitations.html">Limitations</a>.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Roadmap reflects the plan; updated as milestones complete.</td></tr>
-        <tr><th>Tests / results</th><td>No publishable empirical claim yet &mdash; platform/prototype stage.</td></tr>
-        <tr><th>Open questions</th><td>Which methodological question yields a genuinely novel result.</td></tr>
+        <tr><th>Implementation</th><td>Roadmap reflects the plan and the delivered milestones (0&ndash;11). The research directions above are not yet implemented and are not described as done.</td></tr>
+        <tr><th>Tests / results</th><td>No publishable empirical claim yet &mdash; platform/prototype stage. The 274 offline tests certify pipeline <em>behaviour</em>, not a research result.</td></tr>
+        <tr><th>Open questions</th><td>Which methodological question yields a genuinely novel result; which provenance fields actually move a scientist's decision.</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>

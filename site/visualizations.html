@@ -89,7 +89,7 @@ pip install -e '.[viz]'                                  # enable PNG rendering<
     </section>
       <table class="status">
         <tr><th>Implementation</th><td>Done (Milestone 7): figure data in <code>visualization/model.py</code>, builders in <code>visualization/build.py</code> (with <code>load_visualizations(db)</code>), optional <code>matplotlib</code> rendering in <code>visualization/figures.py</code> (<code>write_visualizations</code> always emits the JSON), the <code>biosci figures</code> CLI command, and <code>scripts/05_generate_visualizations.py</code>.</td></tr>
-        <tr><th>Tests / results</th><td>18 visualization tests (195 total); the figure-<em>data</em> tests run on the light core path, while the PNG-rendering test is <strong>skipped when matplotlib is absent</strong>. Tests pin determinism, the matrix cell rule, link-graph consistency, support-count agreement with the M5 tables, and the safety framing.</td></tr>
+        <tr><th>Tests / results</th><td>18 visualization tests (274 total, 1 skipped without matplotlib); the figure-<em>data</em> tests run on the light core path, while the PNG-rendering test is <strong>skipped when matplotlib is absent</strong>. Tests pin determinism, the matrix cell rule, link-graph consistency, support-count agreement with the M5 tables, and the safety framing.</td></tr>
         <tr><th>Open questions</th><td>Figures summarize a tiny, partly-synthetic corpus &mdash; they are descriptive, not field maps; the matrix/table support signal is heuristic and textual, not a biological verdict.</td></tr>
       </table>
     <section>

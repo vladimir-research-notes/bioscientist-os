@@ -34,7 +34,7 @@
   <main class="content">
     <div class="page-head">
       <h1>Overview</h1>
-      <span class="badge badge-scaffold">Scaffold</span>
+      <span class="badge badge-prototype">Prototype</span>
     </div>
     <p class="subtitle">An evidence-centered research workbench that makes provenance inspectable, not opaque.</p>
     <section>
@@ -73,8 +73,9 @@
       <h2>Status</h2>
 
       <p>The project contract (plan, docs, website, permission policy, and an
-      autonomous milestone runner) exists, and <strong>Milestones 0&ndash;10</strong>
-      have landed: the repository is an importable package with a runnable
+      autonomous milestone runner) exists, and <strong>Milestones 0&ndash;11</strong>
+      have landed &mdash; only the final cleanup / quality-gate pass (M12) remains. The
+      repository is an importable package with a runnable
       <code>biosci</code> CLI, the typed data model (pydantic schemas with
       provenance) plus small, clearly-labeled fixtures exist, those fixtures
       <strong>ingest into a deterministic local SQLite database</strong>, the
@@ -105,10 +106,49 @@
       status and <a href="results.html">Results</a> for measured numbers.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Milestones 0&ndash;10 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>, <code>search</code>, <code>topics</code>, <code>extract</code>, <code>evidence</code>, <code>db</code>, <code>figures</code>, <code>eval</code>, <code>memo</code>, <code>llm</code>); 9 typed schemas + provenance model in <code>schemas.py</code>; a fixture loader and labeled fixtures (18 papers, 10 proteins, 9 associations, 3 questions); idempotent, content-deterministic SQLite ingestion via <code>storage/</code>; transparent <a href="search.html">search + topic grouping</a> via <code>search/</code>; dictionary <a href="extraction.html">entity/claim extraction</a>, <a href="evidence.html">evidence-table assembly</a>, and the end-to-end <a href="memo.html">research memo</a> via <code>evidence/</code>; an offline-first <a href="databases.html">connector layer</a> (fixture / cache / opt-in live) via <code>databases/</code>; five <a href="visualizations.html">figures</a> (data + optional matplotlib PNGs) via <code>visualization/</code>; a gold-label <a href="evaluation.html">self-evaluation</a> harness via <code>evals/</code>; and an optional, cost-guarded, disabled-by-default <a href="llm.html">LLM adapter</a> via <code>llm/</code> (off the default path). The remaining work is portfolio polish (M11) and final quality gates (M12).</td></tr>
+        <tr><th>Implementation</th><td>Milestones 0&ndash;11 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>, <code>search</code>, <code>topics</code>, <code>extract</code>, <code>evidence</code>, <code>db</code>, <code>figures</code>, <code>eval</code>, <code>memo</code>, <code>llm</code>); 9 typed schemas + provenance model in <code>schemas.py</code>; a fixture loader and labeled fixtures (18 papers, 10 proteins, 9 associations, 3 questions); idempotent, content-deterministic SQLite ingestion via <code>storage/</code>; transparent <a href="search.html">search + topic grouping</a> via <code>search/</code>; dictionary <a href="extraction.html">entity/claim extraction</a>, <a href="evidence.html">evidence-table assembly</a>, and the end-to-end <a href="memo.html">research memo</a> via <code>evidence/</code>; an offline-first <a href="databases.html">connector layer</a> (fixture / cache / opt-in live) via <code>databases/</code>; five <a href="visualizations.html">figures</a> (data + optional matplotlib PNGs) via <code>visualization/</code>; a gold-label <a href="evaluation.html">self-evaluation</a> harness via <code>evals/</code>; and an optional, cost-guarded, disabled-by-default <a href="llm.html">LLM adapter</a> via <code>llm/</code> (off the default path). The README, docs, and this website have been brought into line with what actually exists (M11); only the final quality-gate pass (M12) remains.</td></tr>
         <tr><th>Tests / results</th><td>274 offline tests pass, 1 skipped (contract + package-import + CLI smoke + schema/fixture + storage/ingestion + search/topics + extraction + evidence table + database connectors + visualizations + evaluation + research memo + LLM adapter). The figure-rendering test is skipped when matplotlib is absent. See <a href="evaluation.html">Evaluation</a> and <a href="results.html">Results</a> for measured numbers.</td></tr>
         <tr><th>Open questions</th><td>Whether transparent baselines alone make claims auditable enough to be useful.</td></tr>
       </table>
+    <section>
+      <h2>Measured results (on the committed fixtures)</h2>
+
+      <p>Produced by <code>biosci eval</code> against committed gold labels; full
+      table with denominators in <a href="results.html">Results</a> and
+      <code>docs/RESULTS.md</code>. These measure <strong>pipeline behaviour on a
+      tiny, partly-synthetic corpus</strong> &mdash; not population performance or
+      biological truth; small N means the intervals are wide on purpose.</p>
+      <table class="grid">
+        <tr><th>Metric</th><th>Value (95% Wilson CI)</th><th>Denominator</th></tr>
+        <tr><td>ingestion correctness</td><td>1.000 [0.912, 1.000]</td><td>40 / 40 records</td></tr>
+        <tr><td>search recall@5 (micro)</td><td>1.000 [0.806, 1.000]</td><td>16 / 16 pairs</td></tr>
+        <tr><td>entity precision / recall</td><td>1.000 / 0.917 (F1 0.957)</td><td>22/22, 22/24</td></tr>
+        <tr><td>claim sanity</td><td>1.000 [0.916, 1.000]</td><td>42 / 42 claims</td></tr>
+        <tr><td>evidence completeness + provenance coverage</td><td>1.000 [0.947, 1.000] each</td><td>68 / 68 rows</td></tr>
+      </table>
+    </section>
+    <section>
+      <h2>What it does <em>not</em> claim</h2>
+
+      <ul>
+        <li><strong>Not</strong> a medical-advice, diagnostic, treatment, or
+        clinical-decision tool; no drug efficacy/safety/dosing &mdash; output that
+        reads as clinical advice is a defect (<a href="safety.html">safety</a>).</li>
+        <li><strong>Not</strong> expert-curation quality: dictionary entity
+        recognition misses synonyms and novel entities; rule/template claim
+        extraction has limited recall and is brittle to paraphrase and negation.</li>
+        <li>"Support / conflict / unknown" is a <strong>heuristic textual signal</strong>,
+        not an adjudication of biological correctness or study quality.</li>
+        <li>The numbers above are <strong>not</strong> a benchmark or a
+        state-of-the-art claim; they certify the pipeline behaves as specified on a
+        small fixture set.</li>
+        <li>The optional <a href="llm.html">LLM adapter</a> adds <strong>no measured
+        pipeline capability</strong> and never speaks as a transparent baseline.</li>
+      </ul>
+      <p class="note">See <a href="limitations.html">Limitations</a> for the full
+      list and <a href="roadmap.html">Roadmap</a> for the path from prototype to a
+      research result.</p>
+    </section>
     <section>
       <h2>Relevant files</h2>
 
