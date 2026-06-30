@@ -56,7 +56,7 @@
         <tr><td>4</td><td>Entity and claim extraction baseline</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>5</td><td>Evidence table builder</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>6</td><td>Database connector layer</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>7</td><td>Visualizations</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>7</td><td>Visualizations</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>8</td><td>Evaluation harness</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>9</td><td>End-to-end research memo generation</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>10</td><td>Optional LLM adapter (not required)</td><td><span class="badge badge-planned">Planned</span></td></tr>
@@ -65,6 +65,38 @@
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 7 &mdash; delivered</h2>
+
+      <p>The workbench now produces <strong>five figures</strong> over its own
+      reports, each split into <strong>inspectable data</strong> and
+      <strong>optional rendering</strong>. Delivered:
+      <code>src/bioscientist_os/visualization/model.py</code> (frozen,
+      <code>matplotlib</code>-free, provenance-carrying figure-data dataclasses),
+      <code>visualization/build.py</code> (builders that re-present the M3 topic
+      grouping, M4 extraction, and M5 evidence tables, plus
+      <code>load_visualizations(db)</code>), <code>visualization/figures.py</code>
+      (an <em>optional</em> <code>matplotlib</code> renderer whose
+      <code>write_visualizations</code> always writes the data JSON and renders PNGs
+      only when the <code>viz</code> extra is installed), the <code>biosci
+      figures</code> CLI command, and
+      <code>scripts/05_generate_visualizations.py</code>. The figures are a
+      <strong>literature timeline</strong> (18 papers / 17 years),
+      a <strong>topic-cluster summary</strong> (10 groups, 6 singleton), a
+      <strong>claim/evidence matrix</strong> (papers &times; question entities,
+      support/conflict/unknown), an <strong>entity/database-link graph</strong> (53
+      nodes, 80 edges), and a <strong>support-vs-conflict table</strong> (3
+      questions: 36 support / 13 conflict / 19 unknown). The figure data is
+      deterministic (byte-identical <code>visualizations.json</code> across runs).</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 195 passed,
+      1 skipped (offline); <code>ruff check</code> clean on the new files. The
+      figure-rendering test is <strong>skipped when matplotlib is absent</strong>, so
+      the core path stays light. The matrix/table support signal is a heuristic
+      <em>textual</em> signal and the link-graph database edges are inferred
+      relations &mdash; neither is a biological or clinical verdict
+      (<a href="safety.html">safety</a>). Figures summarize a tiny, partly-synthetic
+      corpus; they are descriptive, not field maps.</p>
     </section>
     <section>
       <h2>Milestone 6 &mdash; delivered</h2>

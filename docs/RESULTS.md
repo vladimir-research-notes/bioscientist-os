@@ -22,13 +22,15 @@ The only measured results so far concern the build itself, not the pipeline:
 | 3 — search and topic grouping | Done | (subsumed) |
 | 4 — entity and claim extraction baseline | Done | (subsumed) |
 | 5 — evidence table builder | Done | (subsumed) |
-| 6 — database connector layer | Done | `python3 -m pytest -q` → **178 passed** |
+| 6 — database connector layer | Done | (subsumed) |
+| 7 — visualizations | Done | `python3 -m pytest -q` → **195 passed, 1 skipped** |
 
-The 178 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
+The 195 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
 Milestone-1 schema and fixture checks (30), the Milestone-2 storage and
 ingestion checks (17), the Milestone-3 search and topic checks (28), the
 Milestone-4 extraction checks (24), the Milestone-5 evidence-table checks
-(24), and the Milestone-6 connector checks (35): schema JSON round-trips, the
+(24), the Milestone-6 connector checks (35), and the Milestone-7 visualization
+checks (17 run + 1 skipped): schema JSON round-trips, the
 enforced provenance/epistemic/validation rules, fixture loading, ingestion into
 SQLite (count checks, idempotent re-ingest, two-build determinism, exact
 round-trip, schema-validation-on-ingest), search and topic grouping (tokenizer
@@ -44,7 +46,11 @@ lookup with `data_source=fixture`, missing-id `None`/`RecordNotFound`, the
 registry, cache miss→`fixture`/hit→`cache` with offline-first serving and
 canonical round-trip, transient-only retry with deterministic backoff, the
 opt-in live connector exercised offline with a mock transport, and the
-`biosci db` CLI). No *evaluation* numbers exist yet; those land in Milestone 8.
+`biosci db` CLI), and the visualizations (figure-data determinism, the matrix
+cell rule, link-graph consistency, support-count agreement with the M5 tables,
+the safety framing, and the `biosci figures` CLI; the PNG-rendering test is
+skipped when `matplotlib` is absent). No *evaluation* numbers exist yet; those
+land in Milestone 8.
 
 ### Fixtures (Milestone 1)
 
@@ -238,8 +244,37 @@ biological assertion.
 
 ### Figures (Milestone 7)
 
-Saved under `results/figures/` (gitignored, regenerable). Regeneration commands
-are listed in `docs/REPRODUCIBILITY.md`.
+Produced by `python3 scripts/05_generate_visualizations.py` (or `biosci figures
+--db ...`). Each figure is split into **inspectable data** and **optional
+rendering**: the data — a deterministic, provenance-carrying re-presentation of
+the M3/M4/M5 reports — is always written to
+`results/figures/visualizations.json`; PNGs are rendered only when the optional
+`matplotlib` extra is installed (`pip install -e '.[viz]'`). The figure data is
+byte-identical across runs (PNG bytes may vary by `matplotlib` version). All
+artifacts are gitignored and regenerable.
+
+| Figure | What it shows | On the fixtures |
+|--------|---------------|-----------------|
+| `timeline` | papers per publication year (observed metadata) | 18 papers across 17 years (0 undated) |
+| `topic_clusters` | M3 single-link cosine groups + label terms | 10 groups (6 singleton) at threshold 0.15 |
+| `evidence_matrix` | papers × question entities, strongest support label per cell | `rq-autophagy-senescence`: 14 papers × 5 entities (29 claim rows) = 18 support / 3 conflict / 1 unknown / 48 none |
+| `link_graph` | entity ↔ database links + claim co-occurrence | 53 nodes (24 entity, 29 database); 80 edges (51 co-occurrence, 20 xref, 9 association) |
+| `support_conflict` | support/conflict/unknown counts per research question | 3 questions: 36 support / 13 conflict / 19 unknown (68 rows total) |
+
+The evidence matrix defaults to the first stored question
+(`rq-autophagy-senescence`); pass `--question` / `--question-id` to choose
+another. A cell is the **highest-confidence** support label of the rows linking a
+paper to a question entity (ties → smallest `claim_id`); `none` means no claim
+links them (an honest gap), distinct from `unknown` (a claim exists whose phrasing
+neither affirms nor negates). The per-question support counts equal the M5
+evidence tables' counts (the test suite asserts this), so the support-vs-conflict
+totals reconcile exactly with the evidence-table section above (17+15+4 = 36
+support, 6+6+1 = 13 conflict, 8+8+3 = 19 unknown).
+
+These are figure-data **counts and structure**, not quality metrics. The matrix
+and table support signal is a heuristic **textual** signal (`rule:support-cues`)
+and the link-graph database edges are **inferred relations** (combined records) —
+neither is a biological or clinical verdict (see `docs/SAFETY.md`).
 
 ## Exact commands
 

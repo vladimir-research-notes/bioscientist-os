@@ -40,9 +40,10 @@
 
       <p>This page mirrors <code>docs/RESULTS.md</code>. Functional results exist for
       ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4),
-      evidence-table assembly (M5), and the database-connector layer (M6); later rows
-      are still pending. Empty means <em>not yet measured</em>, not zero. Do not cite
-      any number until the corresponding milestone has landed.</p>
+      evidence-table assembly (M5), the database-connector layer (M6), and the
+      figures (M7); later rows are still pending. Empty means <em>not yet
+      measured</em>, not zero. Do not cite any number until the corresponding
+      milestone has landed.</p>
     </section>
     <section>
       <h2>Pending tables</h2>
@@ -57,12 +58,12 @@
         <tr><td>evidence rows + provenance coverage</td><td><strong>done (M5):</strong> 31 / 29 / 8 rows for the three fixture questions, all at 100% provenance coverage; senescence&ndash;inflammation = 17 support / 6 conflict / 8 unknown (behavior, not quality)</td></tr>
         <tr><td>evidence-table support-label quality (95% CI)</td><td>pending (M8)</td></tr>
         <tr><td>database connectors</td><td><strong>done (M6):</strong> 3 fixture connectors (uniprot/opentargets/papers = 10/9/18 records), all <code>data_source=fixture</code>; cache miss&rarr;<code>fixture</code>/hit&rarr;<code>cache</code> (offline-first); inventory, not quality</td></tr>
-        <tr><td>figures</td><td>pending (M7)</td></tr>
+        <tr><td>figures</td><td><strong>done (M7):</strong> 5 figures (timeline 18 papers/17 years; 10 topic clusters; evidence matrix 14&times;5 = 18 support/3 conflict/1 unknown/48 none; link graph 53 nodes/80 edges; support-vs-conflict 36/13/19 over 3 questions); deterministic data JSON, PNGs optional (matplotlib)</td></tr>
       </table>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Numbers appear here as each milestone produces them. Functional results so far: ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4), evidence-table assembly (M5), database connectors (M6).</td></tr>
-        <tr><th>Tests / results</th><td>178 offline tests pass. Ingestion counts/determinism, search/topic behavior, extraction counts/determinism, evidence-table counts/coverage/determinism, and connector provenance/cache/retry behavior are measured; extraction <em>quality</em> and evidence-table support-label <em>quality</em> (precision/recall) are pending (M8).</td></tr>
+        <tr><th>Implementation</th><td>Numbers appear here as each milestone produces them. Functional results so far: ingestion (M2), search + topic grouping (M3), entity/claim extraction (M4), evidence-table assembly (M5), database connectors (M6), figures (M7).</td></tr>
+        <tr><th>Tests / results</th><td>195 offline tests pass (1 skipped). Ingestion counts/determinism, search/topic behavior, extraction counts/determinism, evidence-table counts/coverage/determinism, connector provenance/cache/retry behavior, and figure-data determinism/consistency are measured; extraction <em>quality</em> and evidence-table support-label <em>quality</em> (precision/recall) are pending (M8).</td></tr>
         <tr><th>Open questions</th><td>All results are on a tiny, partly-synthetic corpus &mdash; illustrative only. Search hit@k uses single-target labeled queries; the rigorous evaluation is M8.</td></tr>
       </table>
     <section>

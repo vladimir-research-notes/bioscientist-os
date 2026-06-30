@@ -39,6 +39,14 @@ Milestone 6 adds the offline-first database-connector subcommands:
 * ``biosci db lookup --source <name> --id <id> --db <path> [--cache]`` — fetch one
   record, showing its ``data_source`` provenance (fixture / cache / live).
 
+Milestone 7 adds figure generation over the workbench's own reports:
+
+* ``biosci figures --db <path> [--out-dir <dir>] [--no-render] [--json]`` — build the
+  five figures' inspectable data (literature timeline, topic-cluster summary,
+  claim/evidence matrix, entity/database-link graph, support-vs-conflict table),
+  always write ``visualizations.json``, and render PNGs when the optional
+  ``matplotlib`` extra is installed.
+
 Later milestones add the remaining data subcommands defined in ``docs/PLAN.md``
 (``eval``, ``memo``). The console entry point is
 ``bioscientist_os.cli:main`` (see ``pyproject.toml``); ``python -m bioscientist_os``
@@ -99,8 +107,9 @@ def info() -> None:
         f"Safety: {SAFETY_NOTE}",
         "",
         "Status: fixture ingestion, local SQLite storage, CPU-only search + topic "
-        "grouping, rule-based entity/claim extraction, evidence-table assembly, and "
-        "an offline-first database-connector layer available (Milestones 0-6).",
+        "grouping, rule-based entity/claim extraction, evidence-table assembly, an "
+        "offline-first database-connector layer, and workbench figures available "
+        "(Milestones 0-7).",
         "Evaluation and memo subcommands land milestone by milestone — see "
         "docs/PLAN.md and the website Milestones page.",
     ]
@@ -576,6 +585,115 @@ def _write_evidence_csv(path: Path, report) -> None:
         writer = csv.DictWriter(fh, fieldnames=list(EvidenceReport.EVIDENCE_COLUMNS))
         writer.writeheader()
         writer.writerows(report.evidence_rows())
+
+
+@app.command()
+def figures(
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database to visualize"
+    ),
+    out_dir: Path = typer.Option(
+        Path("results") / "figures",
+        "--out-dir",
+        help="directory for visualizations.json and the PNGs (default: results/figures)",
+    ),
+    question: str = typer.Option(
+        None, "--question", "-q",
+        help="research question (text or stored id) for the evidence matrix",
+    ),
+    question_id: str = typer.Option(
+        None, "--question-id", help="select the evidence-matrix question by stored id"
+    ),
+    threshold: float = typer.Option(
+        None, "--threshold",
+        help="topic-cluster cosine threshold (default: the documented baseline)",
+    ),
+    no_render: bool = typer.Option(
+        False, "--no-render", help="write the figure data only; never render PNGs"
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="emit the figure data as JSON instead of text"
+    ),
+) -> None:
+    """Generate the workbench figures (data always; PNGs when matplotlib is installed).
+
+    Builds five figures from the workbench's own transparent reports — a literature
+    timeline (observed metadata), the M3 topic-cluster summary, a claim/evidence
+    matrix (papers x question entities), an entity/database-link graph, and a
+    support-vs-conflict table. The inspectable figure *data* is always written to
+    ``visualizations.json``; PNGs are rendered only with the optional ``matplotlib``
+    extra (``pip install -e '.[viz]'``). The matrix's support/conflict/unknown cells
+    and the link graph's database edges are heuristic / inferred respectively, NOT
+    biological or clinical verdicts (see docs/SAFETY.md).
+    """
+    from bioscientist_os.search import DEFAULT_THRESHOLD
+    from bioscientist_os.visualization import load_visualizations, write_visualizations
+
+    try:
+        report = load_visualizations(
+            db,
+            question_text=question,
+            question_id=question_id,
+            threshold=DEFAULT_THRESHOLD if threshold is None else threshold,
+        )
+    except ValueError as exc:
+        # Either "not a bioscientist-os database" or "no research question available".
+        if "not a bioscientist-os database" in str(exc):
+            typer.echo(
+                f"{db} is not a bioscientist-os database (no ingested tables). "
+                "Run: biosci ingest data/fixtures --db " + str(db),
+                err=True,
+            )
+        else:
+            typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(code=1) from None
+    except KeyError:
+        typer.echo(f"no stored research question with id {question_id!r} in {db}", err=True)
+        raise typer.Exit(code=1) from None
+
+    if json_output:
+        typer.echo(_json.dumps(report.to_dict(), indent=2, sort_keys=True))
+        return
+
+    artifacts = write_visualizations(report, out_dir, render=not no_render)
+
+    tl = report.timeline
+    cl = report.clusters
+    mx = report.matrix
+    lg = report.link_graph
+    totals = report.support_table.totals()
+    lines = [
+        f"Figures from {db}  (data_source={report.data_source})",
+        f"  timeline        : {tl.total_papers} papers across {tl.num_years} years"
+        + (f" ({tl.undated} undated)" if tl.undated else ""),
+        f"  topic clusters  : {cl.num_groups} groups ({cl.num_singletons} singleton) "
+        f"at threshold {cl.threshold}",
+        f"  evidence matrix : {mx.question_id} — {mx.shape[0]} papers x "
+        f"{mx.shape[1]} entities ({mx.num_rows_used} claim rows)",
+        f"  link graph      : {len(lg.nodes)} nodes, {len(lg.edges)} edges "
+        f"(nodes {lg.node_counts()}; edges {lg.edge_counts()})",
+        f"  support table   : {len(report.support_table.rows)} questions — "
+        f"support={totals['support']} conflict={totals['conflict']} unknown={totals['unknown']}",
+        "",
+        f"Wrote {artifacts.json_path}",
+    ]
+    if artifacts.rendered:
+        for key in report.FIGURE_KEYS:
+            lines.append(f"Wrote {artifacts.figure_paths[key]}")
+    elif no_render:
+        lines.append("(--no-render: PNGs skipped; figure data written to JSON only)")
+    else:
+        lines.append(
+            "(matplotlib not installed: PNGs skipped; install with  pip install -e '.[viz]'  "
+            "— figure data was written to JSON)"
+        )
+    lines += [
+        "",
+        "Matrix support/conflict/unknown is a heuristic textual signal and link-graph "
+        "database edges are inferred relations — neither is a biological or clinical "
+        "verdict (see docs/SAFETY.md).",
+    ]
+    typer.echo("\n".join(lines))
 
 
 # ---------------------------------------------------------------------------

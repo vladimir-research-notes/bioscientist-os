@@ -34,7 +34,7 @@ independently importable and unit-tested.
 | `search/` | BM25F lexical + TF-IDF search, single-link topic grouping **(done, M3)** | M3 |
 | `evidence/` | entity + claim extraction **(done, M4)**; evidence-table builder | M4–M5 |
 | `databases/` | connector interface, fixture/cache/live adapters | M6 |
-| `visualization/` | timeline, clusters, matrix, link graph | M7 |
+| `visualization/` | timeline, clusters, evidence matrix, link graph, support-vs-conflict table **(done, M7)**; matplotlib optional | M7 |
 | `evals/` | gold-label evaluation harness | M8 |
 | `cli.py` | `biosci` command surface | M0+ |
 

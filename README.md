@@ -15,18 +15,22 @@ paper -> extracted claim -> biological entities -> database links -> support / c
 ```
 
 > **Status:** early-stage. The project contract (plan, docs, website, permission
-> policy, autonomous milestone runner) is in place and **Milestones 0–5** have
+> policy, autonomous milestone runner) is in place and **Milestones 0–7** have
 > landed: the repository is an importable package with a runnable `biosci` CLI
 > (`version`, `info`, `env-check`, `ingest`, `stats`, `search`, `topics`,
-> `extract`, `evidence`); typed schemas + labeled fixtures ingest into a
-> deterministic SQLite database; the corpus is searchable (BM25F) and groupable
-> into topics; a transparent non-LLM baseline recognizes entities and extracts
-> claims; and the workbench assembles **evidence tables** grouped by a research
+> `extract`, `evidence`, `db`, `figures`); typed schemas + labeled fixtures ingest
+> into a deterministic SQLite database; the corpus is searchable (BM25F) and
+> groupable into topics; a transparent non-LLM baseline recognizes entities and
+> extracts claims; the workbench assembles **evidence tables** grouped by a research
 > question, every cell with provenance, database links, and a heuristic
-> support/conflict/unknown signal. The remaining pipeline (database connectors,
-> visualizations, evaluation, memo) is built milestone by milestone — see
-> [`docs/PLAN.md`](docs/PLAN.md) and the live status on the website's
-> *Milestones* page. Do not read unimplemented milestones as done.
+> support/conflict/unknown signal; an offline-first **database-connector layer**
+> serves records with an explicit `data_source` provenance (fixture / cache / live);
+> and the workbench generates five **figures** (timeline, topic clusters, evidence
+> matrix, link graph, support-vs-conflict) — inspectable data always, PNGs when the
+> optional `matplotlib` extra is installed. The remaining pipeline (evaluation, memo)
+> is built milestone by milestone — see [`docs/PLAN.md`](docs/PLAN.md) and the live
+> status on the website's *Milestones* page. Do not read unimplemented milestones as
+> done.
 
 ## Why this exists
 
@@ -85,6 +89,8 @@ biosci search "cellular senescence inflammation" --db results/raw/bioscientist.d
 biosci extract --db results/raw/bioscientist.db   # M4
 biosci evidence --question "What evidence links cellular senescence to chronic inflammation?" \
   --db results/raw/bioscientist.db --out results/processed/evidence_table.csv        # M5
+biosci db lookup --source uniprot --id P05231 --db results/raw/bioscientist.db   # M6
+biosci figures --db results/raw/bioscientist.db   # M7 (PNGs need: pip install -e '.[viz]')
 biosci memo --question "..." --db results/raw/bioscientist.db --out results/processed/memo.md  # M9 (planned)
 ```
 

@@ -65,8 +65,13 @@ and every span is the verbatim `abstract[start:end]` — so
 assembly (M5) is the same: questions resolve deterministically, claims are kept in
 corpus order, database links and rows are sorted, and rows are ordered by
 `(-confidence, paper_id, claim_id)` — so `results/processed/evidence_tables.json`
-is byte-identical across runs. The evaluation harness (M8) emits the same numbers
-on every run from the same inputs.
+is byte-identical across runs. Figure generation (M7) is likewise a pure function
+of the database: it re-presents the M3/M4/M5 reports and sorts every series, node,
+and edge before emitting them, so `results/figures/visualizations.json` is
+byte-identical across runs. Only the optional PNG bytes can vary (across
+`matplotlib` versions/fonts); the network-graph layout is seeded so a render is at
+least visually stable run-to-run. The evaluation harness (M8) emits the same
+numbers on every run from the same inputs.
 
 ### End-to-end run (assembled across milestones)
 
@@ -112,7 +117,11 @@ regenerable). `biosci db` drives the offline-first connector layer (M6): `db
 sources` lists the fixture connectors, `db list`/`db lookup` serve records by id with
 an explicit `data_source` provenance, and `db lookup --cache` demonstrates the
 read-through cache under `data/cache/` (gitignored) — the first lookup reports the
-real source, the second reports `data_source=cache`.
+real source, the second reports `data_source=cache`. `biosci figures` (M7) builds
+the five figures over the corpus and writes `results/figures/visualizations.json`
+(the inspectable figure data, always) plus the PNGs when the optional `matplotlib`
+extra is installed; `scripts/05_generate_visualizations.py` is the thin wrapper, and
+`--no-render` writes the data only.
 
 ### What is committed vs. regenerated
 
