@@ -31,7 +31,7 @@ independently importable and unit-tested.
 | `schemas.py` | pydantic models + provenance/epistemic fields | M1 |
 | `ingest/` | fixture loaders, normalization | M2 |
 | `storage/` | sqlite (default) / duckdb persistence | M2 |
-| `search/` | lexical + TF-IDF search, topic grouping | M3 |
+| `search/` | BM25F lexical + TF-IDF search, single-link topic grouping **(done, M3)** | M3 |
 | `evidence/` | entity + claim extraction, evidence-table builder | M4–M5 |
 | `databases/` | connector interface, fixture/cache/live adapters | M6 |
 | `visualization/` | timeline, clusters, matrix, link graph | M7 |

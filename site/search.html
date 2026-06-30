@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Search &amp; topics — bioscientist-os</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><a href="index.html">bioscientist&#8209;os</a></div>
+    <div class="tagline">CPU-first evidence workbench for biomedical literature</div>
+  </header>
+  <nav class="site-nav">
+      <a href="index.html">Overview</a>
+      <a href="architecture.html">Architecture</a>
+      <a href="data-model.html">Data model</a>
+      <a href="ingestion.html">Ingestion</a>
+      <a href="search.html" class="active">Search &amp; topics</a>
+      <a href="evidence.html">Evidence tables</a>
+      <a href="databases.html">Database connectors</a>
+      <a href="visualizations.html">Visualizations</a>
+      <a href="evaluation.html">Evaluation</a>
+      <a href="results.html">Results</a>
+      <a href="milestones.html">Milestones</a>
+      <a href="reproducibility.html">Reproducibility</a>
+      <a href="limitations.html">Limitations</a>
+      <a href="safety.html">Safety</a>
+      <a href="roadmap.html">Roadmap</a>
+  </nav>
+  <main class="content">
+    <div class="page-head">
+      <h1>Search &amp; topics</h1>
+      <span class="badge badge-done">Done (M3)</span>
+    </div>
+    <p class="subtitle">A transparent, CPU-only lexical search whose score is its own explanation, plus simple topic grouping.</p>
+    <section>
+      <h2>Brief</h2>
+
+      <p>Search ranks the ingested papers with <strong>BM25F</strong>, the
+      multi-field variant of Okapi BM25, over three weighted fields &mdash;
+      <code>title</code> (&times;3.0), <code>keywords</code> (&times;2.0), and
+      <code>abstract</code> (&times;1.0). Every hit carries a per-term, per-field
+      breakdown: the inverse document frequency of each query term, which fields it
+      matched in, and its additive contribution to the score &mdash; so the total
+      score is exactly the sum of its parts and nothing is opaque.</p>
+      <pre>biosci search "cellular senescence inflammation" --db results/raw/bioscientist.db
+biosci search "IL-6 SASP senescence" --db results/raw/bioscientist.db --explain
+biosci topics --db results/raw/bioscientist.db --threshold 0.15</pre>
+      <p>Topic grouping is <strong>single-link clustering at a cosine
+      threshold</strong> &mdash; the connected components of a TF-IDF
+      cosine-similarity graph &mdash; with each group labeled by its most
+      distinctive terms. Results are rankings and groupings of
+      <em>observed-metadata</em> papers: search and topics make <strong>no
+      claims</strong> and assert no biology.</p>
+    </section>
+    <section>
+      <h2>Deeper</h2>
+
+      <p>The tokenizer is deliberately simple and documented: text is lower-cased
+      and split into alphanumeric tokens that keep <em>internal</em> hyphens, so
+      biomedical surface forms such as <code>IL-6</code>, <code>p16INK4a</code>, and
+      <code>ATG7-dependent</code> survive as single tokens. There is no stemming and
+      no synonym or identifier expansion &mdash; those would hide which literal term
+      matched. A direct consequence: <code>IL-6</code> and <code>IL6</code> are
+      different tokens, and search does not unify them (mapping surface forms to
+      canonical gene/protein identifiers is entity linking, Milestone&nbsp;4).</p>
+
+      <p>BM25F uses <code>k1&nbsp;=&nbsp;1.5</code> and <code>b&nbsp;=&nbsp;0.75</code>;
+      idf is the non-negative Robertson form. Hits sort by descending score then by
+      <code>paper_id</code> (a stable tie-break), so a query reproduces exactly on
+      every build. An optional <code>--method tfidf</code> mode scores papers by
+      smoothed, L2-normalized TF-IDF cosine to the query &mdash; the same vectors
+      used for topic grouping.</p>
+
+      <p>Single-link clustering is transparent but has honest limits: it can
+      <em>chain</em> loosely-related papers through intermediate links, and it cannot
+      place one paper in two themes (a paper about autophagy <em>and</em> the SASP
+      lands in only one group). The number of groups is <strong>monotone</strong> in
+      the threshold &mdash; raising it only removes edges, so groups never merge. The
+      threshold (<code>0.15</code> by default) was chosen on these fixtures and is
+      reported in every result, not hidden. The labels describe a group; they are
+      not asserted topics of the field.</p>
+
+      <p>The index is recomputed in memory from the database on each run rather than
+      persisted. For the small corpora this workbench targets that is a pure,
+      deterministic function of the database with negligible cost; it would be a
+      scaling limitation on a large corpus, which is stated rather than hidden.</p>
+    </section>
+      <table class="status">
+        <tr><th>Implementation</th><td>Done (M3): <code>SearchIndex</code> (BM25F + TF-IDF cosine) in <code>search/index.py</code>, single-link topic grouping in <code>search/topics.py</code>, the transparent tokenizer in <code>search/tokenize.py</code>, and result dataclasses in <code>search/model.py</code>, wired to <code>biosci search</code> / <code>biosci topics</code>.</td></tr>
+        <tr><th>Tests / results</th><td>28 new tests (95 total, offline). On 18 indexed papers (436-term vocabulary): topic grouping at threshold 0.15 yields 10 groups (4 multi-paper, 6 singletons); on 8 single-target labeled queries the expected paper is rank&nbsp;1 in 7/8 and in the top&nbsp;3 in 8/8 (a sanity check on a tiny synthetic corpus, not a recall benchmark &mdash; see <a href="results.html">Results</a> and <a href="evaluation.html">Evaluation</a>).</td></tr>
+        <tr><th>Open questions</th><td>Whether to add identifier-aware matching (<code>IL-6</code>&nbsp;&harr;&nbsp;<code>IL6</code>) once entity linking exists (M4); whether single-link clustering should be replaced by an overlapping/soft topic method; whether a persisted index is ever needed at this scale.</td></tr>
+      </table>
+    <section>
+      <h2>Relevant files</h2>
+
+    </section>
+      <ul class="files">
+        <li><code>src/bioscientist_os/search/tokenize.py</code></li>
+        <li><code>src/bioscientist_os/search/index.py</code></li>
+        <li><code>src/bioscientist_os/search/topics.py</code></li>
+        <li><code>src/bioscientist_os/search/model.py</code></li>
+        <li><code>src/bioscientist_os/cli.py</code> (<code>search</code>, <code>topics</code>)</li>
+        <li><code>scripts/02_build_index.py</code></li>
+        <li><code>tests/test_search.py</code></li>
+      </ul>
+  </main>
+  <footer class="site-footer">
+    <p>bioscientist-os — research-assistance tool, <strong>not</strong> a medical-advice
+    or diagnostic tool (<a href="safety.html">safety</a>). Built milestone by milestone;
+    this site reflects the repository's actual state. See <a href="limitations.html">limitations</a>.</p>
+  </footer>
+</body>
+</html>

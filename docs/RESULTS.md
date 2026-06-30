@@ -18,17 +18,20 @@ The only measured results so far concern the build itself, not the pipeline:
 |-----------|--------|--------------------|
 | 0 — package skeleton and runnable CLI | Done | (subsumed) |
 | 1 — data schemas and small fixtures | Done | (subsumed) |
-| 2 — ingestion and local storage | Done | `python3 -m pytest -q` → **67 passed** |
+| 2 — ingestion and local storage | Done | (subsumed) |
+| 3 — search and topic grouping | Done | `python3 -m pytest -q` → **95 passed** |
 
-The 67 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
-Milestone-1 schema and fixture checks (30), and the Milestone-2 storage and
-ingestion checks (17): schema JSON round-trips, the enforced
-provenance/epistemic/validation rules, fixture loading (counts, `synthetic`
-labeling, `data_source` stamping, loud failure on malformed input), and now
-ingestion into SQLite (count checks, idempotent re-ingest, two-build
-determinism, exact round-trip, and schema-validation-on-ingest). No search,
-extraction, evidence, or evaluation *pipeline* numbers exist yet; those land in
-Milestones 3–8.
+The 95 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
+Milestone-1 schema and fixture checks (30), the Milestone-2 storage and
+ingestion checks (17), and the Milestone-3 search and topic checks (28): schema
+JSON round-trips, the enforced provenance/epistemic/validation rules, fixture
+loading, ingestion into SQLite (count checks, idempotent re-ingest, two-build
+determinism, exact round-trip, schema-validation-on-ingest), and now search and
+topic grouping (tokenizer behavior, BM25F scoring with `score == Σ
+contributions`, field weighting, tiny labeled queries, TF-IDF cosine
+self-similarity, topic partition/monotonicity, and the CLI). No extraction,
+evidence, or evaluation *pipeline* numbers exist yet; those land in
+Milestones 4–8.
 
 ### Fixtures (Milestone 1)
 
@@ -75,11 +78,44 @@ independent of insertion order and on-disk layout. Every ingested row is
 *observed metadata* with `data_source = fixture`; no claims or relations are
 produced at ingestion.
 
-### Search (Milestone 3)
+### Search and topic grouping (Milestone 3)
 
-| Query | Recall@5 | Denominator |
-|-------|----------|-------------|
-| _pending_ | | |
+Produced by `python3 scripts/02_build_index.py` (or `biosci search` /
+`biosci topics`). The index is recomputed in memory from the ingested database
+each run; building it is deterministic.
+
+Corpus index over the 18 ingested papers:
+
+| Quantity | Value |
+|----------|-------|
+| papers indexed | 18 |
+| vocabulary (distinct terms, all fields) | 436 |
+| avg field length (title / keywords / abstract) | 9.7 / 5.5 / 45.2 tokens |
+| BM25F field weights (title / keywords / abstract) | 3.0 / 2.0 / 1.0 |
+| BM25 parameters | `k1 = 1.5`, `b = 0.75` |
+
+Search sanity on **8 single-target, hand-labeled queries** (each query has one
+"clearly correct" paper; assertion is top-_k_ membership):
+
+| Metric | Value | Denominator |
+|--------|-------|-------------|
+| expected paper at rank 1 (`hit@1`) | 0.88 | 7 / 8 |
+| expected paper in top 3 (`hit@3`) | 1.00 | 8 / 8 |
+| expected paper in top 5 (`hit@5`) | 1.00 | 8 / 8 |
+
+This is a sanity check on a tiny synthetic corpus, **not** a recall benchmark;
+the rigorous evaluation with denominators and confidence intervals is Milestone 8.
+
+Topic grouping (single-link cosine clustering) at the default threshold `0.15`:
+
+| Quantity | Value |
+|----------|-------|
+| groups | 10 (4 multi-paper, 6 singletons) |
+| multi-paper groups (by label terms) | SASP/secretion (4); senescence markers (3); autophagy/mTOR/longevity (3); senolytics (2) |
+| determinism | identical grouping on every build; group count is monotone non-decreasing in the threshold |
+
+Group labels are the most distinctive terms of each group; they describe a group
+and are **not** asserted topics of the field.
 
 ### Entity / claim extraction (Milestones 4, 8)
 

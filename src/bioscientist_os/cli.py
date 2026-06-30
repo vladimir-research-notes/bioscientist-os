@@ -14,10 +14,16 @@ Milestone 2 adds the local-data subcommands:
 * ``biosci ingest <dir> --db <path>`` — load fixtures into a SQLite database;
 * ``biosci stats --db <path>``        — report what an ingested database contains.
 
+Milestone 3 adds CPU-only search and topic grouping over the ingested corpus:
+
+* ``biosci search "<query>" --db <path>`` — BM25F lexical search with a per-term,
+  per-field score explanation (optional TF-IDF cosine mode);
+* ``biosci topics --db <path>``           — single-link cosine topic grouping.
+
 Later milestones add the remaining data subcommands defined in ``docs/PLAN.md``
-(``search``, ``topics``, ``evidence``, ``eval``, ``memo``). The console entry
-point is ``bioscientist_os.cli:main`` (see ``pyproject.toml``);
-``python -m bioscientist_os`` routes here too via ``__main__``.
+(``evidence``, ``eval``, ``memo``). The console entry point is
+``bioscientist_os.cli:main`` (see ``pyproject.toml``); ``python -m bioscientist_os``
+routes here too via ``__main__``.
 """
 
 from __future__ import annotations
@@ -73,10 +79,10 @@ def info() -> None:
         "",
         f"Safety: {SAFETY_NOTE}",
         "",
-        "Status: fixture ingestion + local SQLite storage available "
-        "(Milestones 0-2).",
-        "Search, extraction, evidence, and memo subcommands land milestone by",
-        "milestone — see docs/PLAN.md and the website Milestones page.",
+        "Status: fixture ingestion, local SQLite storage, and CPU-only search + "
+        "topic grouping available (Milestones 0-3).",
+        "Extraction, evidence, and memo subcommands land milestone by milestone —",
+        "see docs/PLAN.md and the website Milestones page.",
     ]
     typer.echo("\n".join(lines))
 
@@ -196,6 +202,132 @@ def stats(
         "",
         "All rows are level: observed metadata (data_source=fixture). "
         "Not a clinical or diagnostic data source (see docs/SAFETY.md).",
+    ]
+    typer.echo("\n".join(lines))
+
+
+def _load_index_or_exit(db: Path):
+    """Open ``db`` and build a search index, or print the ``stats``-style error and exit 1."""
+    from bioscientist_os.search import load_index
+
+    try:
+        return load_index(db)
+    except ValueError:
+        typer.echo(
+            f"{db} is not a bioscientist-os database (no ingested tables). "
+            "Run: biosci ingest data/fixtures --db " + str(db),
+            err=True,
+        )
+        raise typer.Exit(code=1) from None
+
+
+@app.command()
+def search(
+    query: str = typer.Argument(..., help='search query, e.g. "cellular senescence inflammation"'),
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database to search"
+    ),
+    limit: int = typer.Option(10, "--limit", "-n", help="maximum hits to return"),
+    method: str = typer.Option(
+        "bm25", "--method", help="scoring method: 'bm25' (default) or 'tfidf' (cosine)"
+    ),
+    explain: bool = typer.Option(
+        False, "--explain", help="show the full per-term score breakdown for each hit"
+    ),
+    json_output: bool = typer.Option(
+        False, "--json", help="emit the result as JSON instead of text"
+    ),
+) -> None:
+    """Search the ingested corpus (CPU-only, offline) with a transparent lexical baseline.
+
+    Default scoring is BM25F over the title / keywords / abstract fields; every hit
+    carries which query terms matched, in which fields, and each term's score
+    contribution. Results are a *ranking of observed-metadata papers* — search makes
+    no claims and asserts no biology.
+    """
+    index = _load_index_or_exit(db)
+    if method not in ("bm25", "tfidf"):
+        typer.echo(f"unknown --method {method!r}; use 'bm25' or 'tfidf'", err=True)
+        raise typer.Exit(code=2)
+    response = index.search(query, limit=limit) if method == "bm25" else index.tfidf_search(
+        query, limit=limit
+    )
+
+    if json_output:
+        typer.echo(_json.dumps(response.to_dict(), indent=2, sort_keys=True))
+        return
+
+    header = (
+        f'Search: "{response.query}"  (method={response.method}, '
+        f"N={response.total_papers}, data_source={response.data_source})"
+    )
+    lines = [header, "query terms: " + (", ".join(response.query_terms) or "(none)")]
+    if not response.hits:
+        lines.append("  (no matching papers)")
+    for hit in response.hits:
+        year = hit.year if hit.year is not None else "----"
+        lines.append(f"  {hit.rank:>2}. {hit.score:7.3f}  {hit.paper_id}  {year}  {hit.title}")
+        lines.append(f"        matched: {hit.why()}")
+        if explain:
+            for m in hit.term_matches:
+                fields = ", ".join(f"{f}:{n}" for f, n in sorted(m.field_tf.items())) or "—"
+                lines.append(
+                    f"          {m.term:<18} idf={m.idf:6.3f}  fields[{fields}]  "
+                    f"wtf={m.weighted_tf:6.3f}  +{m.contribution:6.3f}"
+                )
+    lines += [
+        "",
+        "Hits are observed metadata (ranked papers); search produces no claims or "
+        "relations (see docs/SAFETY.md).",
+    ]
+    typer.echo("\n".join(lines))
+
+
+@app.command()
+def topics(
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database to group"
+    ),
+    threshold: float = typer.Option(
+        None, "--threshold", help="cosine edge threshold (default: the documented baseline)"
+    ),
+    top_terms: int = typer.Option(6, "--top-terms", help="label terms to show per group"),
+    json_output: bool = typer.Option(
+        False, "--json", help="emit the report as JSON instead of text"
+    ),
+) -> None:
+    """Group the corpus into topics by single-link cosine clustering (transparent baseline).
+
+    Connected components of a TF-IDF cosine-similarity graph; each group is labeled
+    by its most distinctive terms. Groups describe papers — they are not asserted
+    topics of the field.
+    """
+    from bioscientist_os.search import DEFAULT_THRESHOLD, group_topics
+
+    index = _load_index_or_exit(db)
+    report = group_topics(
+        index, threshold=DEFAULT_THRESHOLD if threshold is None else threshold, top_terms=top_terms
+    )
+
+    if json_output:
+        typer.echo(_json.dumps(report.to_dict(), indent=2, sort_keys=True))
+        return
+
+    lines = [
+        f"Topic report  (method={report.method})",
+        f"  threshold={report.threshold}  N={report.total_papers}  "
+        f"groups={report.num_groups} ({report.num_singletons} singleton)  "
+        f"data_source={report.data_source}",
+        "",
+    ]
+    for g in report.groups:
+        lines.append(f"  {g.topic_id}  (n={g.size})  terms: {', '.join(g.label_terms)}")
+        for pid in g.paper_ids:
+            lines.append(f"        {pid}")
+    lines += [
+        "",
+        "Groups are a transparent clustering of observed-metadata papers; the labels "
+        "describe a group, they are not claims (see docs/SAFETY.md).",
     ]
     typer.echo("\n".join(lines))
 

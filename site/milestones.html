@@ -16,6 +16,7 @@
       <a href="architecture.html">Architecture</a>
       <a href="data-model.html">Data model</a>
       <a href="ingestion.html">Ingestion</a>
+      <a href="search.html">Search &amp; topics</a>
       <a href="evidence.html">Evidence tables</a>
       <a href="databases.html">Database connectors</a>
       <a href="visualizations.html">Visualizations</a>
@@ -50,7 +51,7 @@
         <tr><td>0</td><td>Package skeleton and runnable contract</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>1</td><td>Data schemas and small fixtures</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>2</td><td>Ingestion and local storage</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>3</td><td>Search and topic grouping</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>3</td><td>Search and topic grouping</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>4</td><td>Entity and claim extraction baseline</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>5</td><td>Evidence table builder</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>6</td><td>Database connector layer</td><td><span class="badge badge-planned">Planned</span></td></tr>
@@ -63,6 +64,31 @@
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 3 &mdash; delivered</h2>
+
+      <p>The ingested corpus is now searchable and groupable, on CPU and offline.
+      Delivered: a field-aware in-memory <code>SearchIndex</code>
+      (<code>src/bioscientist_os/search/index.py</code>) with a transparent
+      <strong>BM25F</strong> scorer over weighted <code>title</code> /
+      <code>keywords</code> / <code>abstract</code> fields and an optional TF-IDF
+      cosine mode; <strong>single-link cosine topic grouping</strong>
+      (<code>search/topics.py</code>); the transparent tokenizer
+      (<code>search/tokenize.py</code>); the <code>biosci search</code> and
+      <code>biosci topics</code> CLI commands (with <code>--explain</code> and
+      <code>--json</code>); and a thin <code>scripts/02_build_index.py</code> wrapper.
+      Every search hit reports a per-term, per-field breakdown whose contributions
+      sum exactly to the score; every topic group reports its distinctive label
+      terms. Indexing the <strong>18</strong> papers gives a 436-term vocabulary;
+      topic grouping at threshold 0.15 yields <strong>10</strong> groups (4
+      multi-paper, 6 singletons), and on 8 single-target labeled queries the expected
+      paper is rank&nbsp;1 in 7/8 and in the top&nbsp;3 in 8/8.</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 95 passed
+      (offline); <code>ruff check</code> clean on the new files. Results are rankings
+      and groupings of <em>observed-metadata</em> papers; search and topics produce
+      <strong>no claims</strong>. The labeled-query numbers are a sanity check on a
+      tiny synthetic corpus, not a recall benchmark (the rigorous evaluation is M8).</p>
     </section>
     <section>
       <h2>Milestone 2 &mdash; delivered</h2>
@@ -136,6 +162,7 @@
         <li><code>src/bioscientist_os/fixtures.py</code></li>
         <li><code>src/bioscientist_os/ingest/pipeline.py</code></li>
         <li><code>src/bioscientist_os/storage/sqlite_store.py</code></li>
+        <li><code>src/bioscientist_os/search/</code></li>
         <li><code>data/fixtures/</code></li>
         <li><code>scripts/run_all_milestones_with_claude.sh</code></li>
       </ul>

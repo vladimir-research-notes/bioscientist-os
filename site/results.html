@@ -16,6 +16,7 @@
       <a href="architecture.html">Architecture</a>
       <a href="data-model.html">Data model</a>
       <a href="ingestion.html">Ingestion</a>
+      <a href="search.html">Search &amp; topics</a>
       <a href="evidence.html">Evidence tables</a>
       <a href="databases.html">Database connectors</a>
       <a href="visualizations.html">Visualizations</a>
@@ -32,13 +33,13 @@
       <h1>Results</h1>
       <span class="badge badge-scaffold">Scaffold</span>
     </div>
-    <p class="subtitle">Measured numbers, with denominators. Currently pending &mdash; populated as milestones land.</p>
+    <p class="subtitle">Measured numbers, with denominators &mdash; populated as milestones land.</p>
     <section>
       <h2>Brief</h2>
 
-      <p>This page mirrors <code>docs/RESULTS.md</code>. It is intentionally near-empty
-      in the scaffold: there are no functional results to report yet. Empty means
-      <em>not yet measured</em>, not zero. Do not cite any number until the
+      <p>This page mirrors <code>docs/RESULTS.md</code>. Functional results exist for
+      ingestion (M2) and search + topic grouping (M3); later rows are still pending.
+      Empty means <em>not yet measured</em>, not zero. Do not cite any number until the
       corresponding milestone has landed.</p>
     </section>
     <section>
@@ -47,16 +48,17 @@
       <table class="grid">
         <tr><th>Result</th><th>Status</th></tr>
         <tr><td>papers / proteins / links ingested</td><td><strong>done (M2):</strong> 18 / 10 / 9 (+3 questions = 40 rows); idempotent, deterministic</td></tr>
-        <tr><td>search recall@k</td><td>pending (M3)</td></tr>
+        <tr><td>search hit@k (8 single-target labeled queries)</td><td><strong>done (M3):</strong> hit@1 = 7/8 (0.88), hit@3 = hit@5 = 8/8 (1.00); sanity check, not a benchmark</td></tr>
+        <tr><td>topic grouping</td><td><strong>done (M3):</strong> 10 groups at threshold 0.15 (4 multi-paper, 6 singletons); deterministic, monotone in threshold</td></tr>
         <tr><td>entity precision / recall (95% CI)</td><td>pending (M4, M8)</td></tr>
         <tr><td>evidence rows + provenance coverage</td><td>pending (M5, M8)</td></tr>
         <tr><td>figures</td><td>pending (M7)</td></tr>
       </table>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Scaffold; numbers appear here as each milestone produces them. First functional result: ingestion (M2).</td></tr>
-        <tr><th>Tests / results</th><td>67 offline tests pass. Ingestion counts and determinism are measured; search/extraction/evidence metrics still pending.</td></tr>
-        <tr><th>Open questions</th><td>All results are on a tiny, partly-synthetic corpus &mdash; illustrative only.</td></tr>
+        <tr><th>Implementation</th><td>Numbers appear here as each milestone produces them. Functional results so far: ingestion (M2), search + topic grouping (M3).</td></tr>
+        <tr><th>Tests / results</th><td>95 offline tests pass. Ingestion counts/determinism and search/topic behavior are measured; extraction/evidence metrics still pending.</td></tr>
+        <tr><th>Open questions</th><td>All results are on a tiny, partly-synthetic corpus &mdash; illustrative only. Search hit@k uses single-target labeled queries; the rigorous evaluation is M8.</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>

@@ -53,8 +53,12 @@ sorted-key JSON, and `SQLiteStore.content_digest()` hashes every row in
 primary-key order — so `biosci stats` reports the **same SHA-256 content digest**
 on every build from the same fixtures, and re-ingesting is an idempotent UPSERT
 that never creates duplicate rows. (Raw `.db` bytes can still differ across
-libsqlite versions; the content digest is the robust, logical guarantee.) The
-evaluation harness (M8) emits the same numbers on every run from the same inputs.
+libsqlite versions; the content digest is the robust, logical guarantee.) Search
+and topic grouping (M3) are likewise deterministic: the in-memory index is a pure
+function of the database, BM25F hits sort by score then `paper_id` (a stable
+tie-break), and topic groups, members, and labels are all sorted — so a query and
+a topic report reproduce exactly on every build. The evaluation harness (M8)
+emits the same numbers on every run from the same inputs.
 
 ### End-to-end run (assembled across milestones)
 
@@ -69,6 +73,19 @@ python3 scripts/06_run_eval.py                   # M8  -> results/processed/eval
 
 Each script is a thin, install-free wrapper around the package and prints exactly
 what it wrote. The canonical numbers are mirrored into `docs/RESULTS.md`.
+
+Once the database exists, search and topic grouping can be driven directly
+(offline, CPU-only):
+
+```bash
+biosci search "cellular senescence inflammation" --db results/raw/bioscientist.db
+biosci search "IL-6 SASP senescence" --db results/raw/bioscientist.db --explain
+biosci topics --db results/raw/bioscientist.db --threshold 0.15
+```
+
+`biosci search --explain` prints, per hit, each query term's idf, the fields it
+matched in, and its additive score contribution (the contributions sum to the
+hit's score). `--json` emits the same structure for downstream use.
 
 ### What is committed vs. regenerated
 
