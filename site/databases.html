@@ -32,34 +32,84 @@
   <main class="content">
     <div class="page-head">
       <h1>Database connectors</h1>
-      <span class="badge badge-planned">Planned</span>
+      <span class="badge badge-done">Done</span>
     </div>
-    <p class="subtitle">Offline-first adapters with a provenance field on every record.</p>
+    <p class="subtitle">Offline-first adapters with an explicit data_source provenance on every record.</p>
     <section>
       <h2>Brief</h2>
 
       <p>A base connector interface with a required fixture-backed connector, a local
-      cache, retry/error handling, and a <code>data_source</code> provenance field
-      (fixture / cache / live). Live API connectors (PubMed, Europe PMC, OpenAlex,
-      UniProt, Open Targets, PDB/AlphaFold) are optional, off by default, and never a
-      test dependency.</p>
+      read-through cache, transient-error retry/backoff, and an explicit
+      <code>data_source</code> provenance field (<code>fixture</code> /
+      <code>cache</code> / <code>live</code>) on every record. A <em>connector</em>
+      hides <strong>where</strong> a record comes from behind one small interface
+      (<code>fetch(id)</code>, <code>get</code>, <code>fetch_many</code>,
+      <code>ids</code>), so a memo or evidence table can show whether a database link
+      is committed, cached, or freshly fetched. Live API connectors are optional,
+      <strong>off by default</strong>, and never a test dependency.</p>
+      <pre>BaseConnector
+  &#9500;&#9472; FixtureConnector   committed records   &rarr; data_source=fixture   [required]
+  &#9500;&#9472; CachedConnector    read-through cache   &rarr; data_source=cache     (data/cache/, gitignored)
+  &#9492;&#9472; LiveConnector      opt-in HTTP          &rarr; data_source=live      [opt-in, off by default]</pre>
     </section>
     <section>
-      <h2>Targeted sources</h2>
+      <h2>Default connectors</h2>
 
       <table class="grid">
-        <tr><th>Source</th><th>Models</th><th>Status</th></tr>
-        <tr><td>PubMed / NCBI</td><td>paper metadata</td><td>fixture (live optional)</td></tr>
-        <tr><td>Europe PMC / OpenAlex</td><td>paper metadata</td><td>optional</td></tr>
-        <tr><td>UniProt</td><td>protein records</td><td>fixture (live optional)</td></tr>
-        <tr><td>Open Targets</td><td>disease/gene/protein links</td><td>fixture</td></tr>
-        <tr><td>PDB / AlphaFold</td><td>structure links</td><td>optional, link-only</td></tr>
+        <tr><th>Name</th><th>Source</th><th>Record</th><th>Records</th><th>data_source</th></tr>
+        <tr><td><code>uniprot</code></td><td>UniProt</td><td>protein</td><td>10</td><td><code>fixture</code></td></tr>
+        <tr><td><code>opentargets</code></td><td>OpenTargets</td><td>association</td><td>9</td><td><code>fixture</code></td></tr>
+        <tr><td><code>papers</code></td><td>papers</td><td>paper metadata</td><td>18</td><td><code>fixture</code></td></tr>
       </table>
+      <p class="note">The <code>papers</code> connector is the offline stand-in for a
+      PubMed / Europe PMC paper-metadata connector; it serves the corpus
+      <code>Paper</code>s by <code>paper_id</code>.</p>
+    </section>
+    <section>
+      <h2>Cache and provenance</h2>
+
+      <p>The cache layer (<code>CachedConnector</code>) wraps any connector and
+      persists each fetched record as canonical JSON under
+      <code>data/cache/&lt;source&gt;/&lt;id&gt;.json</code> (gitignored). Its
+      provenance discipline is the point: a <strong>cache hit</strong> is stamped
+      <code>data_source=cache</code> (the bytes came from the local file) and needs no
+      inner connector at all; a <strong>cache miss</strong> returns the inner
+      connector's own <code>data_source</code> and writes a <code>cache</code>-stamped
+      copy for next time. So the first lookup reports where the data really came from,
+      and the second reports <code>cache</code> &mdash; never the reverse. A cache
+      warmed from a source still serves offline with the inner connector gone.</p>
+    </section>
+    <section>
+      <h2>Retry and the opt-in live path</h2>
+
+      <p><code>call_with_retries</code> retries only <strong>transient</strong>
+      failures (timeouts, 5xx, 429) with bounded exponential backoff, wraps an
+      exhausted budget in a <code>ConnectorError</code>, and never retries a permanent
+      error; the <code>sleep</code> is injectable so the schedule is deterministic and
+      tests run instantly. A missing id is <code>None</code> (<code>fetch</code>) or
+      <code>RecordNotFound</code> (<code>get</code>), distinct from an operational
+      failure.</p>
+      <p><code>LiveConnector</code> is off by default: with
+      <code>allow_network=False</code> it raises <em>before</em> any transport call,
+      so constructing one is inert. Its HTTP transport is injected, so the
+      parse/retry/provenance logic is exercised entirely <strong>offline</strong> with
+      a mock transport in tests; the real stdlib transport is reached only when a
+      caller opts in. One example ships (<code>uniprot_live_connector</code>) to show
+      the shape of a real adapter &mdash; best-effort, never run in CI.</p>
+    </section>
+    <section>
+      <h2>Commands</h2>
+
+      <pre>biosci db sources --db results/raw/bioscientist.db
+biosci db list   --source uniprot --db results/raw/bioscientist.db
+biosci db lookup --source uniprot --id P05231 --db results/raw/bioscientist.db
+biosci db lookup --source uniprot --id P05231 --db results/raw/bioscientist.db --cache  # 1st: fixture
+biosci db lookup --source uniprot --id P05231 --db results/raw/bioscientist.db --cache  # 2nd: cache</pre>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Planned for Milestone 6 (fixture + cache required; live optional).</td></tr>
-        <tr><th>Tests / results</th><td>Connector tests use only fixtures/cache; live mode is never tested in CI.</td></tr>
-        <tr><th>Open questions</th><td>Where licensing is uncertain, fixtures are synthetic and labeled.</td></tr>
+        <tr><th>Implementation</th><td>Done (Milestone 6): <code>BaseConnector</code> + errors + retry (<code>base.py</code>), <code>FixtureConnector</code> + <code>uniprot</code>/<code>opentargets</code>/<code>papers</code> factories (<code>fixture.py</code>), <code>CachedConnector</code> (<code>cache.py</code>), opt-in <code>LiveConnector</code> (<code>live.py</code>), <code>ConnectorRegistry</code> + <code>open_connectors</code> (<code>registry.py</code>), and the <code>biosci db</code> CLI.</td></tr>
+        <tr><th>Tests / results</th><td>35 connector tests pass offline (178 total): fixture lookup + provenance, registry, cache miss&rarr;<code>fixture</code>/hit&rarr;<code>cache</code> with offline-first serving and canonical round-trip, transient-only retry with deterministic backoff, the live connector via a mock transport, and the CLI. Live mode is never exercised in CI.</td></tr>
+        <tr><th>Open questions</th><td>Where licensing is uncertain, fixtures are synthetic and labeled; only the fixture/cache path carries reproducibility guarantees.</td></tr>
       </table>
     <section>
       <h2>Relevant files</h2>
@@ -67,9 +117,12 @@
     </section>
       <ul class="files">
         <li><code>docs/DATABASES.md</code></li>
-        <li><code>src/bioscientist_os/databases/</code></li>
-        <li><code>data/fixtures/uniprot/</code></li>
-        <li><code>data/fixtures/opentargets/</code></li>
+        <li><code>src/bioscientist_os/databases/base.py</code></li>
+        <li><code>src/bioscientist_os/databases/fixture.py</code></li>
+        <li><code>src/bioscientist_os/databases/cache.py</code></li>
+        <li><code>src/bioscientist_os/databases/live.py</code></li>
+        <li><code>src/bioscientist_os/databases/registry.py</code></li>
+        <li><code>tests/test_connectors.py</code></li>
       </ul>
   </main>
   <footer class="site-footer">

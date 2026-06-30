@@ -55,7 +55,7 @@
         <tr><td>3</td><td>Search and topic grouping</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>4</td><td>Entity and claim extraction baseline</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>5</td><td>Evidence table builder</td><td><span class="badge badge-done">Done</span></td></tr>
-        <tr><td>6</td><td>Database connector layer</td><td><span class="badge badge-planned">Planned</span></td></tr>
+        <tr><td>6</td><td>Database connector layer</td><td><span class="badge badge-done">Done</span></td></tr>
         <tr><td>7</td><td>Visualizations</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>8</td><td>Evaluation harness</td><td><span class="badge badge-planned">Planned</span></td></tr>
         <tr><td>9</td><td>End-to-end research memo generation</td><td><span class="badge badge-planned">Planned</span></td></tr>
@@ -65,6 +65,36 @@
       </table>
       <p class="note">This table is updated by each milestone run. "Planned" means not
       yet implemented &mdash; the website never describes unimplemented features as done.</p>
+    </section>
+    <section>
+      <h2>Milestone 6 &mdash; delivered</h2>
+
+      <p>The workbench now has an <strong>offline-first database-connector
+      layer</strong>: a clean adapter that hides <em>where</em> a record comes from
+      behind one interface and keeps an honest <code>data_source</code> provenance on
+      every record. Delivered: <code>BaseConnector</code> plus the connector error
+      hierarchy and a deterministic, injectable-sleep retry helper
+      (<code>databases/base.py</code>); the required <code>FixtureConnector</code> with
+      <code>uniprot</code> / <code>opentargets</code> / <code>papers</code> factories
+      (<code>databases/fixture.py</code>); a gitignored read-through
+      <code>CachedConnector</code> under <code>data/cache/</code>
+      (<code>databases/cache.py</code>); an <strong>opt-in</strong>, off-by-default
+      <code>LiveConnector</code> with an injected transport and one best-effort UniProt
+      example (<code>databases/live.py</code>); a <code>ConnectorRegistry</code> with
+      <code>load_connectors</code> / <code>open_connectors</code>
+      (<code>databases/registry.py</code>); and the <code>biosci db</code> CLI
+      (<code>sources</code>, <code>list</code>, <code>lookup</code>, with
+      <code>--cache</code> and <code>--json</code>). Provenance is <em>stamped</em>,
+      never passed through: a fixture lookup reports <code>fixture</code>, a cache hit
+      reports <code>cache</code> (and serves offline with no inner call), a live fetch
+      reports <code>live</code>. The three fixture connectors serve
+      <strong>10 / 9 / 18</strong> records.</p>
+      <p class="note">Validation: <code>python3 -m pytest -q</code> &rarr; 178 passed
+      (offline); <code>ruff check</code> clean on the new files. The connector layer
+      serves <em>observed metadata</em> only &mdash; no claim, relation, or biological
+      assertion. Live connectors are opt-in and <strong>never run in CI</strong>; only
+      the fixture/cache path carries reproducibility guarantees
+      (<a href="databases.html">database connectors</a>).</p>
     </section>
     <section>
       <h2>Milestone 5 &mdash; delivered</h2>
@@ -228,6 +258,7 @@
         <li><code>src/bioscientist_os/storage/sqlite_store.py</code></li>
         <li><code>src/bioscientist_os/search/</code></li>
         <li><code>src/bioscientist_os/evidence/</code></li>
+        <li><code>src/bioscientist_os/databases/</code></li>
         <li><code>data/fixtures/</code></li>
         <li><code>scripts/run_all_milestones_with_claude.sh</code></li>
       </ul>

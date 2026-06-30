@@ -32,6 +32,13 @@ Milestone 5 assembles the headline artifact, the evidence table:
   extracted claims by a research question into a table whose every row carries
   provenance, database links, and a heuristic support/conflict/unknown label.
 
+Milestone 6 adds the offline-first database-connector subcommands:
+
+* ``biosci db sources --db <path>``                  — list the available connectors;
+* ``biosci db list --source <name> --db <path>``     — list a source's record ids;
+* ``biosci db lookup --source <name> --id <id> --db <path> [--cache]`` — fetch one
+  record, showing its ``data_source`` provenance (fixture / cache / live).
+
 Later milestones add the remaining data subcommands defined in ``docs/PLAN.md``
 (``eval``, ``memo``). The console entry point is
 ``bioscientist_os.cli:main`` (see ``pyproject.toml``); ``python -m bioscientist_os``
@@ -92,8 +99,8 @@ def info() -> None:
         f"Safety: {SAFETY_NOTE}",
         "",
         "Status: fixture ingestion, local SQLite storage, CPU-only search + topic "
-        "grouping, rule-based entity/claim extraction, and evidence-table assembly "
-        "available (Milestones 0-5).",
+        "grouping, rule-based entity/claim extraction, evidence-table assembly, and "
+        "an offline-first database-connector layer available (Milestones 0-6).",
         "Evaluation and memo subcommands land milestone by milestone — see "
         "docs/PLAN.md and the website Milestones page.",
     ]
@@ -569,6 +576,179 @@ def _write_evidence_csv(path: Path, report) -> None:
         writer = csv.DictWriter(fh, fieldnames=list(EvidenceReport.EVIDENCE_COLUMNS))
         writer.writeheader()
         writer.writerows(report.evidence_rows())
+
+
+# ---------------------------------------------------------------------------
+# Milestone 6 — database connectors (`biosci db ...`)
+# ---------------------------------------------------------------------------
+
+# The default cache directory for `db lookup --cache`. Gitignored (see .gitignore);
+# resolved relative to the current working directory (normally the repo root).
+DEFAULT_CACHE_DIR = Path("data") / "cache"
+
+# Shared help text for the `--source` option of the db subcommands.
+_SOURCE_HELP = "connector name: uniprot / opentargets / papers"
+
+db_app = typer.Typer(
+    name="db",
+    add_completion=False,
+    no_args_is_help=True,
+    help=(
+        "Offline-first database connectors: look up UniProt-style proteins, Open "
+        "Targets-style associations, and paper metadata by id, with explicit "
+        "data_source provenance (fixture / cache / live). Live sources are opt-in "
+        "and never used here (see docs/DATABASES.md)."
+    ),
+)
+app.add_typer(db_app, name="db")
+
+
+def _open_registry_or_exit(db: Path):
+    """Open ``db`` and build the connector registry, or print the error and exit 1."""
+    from bioscientist_os.databases import open_connectors
+
+    try:
+        return open_connectors(db)
+    except ValueError:
+        typer.echo(
+            f"{db} is not a bioscientist-os database (no ingested tables). "
+            "Run: biosci ingest data/fixtures --db " + str(db),
+            err=True,
+        )
+        raise typer.Exit(code=1) from None
+
+
+def _connector_or_exit(registry, source: str):
+    """Return the named connector, or list the valid names and exit 2."""
+    if source not in registry:
+        typer.echo(
+            f"unknown source {source!r}; available: {', '.join(registry.names())}",
+            err=True,
+        )
+        raise typer.Exit(code=2)
+    return registry.get(source)
+
+
+def _record_payload(record) -> dict:
+    """A JSON-friendly view of a fetched record, with provenance surfaced on top."""
+    dumped = record.model_dump(mode="json")
+    return {
+        "record_id": dumped.get("record_id") or dumped.get("paper_id"),
+        "source": getattr(record, "source", None),
+        "data_source": record.data_source.value,
+        "synthetic": getattr(record, "synthetic", None),
+        "record": dumped,
+    }
+
+
+@db_app.command("sources")
+def db_sources(
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="emit JSON instead of text"),
+) -> None:
+    """List the available connectors and how many records each holds."""
+    registry = _open_registry_or_exit(db)
+    rows = registry.describe()
+    if json_output:
+        typer.echo(_json.dumps({"db": str(db), "connectors": rows}, indent=2, sort_keys=True))
+        return
+    lines = [f"Connectors for {db}:"]
+    for r in rows:
+        lines.append(
+            f"  {r['name']:<12} source={r['source']:<12} type={r['record_type']:<11} "
+            f"records={r['count']}  data_source={r['data_source']}"
+        )
+    lines += [
+        "",
+        "All connectors are fixture-backed (data_source=fixture); cache (--cache) and "
+        "live sources are opt-in (see docs/DATABASES.md).",
+    ]
+    typer.echo("\n".join(lines))
+
+
+@db_app.command("list")
+def db_list(
+    source: str = typer.Option(..., "--source", help=_SOURCE_HELP),
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="emit JSON instead of text"),
+) -> None:
+    """List the record ids a source can serve."""
+    registry = _open_registry_or_exit(db)
+    connector = _connector_or_exit(registry, source)
+    ids = connector.ids()
+    if json_output:
+        typer.echo(
+            _json.dumps(
+                {"source": source, "data_source": connector.data_source.value, "ids": ids},
+                indent=2,
+                sort_keys=True,
+            )
+        )
+        return
+    lines = [f"{source}: {len(ids)} record id(s)  (data_source={connector.data_source.value})"]
+    lines += [f"  {rid}" for rid in ids]
+    typer.echo("\n".join(lines))
+
+
+@db_app.command("lookup")
+def db_lookup(
+    source: str = typer.Option(..., "--source", help=_SOURCE_HELP),
+    record_id: str = typer.Option(..., "--id", help="record id, e.g. P05231 or biosci-paper-001"),
+    db: Path = typer.Option(
+        ..., "--db", exists=True, dir_okay=False, help="ingested SQLite database"
+    ),
+    cache: bool = typer.Option(
+        False, "--cache", help="serve through a local read-through cache (data/cache/, gitignored)"
+    ),
+    cache_dir: Path = typer.Option(
+        DEFAULT_CACHE_DIR, "--cache-dir", help="cache directory for --cache (default: data/cache)"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="emit JSON instead of text"),
+) -> None:
+    """Fetch one record by id, showing its data_source provenance.
+
+    A fixture lookup reports ``data_source=fixture``. With ``--cache``, the first
+    lookup reports the underlying source and writes a cache copy; a second lookup of
+    the same id reports ``data_source=cache`` (served from the local file, offline).
+    The record is observed metadata — no claim, relation, or biological assertion is
+    made (see docs/SAFETY.md).
+    """
+    from bioscientist_os.databases import CachedConnector, RecordNotFound
+
+    registry = _open_registry_or_exit(db)
+    connector = _connector_or_exit(registry, source)
+    if cache:
+        connector = CachedConnector(connector, cache_dir)
+
+    try:
+        record = connector.get(record_id)
+    except RecordNotFound:
+        typer.echo(f"no record {record_id!r} in source {source!r} ({db})", err=True)
+        raise typer.Exit(code=1) from None
+
+    payload = _record_payload(record)
+    if json_output:
+        typer.echo(_json.dumps(payload, indent=2, sort_keys=True))
+        return
+    lines = [
+        f"{source}/{payload['record_id']}  (data_source={payload['data_source']}, "
+        f"synthetic={payload['synthetic']})",
+    ]
+    for key, value in sorted(payload["record"].items()):
+        if key in ("data_source",):
+            continue
+        lines.append(f"  {key}: {value}")
+    lines += [
+        "",
+        "Observed metadata served by a connector; data_source is its provenance "
+        "(fixture / cache / live). Not a clinical or diagnostic data source "
+        "(see docs/SAFETY.md).",
+    ]
+    typer.echo("\n".join(lines))
 
 
 def main() -> None:

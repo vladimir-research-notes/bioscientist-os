@@ -93,6 +93,8 @@ biosci extract --db results/raw/bioscientist.db --paper biosci-paper-006
 biosci evidence --db results/raw/bioscientist.db \
   --question "What evidence links cellular senescence to chronic inflammation?" \
   --out results/processed/evidence_table.csv
+biosci db sources --db results/raw/bioscientist.db
+biosci db lookup --source uniprot --id P05231 --db results/raw/bioscientist.db
 ```
 
 `biosci search --explain` prints, per hit, each query term's idf, the fields it
@@ -106,7 +108,11 @@ table for a research question — every row with full provenance, database links
 and a heuristic support/conflict/unknown label;
 `scripts/04_build_evidence_table.py` writes one `evidence_<question_id>.csv` per
 question plus `evidence_table.csv` and `evidence_tables.json` (gitignored,
-regenerable).
+regenerable). `biosci db` drives the offline-first connector layer (M6): `db
+sources` lists the fixture connectors, `db list`/`db lookup` serve records by id with
+an explicit `data_source` provenance, and `db lookup --cache` demonstrates the
+read-through cache under `data/cache/` (gitignored) — the first lookup reports the
+real source, the second reports `data_source=cache`.
 
 ### What is committed vs. regenerated
 

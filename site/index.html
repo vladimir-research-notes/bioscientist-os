@@ -71,7 +71,7 @@
       <h2>Status</h2>
 
       <p>The project contract (plan, docs, website, permission policy, and an
-      autonomous milestone runner) exists, and <strong>Milestones 0&ndash;5</strong>
+      autonomous milestone runner) exists, and <strong>Milestones 0&ndash;6</strong>
       have landed: the repository is an importable package with a runnable
       <code>biosci</code> CLI, the typed data model (pydantic schemas with
       provenance) plus small, clearly-labeled fixtures exist, those fixtures
@@ -79,16 +79,19 @@
       corpus is <strong>searchable (BM25F, with a per-term score explanation)
       and groupable into topics</strong>, a transparent, non-LLM baseline
       <strong>recognizes entities and extracts claims</strong> from the abstracts,
-      and the workbench now <strong>assembles evidence tables</strong> grouped by a
+      the workbench <strong>assembles evidence tables</strong> grouped by a
       research question &mdash; every cell with provenance, database links, and a
       heuristic support/conflict/unknown signal (see
-      <a href="evidence.html">Evidence tables</a>). See the
+      <a href="evidence.html">Evidence tables</a>) &mdash; and an
+      <strong>offline-first <a href="databases.html">database-connector layer</a></strong>
+      serves records by id with an explicit <code>data_source</code> provenance
+      (fixture / cache / live). See the
       <a href="milestones.html">Milestones</a> page for live status and
       <a href="results.html">Results</a> for measured numbers.</p>
     </section>
       <table class="status">
-        <tr><th>Implementation</th><td>Milestones 0&ndash;5 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>, <code>search</code>, <code>topics</code>, <code>extract</code>, <code>evidence</code>); 9 typed schemas + provenance model in <code>schemas.py</code>; a fixture loader and labeled fixtures (18 papers, 10 proteins, 9 associations, 3 questions); idempotent, content-deterministic SQLite ingestion via <code>storage/</code>; transparent <a href="search.html">search + topic grouping</a> via <code>search/</code>; dictionary <a href="extraction.html">entity/claim extraction</a> and <a href="evidence.html">evidence-table assembly</a> via <code>evidence/</code>. The remaining pipeline subpackages (connectors, visualization, evals) are skeletons until M6+.</td></tr>
-        <tr><th>Tests / results</th><td>143 offline tests pass (contract + package-import + CLI smoke + schema/fixture + storage/ingestion + search/topics + extraction + evidence table). Evaluation results pending (see Results).</td></tr>
+        <tr><th>Implementation</th><td>Milestones 0&ndash;6 done: importable package + <code>biosci</code> CLI (<code>version</code>, <code>info</code>, <code>env-check</code>, <code>ingest</code>, <code>stats</code>, <code>search</code>, <code>topics</code>, <code>extract</code>, <code>evidence</code>, <code>db</code>); 9 typed schemas + provenance model in <code>schemas.py</code>; a fixture loader and labeled fixtures (18 papers, 10 proteins, 9 associations, 3 questions); idempotent, content-deterministic SQLite ingestion via <code>storage/</code>; transparent <a href="search.html">search + topic grouping</a> via <code>search/</code>; dictionary <a href="extraction.html">entity/claim extraction</a> and <a href="evidence.html">evidence-table assembly</a> via <code>evidence/</code>; and an offline-first <a href="databases.html">connector layer</a> (fixture / cache / opt-in live) via <code>databases/</code>. The remaining pipeline subpackages (visualization, evals) are skeletons until M7+.</td></tr>
+        <tr><th>Tests / results</th><td>178 offline tests pass (contract + package-import + CLI smoke + schema/fixture + storage/ingestion + search/topics + extraction + evidence table + database connectors). Evaluation results pending (see Results).</td></tr>
         <tr><th>Open questions</th><td>Whether transparent baselines alone make claims auditable enough to be useful.</td></tr>
       </table>
     <section>

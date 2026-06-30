@@ -21,25 +21,30 @@ The only measured results so far concern the build itself, not the pipeline:
 | 2 — ingestion and local storage | Done | (subsumed) |
 | 3 — search and topic grouping | Done | (subsumed) |
 | 4 — entity and claim extraction baseline | Done | (subsumed) |
-| 5 — evidence table builder | Done | `python3 -m pytest -q` → **143 passed** |
+| 5 — evidence table builder | Done | (subsumed) |
+| 6 — database connector layer | Done | `python3 -m pytest -q` → **178 passed** |
 
-The 143 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
+The 178 tests are the Milestone-0 contract/import/CLI-smoke checks (20), the
 Milestone-1 schema and fixture checks (30), the Milestone-2 storage and
 ingestion checks (17), the Milestone-3 search and topic checks (28), the
-Milestone-4 extraction checks (24), and the Milestone-5 evidence-table checks
-(24): schema JSON round-trips, the enforced provenance/epistemic/validation
-rules, fixture loading, ingestion into SQLite (count checks, idempotent
-re-ingest, two-build determinism, exact round-trip, schema-validation-on-ingest),
-search and topic grouping (tokenizer behavior, BM25F scoring with
-`score == Σ contributions`, field weighting, tiny labeled queries, TF-IDF cosine
-self-similarity, topic partition/monotonicity), extraction (span-exact
-tokenizer/sentence splitter, dictionary build from fixtures, longest-match
-recognition, span round-trips against the abstract, the relation templates, the
-transparent confidence, determinism, and the CLI), and now the evidence table
-(the support/conflict/unknown cue heuristic, question resolution, the relevance
-filter, span round-trips, 100% provenance coverage, column completeness,
-determinism, and the CLI). No *evaluation* numbers exist yet; those land in
-Milestone 8.
+Milestone-4 extraction checks (24), the Milestone-5 evidence-table checks
+(24), and the Milestone-6 connector checks (35): schema JSON round-trips, the
+enforced provenance/epistemic/validation rules, fixture loading, ingestion into
+SQLite (count checks, idempotent re-ingest, two-build determinism, exact
+round-trip, schema-validation-on-ingest), search and topic grouping (tokenizer
+behavior, BM25F scoring with `score == Σ contributions`, field weighting, tiny
+labeled queries, TF-IDF cosine self-similarity, topic partition/monotonicity),
+extraction (span-exact tokenizer/sentence splitter, dictionary build from
+fixtures, longest-match recognition, span round-trips against the abstract, the
+relation templates, the transparent confidence, determinism, and the CLI), the
+evidence table (the support/conflict/unknown cue heuristic, question resolution,
+the relevance filter, span round-trips, 100% provenance coverage, column
+completeness, determinism, and the CLI), and now the connector layer (fixture
+lookup with `data_source=fixture`, missing-id `None`/`RecordNotFound`, the
+registry, cache miss→`fixture`/hit→`cache` with offline-first serving and
+canonical round-trip, transient-only retry with deterministic backoff, the
+opt-in live connector exercised offline with a mock transport, and the
+`biosci db` CLI). No *evaluation* numbers exist yet; those land in Milestone 8.
 
 ### Fixtures (Milestone 1)
 
@@ -198,6 +203,38 @@ particular it does not detect cross-paper *directional* conflict — e.g. paper-
 senescence`) both read as `support` per row. These are **builder counts and
 behavior**, not quality metrics; support-label precision/recall against gold
 labels (with denominators and Wilson intervals) is Milestone 8.
+
+### Database connectors (Milestone 6)
+
+Produced by `biosci db sources / list / lookup` over the ingested database (or the
+library entry points `load_connectors()` / `open_connectors(db)`). The connectors are
+fixture-backed and offline; the table is connector inventory, **not** a quality
+metric.
+
+| Connector | Source | Record type | Records | Default `data_source` |
+|-----------|--------|-------------|---------|-----------------------|
+| `uniprot` | `UniProt` | protein | 10 | `fixture` |
+| `opentargets` | `OpenTargets` | association | 9 | `fixture` |
+| `papers` | `papers` | paper metadata | 18 | `fixture` |
+
+Behavior pinned by the 35 connector tests (no network, no real sleeping):
+
+- every fixture lookup is stamped `data_source = fixture`; a missing id is `None`
+  (`fetch`) or `RecordNotFound` (`get`), never a guess;
+- the cache makes provenance honest and offline-first: a first lookup reports the
+  real source and writes a `data/cache/<source>/<id>.json` copy; a second lookup of
+  the same id reports `data_source = cache` and is served from the local file with no
+  inner call (a cache warmed from a source still serves with the inner connector
+  gone). Cache files are canonical JSON and round-trip back into the typed model;
+- `call_with_retries` retries only transient failures (deterministic injected
+  backoff `[0.5, 1.0]` for two retries), wraps an exhausted budget in a
+  `ConnectorError`, and never retries a permanent error;
+- the live connector is **off by default** (it raises before any transport call) and,
+  with an injected mock transport, parses, retries, 404→`None`, and stamps
+  `data_source = live`.
+
+The connector layer serves *observed metadata* only; it makes no claim, relation, or
+biological assertion.
 
 ### Figures (Milestone 7)
 
